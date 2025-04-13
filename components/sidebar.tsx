@@ -1,13 +1,13 @@
-import { Search, Home, Plus, Settings, FileText, Trash, Users, MessageSquare } from "lucide-react"
+import { Search, Home, Plus, Settings, FileText,  MessageSquare } from "lucide-react"
 import Link from "next/link"
+import User from "./dashboard/user"
 
 export function Sidebar() {
+  
   return (
     <aside className="w-60 border-r border-neutral-800 flex flex-col h-full">
       <div className="p-3 border-b border-neutral-800">
-        <div className="flex items-center gap-2 px-3 py-1 text-sm text-neutral-300">
-          <span className="font-medium">Ikuzwe she...</span>
-        </div>
+        Planify
       </div>
 
       <div className="p-2 space-y-1">
@@ -77,10 +77,7 @@ export function Sidebar() {
       </div>
 
       <div className="p-2 border-t border-neutral-800">
-        <button className="flex items-center gap-2 px-3 py-1.5 w-full rounded-md hover:bg-neutral-800 text-sm text-neutral-300">
-          <Users className="h-4 w-4" />
-          Invite members
-        </button>
+        <User />
       </div>
     </aside>
   )
