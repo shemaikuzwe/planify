@@ -96,7 +96,7 @@ export function WeeklyTodoList() {
     <div className="min-h-screen">
       <header className="flex items-center justify-between p-4 border-b border-neutral-800">
         <div className="flex items-center gap-2">
-          <List className="h-5 w-5 text-neutral-400" />
+          <List className="h-5 w-5 " />
           <h1 className="text-sm font-medium">Weekly To-do List</h1>
         </div>
         <div className="flex items-center gap-2">
@@ -124,7 +124,7 @@ export function WeeklyTodoList() {
           to the new week.
         </p>
 
-        <Button variant="outline" className="mb-8 border-neutral-700 text-neutral-300" onClick={createNewWeek}>
+        <Button variant="default" className="mb-8" onClick={createNewWeek}>
           <List className="h-4 w-4 mr-2" />
           New week of blank to-do&apos;s
         </Button>

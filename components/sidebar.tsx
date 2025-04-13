@@ -11,14 +11,14 @@ export function Sidebar() {
       </div>
 
       <div className="p-2 space-y-1">
-        <button className="flex items-center gap-2 px-3 py-1.5 w-full rounded-md hover:bg-neutral-800 text-sm text-neutral-300">
+        {/* <button className="flex items-center gap-2 px-3 py-1.5 w-full rounded-md hover:bg-neutral-800 text-sm text-neutral-300">
           <Search className="h-4 w-4" />
           Search
         </button>
         <button className="flex items-center gap-2 px-3 py-1.5 w-full rounded-md hover:bg-neutral-800 text-sm text-neutral-300">
           <MessageSquare className="h-4 w-4" />
           Notion AI
-        </button>
+        </button> */}
       </div>
 
       <div className="p-2">
@@ -60,7 +60,7 @@ export function Sidebar() {
           <Settings className="h-4 w-4" />
           Settings
         </Link>
-        <Link
+        {/* <Link
           href="/templates"
           className="flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-neutral-800 text-sm text-neutral-300"
         >
@@ -73,7 +73,7 @@ export function Sidebar() {
         >
           <Trash className="h-4 w-4" />
           Trash
-        </Link>
+        </Link> */}
       </div>
 
       <div className="p-2 border-t border-neutral-800">
