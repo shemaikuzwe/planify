@@ -93,7 +93,7 @@ export function WeeklyTodoList() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen w-full">
       <header className="flex items-center justify-between p-4 border-b border-neutral-800">
         <div className="flex items-center gap-2">
           <List className="h-5 w-5 " />

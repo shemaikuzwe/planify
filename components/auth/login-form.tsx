@@ -21,7 +21,7 @@ export default function LoginForm() {
               className="w-full justify-start  py-4 text-base"
               type="submit"
             >
-             <GitHub/>
+             {/* <GitHub/> */}
               Continue With Github
             </Button>
           </form>
@@ -33,6 +33,7 @@ export default function LoginForm() {
             <Button
               variant="outline"
               className="w-full justify-start  py-4 text-base"
+              type="submit"
             >
               <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path
