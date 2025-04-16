@@ -14,12 +14,12 @@ const ExcalidrawWithClientOnly = dynamic(
 
 export default function Page() {
   return (
-    <>
+    <div className="h-full w-fit">
       <Script id="load-env-variables" strategy="beforeInteractive">
         {`window["EXCALIDRAW_ASSET_PATH"] = window.origin;`}
       </Script>
 
       <ExcalidrawWithClientOnly />
-    </>
+    </div>
   );
 }

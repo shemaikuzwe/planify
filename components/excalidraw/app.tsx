@@ -1,3 +1,4 @@
+import { nanoid } from "nanoid";
 import React, {
   useEffect,
   useState,
@@ -22,12 +23,17 @@ import type {
 
 import {
   resolvablePromise,
+  distance2d,
+  withBatchedUpdates,
+  withBatchedUpdatesThrottled,
 } from "./utils";
 
 import CustomFooter from "./footer";
 
 
 import type { ResolvablePromise } from "./utils";
+import { useSidebar } from "../ui/sidebar";
+import { cn } from "@/lib/utils";
 
 type Comment = {
   x: number;
@@ -49,6 +55,8 @@ type PointerDownState = {
 };
 
 const COMMENT_ICON_DIMENSION = 32;
+const COMMENT_INPUT_HEIGHT = 50;
+const COMMENT_INPUT_WIDTH = 150;
 
 export interface AppProps {
   useCustom: (api: ExcalidrawImperativeAPI | null, customArgs?: any[]) => void;
@@ -65,17 +73,18 @@ export default function ExampleApp({
   excalidrawLib,
 }: AppProps) {
   const {
-
+    exportToClipboard,
     useHandleLibrary,
     MIME_TYPES,
     sceneCoordsToViewportCoords,
-
+    viewportCoordsToSceneCoords,
     Footer,
     WelcomeScreen,
- 
     LiveCollaborationTrigger,
     convertToExcalidrawElements,
   } = excalidrawLib;
+  const { state } = useSidebar();
+  const collapsed = state === "collapsed";
   const appRef = useRef<any>(null);
   const [viewModeEnabled, setViewModeEnabled] = useState(false);
   const [zenModeEnabled, setZenModeEnabled] = useState(false);
@@ -178,7 +187,7 @@ export default function ExampleApp({
             />
           </Footer>
         )}
-        <WelcomeScreen />  
+        <WelcomeScreen />
       </>,
     );
     return newElement;
@@ -286,24 +295,24 @@ export default function ExampleApp({
     [],
   );
 
-  // const onCopy = async (type: "png" | "svg" | "json") => {
-  //   if (!excalidrawAPI) {
-  //     return false;
-  //   }
-  //   await exportToClipboard({
-  //     elements: excalidrawAPI.getSceneElements(),
-  //     appState: excalidrawAPI.getAppState(),
-  //     files: excalidrawAPI.getFiles(),
-  //     type,
-  //   });
-  //   window.alert(`Copied to clipboard as ${type} successfully`);
-  // };
+  const onCopy = async (type: "png" | "svg" | "json") => {
+    if (!excalidrawAPI) {
+      return false;
+    }
+    await exportToClipboard({
+      elements: excalidrawAPI.getSceneElements(),
+      appState: excalidrawAPI.getAppState(),
+      files: excalidrawAPI.getFiles(),
+      type,
+    });
+    window.alert(`Copied to clipboard as ${type} successfully`);
+  };
 
-  // const [pointerData, setPointerData] = useState<{
-  //   pointer: { x: number; y: number };
-  //   button: "down" | "up";
-  //   pointersMap: Gesture["pointers"];
-  // } | null>(null);
+  const [pointerData, setPointerData] = useState<{
+    pointer: { x: number; y: number };
+    button: "down" | "up";
+    pointersMap: Gesture["pointers"];
+  } | null>(null);
 
   const onPointerDown = (
     activeTool: AppState["activeTool"],
@@ -336,12 +345,213 @@ export default function ExampleApp({
     });
   };
 
+  const onPointerMoveFromPointerDownHandler = (
+    pointerDownState: PointerDownState,
+  ) => {
+    return withBatchedUpdatesThrottled((event) => {
+      if (!excalidrawAPI) {
+        return false;
+      }
+      const { x, y } = viewportCoordsToSceneCoords(
+        {
+          clientX: event.clientX - pointerDownState.hitElementOffsets.x,
+          clientY: event.clientY - pointerDownState.hitElementOffsets.y,
+        },
+        excalidrawAPI.getAppState(),
+      );
+      setCommentIcons({
+        ...commentIcons,
+        [pointerDownState.hitElement.id!]: {
+          ...commentIcons[pointerDownState.hitElement.id!],
+          x,
+          y,
+        },
+      });
+    });
+  };
+  const onPointerUpFromPointerDownHandler = (
+    pointerDownState: PointerDownState,
+  ) => {
+    return withBatchedUpdates((event) => {
+      window.removeEventListener("pointermove", pointerDownState.onMove);
+      window.removeEventListener("pointerup", pointerDownState.onUp);
+      excalidrawAPI?.setActiveTool({ type: "selection" });
+      const distance = distance2d(
+        pointerDownState.x,
+        pointerDownState.y,
+        event.clientX,
+        event.clientY,
+      );
+      if (distance === 0) {
+        if (!comment) {
+          setComment({
+            x: pointerDownState.hitElement.x + 60,
+            y: pointerDownState.hitElement.y,
+            value: pointerDownState.hitElement.value,
+            id: pointerDownState.hitElement.id,
+          });
+        } else {
+          setComment(null);
+        }
+      }
+    });
+  };
+
+  const renderCommentIcons = () => {
+    return Object.values(commentIcons).map((commentIcon) => {
+      if (!excalidrawAPI) {
+        return false;
+      }
+      const appState = excalidrawAPI.getAppState();
+      const { x, y } = sceneCoordsToViewportCoords(
+        { sceneX: commentIcon.x, sceneY: commentIcon.y },
+        excalidrawAPI.getAppState(),
+      );
+      return (
+        <div
+          id={commentIcon.id}
+          key={commentIcon.id}
+          style={{
+            top: `${y - COMMENT_ICON_DIMENSION / 2 - appState!.offsetTop}px`,
+            left: `${x - COMMENT_ICON_DIMENSION / 2 - appState!.offsetLeft}px`,
+            position: "absolute",
+            zIndex: 1,
+            width: `${COMMENT_ICON_DIMENSION}px`,
+            height: `${COMMENT_ICON_DIMENSION}px`,
+            cursor: "pointer",
+            touchAction: "none",
+          }}
+          className="comment-icon"
+          onPointerDown={(event) => {
+            event.preventDefault();
+            if (comment) {
+              commentIcon.value = comment.value;
+              saveComment();
+            }
+            const pointerDownState: any = {
+              x: event.clientX,
+              y: event.clientY,
+              hitElement: commentIcon,
+              hitElementOffsets: { x: event.clientX - x, y: event.clientY - y },
+            };
+            const onPointerMove =
+              onPointerMoveFromPointerDownHandler(pointerDownState);
+            const onPointerUp =
+              onPointerUpFromPointerDownHandler(pointerDownState);
+            window.addEventListener("pointermove", onPointerMove);
+            window.addEventListener("pointerup", onPointerUp);
+
+            pointerDownState.onMove = onPointerMove;
+            pointerDownState.onUp = onPointerUp;
+
+            excalidrawAPI?.setActiveTool({
+              type: "custom",
+              customType: "comment",
+            });
+          }}
+        >
+          <div className="comment-avatar">
+            <img src="images/doremon.png" alt="doremon" />
+          </div>
+        </div>
+      );
+    });
+  };
+
+  const saveComment = () => {
+    if (!comment) {
+      return;
+    }
+    if (!comment.id && !comment.value) {
+      setComment(null);
+      return;
+    }
+    const id = comment.id || nanoid();
+    setCommentIcons({
+      ...commentIcons,
+      [id]: {
+        x: comment.id ? comment.x - 60 : comment.x,
+        y: comment.y,
+        id,
+        value: comment.value,
+      },
+    });
+    setComment(null);
+  };
+
+  const renderComment = () => {
+    if (!comment) {
+      return null;
+    }
+    const appState = excalidrawAPI?.getAppState()!;
+    const { x, y } = sceneCoordsToViewportCoords(
+      { sceneX: comment.x, sceneY: comment.y },
+      appState,
+    );
+    let top = y - COMMENT_ICON_DIMENSION / 2 - appState.offsetTop;
+    let left = x - COMMENT_ICON_DIMENSION / 2 - appState.offsetLeft;
+
+    if (
+      top + COMMENT_INPUT_HEIGHT <
+      appState.offsetTop + COMMENT_INPUT_HEIGHT
+    ) {
+      top = COMMENT_ICON_DIMENSION / 2;
+    }
+    if (top + COMMENT_INPUT_HEIGHT > appState.height) {
+      top = appState.height - COMMENT_INPUT_HEIGHT - COMMENT_ICON_DIMENSION / 2;
+    }
+    if (
+      left + COMMENT_INPUT_WIDTH <
+      appState.offsetLeft + COMMENT_INPUT_WIDTH
+    ) {
+      left = COMMENT_ICON_DIMENSION / 2;
+    }
+    if (left + COMMENT_INPUT_WIDTH > appState.width) {
+      left = appState.width - COMMENT_INPUT_WIDTH - COMMENT_ICON_DIMENSION / 2;
+    }
+
+    return (
+      <textarea
+        className="comment"
+        style={{
+          top: `${top}px`,
+          left: `${left}px`,
+          position: "absolute",
+          zIndex: 1,
+          height: `${COMMENT_INPUT_HEIGHT}px`,
+          width: `${COMMENT_INPUT_WIDTH}px`,
+        }}
+        ref={(ref) => {
+          setTimeout(() => ref?.focus());
+        }}
+        placeholder={comment.value ? "Reply" : "Comment"}
+        value={comment.value}
+        onChange={(event) => {
+          setComment({ ...comment, value: event.target.value });
+        }}
+        onBlur={saveComment}
+        onKeyDown={(event) => {
+          if (!event.shiftKey && event.key === "Enter") {
+            event.preventDefault();
+            saveComment();
+          }
+        }}
+      />
+    );
+  };
+
+
+
   return (
-    <div className="w-full h-full fixed px-7 py-2" ref={appRef}>
-        {renderExcalidraw(children)}
-        {/* {Object.keys(commentIcons || []).length > 0 && renderCommentIcons()}
+    <div className={cn("h-full fixed px-4 py-2", {
+      "w-320": collapsed, 
+      "w-270": !collapsed  
+    })}
+      ref={appRef}>
+      {renderExcalidraw(children)}
+      {/* {Object.keys(commentIcons || []).length > 0 && renderCommentIcons()}
         {comment && renderComment()} */}
-    
+
     </div>
   );
 }

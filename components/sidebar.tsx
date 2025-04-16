@@ -1,5 +1,3 @@
-"use client"
-
 import { Home, Plus, Settings, FileText, LayoutDashboard } from "lucide-react"
 import Link from "next/link"
 import User from "./dashboard/user"
@@ -21,12 +19,14 @@ export function Sidebar() {
   return (
     <ShadcnSidebar className="border-r border-neutral-800" collapsible="icon">
       <SidebarHeader className="border-b border-neutral-800">
-        <div className="flex items-center gap-2 px-3 py-2 text-white">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-neutral-800">
-            <LayoutDashboard className="h-4 w-4" />
+        <SidebarMenu>
+          <div className="flex items-center gap-2 px-3 py-2 text-white">
+            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-neutral-800">
+              <LayoutDashboard className="h-4 w-4" />
+            </div>
+            <span className="font-semibold text-lg sr-only">Planify</span>
           </div>
-          <span className="font-semibold text-lg sr-only">Planify</span>
-        </div>
+        </SidebarMenu>
       </SidebarHeader>
 
       <SidebarContent>
@@ -66,10 +66,12 @@ export function Sidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <Link href={"/excalidraw"}className="flex gap-2 items-center w-full text-neutral-300"> 
-                 <FileText className="h-4 w-4" />
-                 <span>Excalidraw</span>
-                </Link>
+                <SidebarMenuButton asChild tooltip={"Excalidraw"}>
+                  <Link href={"/excalidraw"} className="flex gap-2 items-center w-full text-neutral-300">
+                    <FileText className="h-4 w-4" />
+                    <span>Excalidraw</span>
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Add new">
@@ -100,9 +102,11 @@ export function Sidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-neutral-800">
-        <div className="p-2">
-          <User />
-        </div>
+        <SidebarMenu>
+          <div >
+            <User />
+          </div>
+        </SidebarMenu>
       </SidebarFooter>
       <SidebarRail />
     </ShadcnSidebar>
