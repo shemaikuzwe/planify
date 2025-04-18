@@ -5,6 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { signOut, useSession } from 'next-auth/react'
 import { useSidebar } from '../ui/sidebar'
 import { cn } from '@/lib/utils'
+import ThemeToggle from '../ui/theme-toggle'
 
 export default function User() {
     const user = useSession()?.data?.user;
@@ -28,6 +29,7 @@ export default function User() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>Profile</DropdownMenuItem>
                 <DropdownMenuItem>Settings</DropdownMenuItem>
+                <DropdownMenu><ThemeToggle /></DropdownMenu>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => signOut()}>Logout</DropdownMenuItem>
             </DropdownMenuContent>

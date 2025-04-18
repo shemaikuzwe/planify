@@ -94,10 +94,10 @@ export function WeeklyTodoList() {
 
   return (
     <div className="min-h-screen w-full">
-      <header className="flex items-center justify-between p-4 border-b border-neutral-800">
+      <header className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-2">
           <List className="h-5 w-5 " />
-          <h1 className="text-sm font-medium">Weekly To-do List</h1>
+          <h1 className="text-sm font-medium">Weekly To-do</h1>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-neutral-400 px-2 py-1 border border-neutral-700 rounded">Private</span>
@@ -115,18 +115,10 @@ export function WeeklyTodoList() {
       </header>
 
       <div className="p-8 max-w-5xl mx-auto">
-        <h1 className="text-4xl font-bold mb-6">Weekly To-do List</h1>
-
-        <p className="text-neutral-400 mb-4">
-          Add your weekly to-do&apos;s. You can always add more by typing{" "}
-          <code className="bg-neutral-800 px-1.5 py-0.5 rounded text-xs">/to-do</code> in an empty space. Click this
-          button to create a fresh set of to-do&apos;s for a new week. You can drag any old to-do&apos;s from last week
-          to the new week.
-        </p>
 
         <Button variant="default" className="mb-8" onClick={createNewWeek}>
           <List className="h-4 w-4 mr-2" />
-          New week of blank to-do&apos;s
+          New
         </Button>
 
         <h2 className="text-2xl font-semibold mb-6 border-b border-neutral-800 pb-2">March 4 - March 9</h2>

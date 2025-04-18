@@ -450,9 +450,9 @@ export default function ExampleApp({
             });
           }}
         >
-          <div className="comment-avatar">
+          {/* <div className="comment-avatar">
             <img src="images/doremon.png" alt="doremon" />
-          </div>
+          </div> */}
         </div>
       );
     });
