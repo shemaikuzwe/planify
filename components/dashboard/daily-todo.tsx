@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, type KeyboardEvent, type FormEvent } from "react"
-import { Plus, Clock, Trash, Edit, Flag, CalendarIcon} from "lucide-react"
+import { Plus, Clock, Trash, Edit, Flag, CalendarIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
