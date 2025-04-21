@@ -7,7 +7,7 @@ import {
   integer,
   pgEnum,
 } from "drizzle-orm/pg-core";
-import type { AdapterAccountType } from "next-auth/adapters";
+import type { AdapterAccountType } from "@auth/core/adapters";
 
 //enums
 export const priority = ["HIGH", "MEDIUM", "LOW"] as const;
