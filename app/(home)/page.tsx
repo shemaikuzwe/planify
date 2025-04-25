@@ -1,4 +1,4 @@
-import DailyTodo from '@/components/dashboard/daily-todo'
+import DailyTodo from '@/components/home/daily-todo'
 import { Button } from '@/components/ui/button'
 import { GetUserTodos } from '@/lib/data'
 import { CalendarCheck, MessageSquare, Share, Star } from 'lucide-react'

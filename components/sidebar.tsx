@@ -1,7 +1,7 @@
 "use client"
 import { Home, Settings, LayoutDashboard, List, ListTodo, CalendarCheck } from "lucide-react"
 import Link from "next/link"
-import User from "./dashboard/user"
+import User from "./home/user"
 import {
   Sidebar as ShadcnSidebar,
   SidebarContent,

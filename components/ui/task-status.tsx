@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { TaskStatus } from "@/lib/types"
+import type { TaskStatus } from "@/lib/types"
 
 
 
