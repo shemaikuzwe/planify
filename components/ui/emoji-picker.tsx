@@ -128,7 +128,7 @@ function EmojiPickerContent({ onEmojiSelect }: EmojiPickerProps & { onClose?: ()
             key={category}
             variant={activeCategory === category ? "default" : "ghost"}
             size="sm"
-            className="text-xs whitespace-nowrap mr-1"
+            className="text-xs whitespace-nowrap "
             onClick={() => setActiveCategory(category)}
             type="button"
           >

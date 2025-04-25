@@ -598,7 +598,7 @@ export default function DailyTodo({ todos }: Props) {
                             </ul>
 
                             {addingTaskTo === category.id ? (
-                                <AddTaskForm categoryId={category.id} />
+                                <AddTaskForm categoryId={category.id} setAddingTaskTo={setAddingTaskTo} />
                             ) : (
                                 <button
                                     className="flex items-center text-gray-500 mt-3 text-sm hover:text-gray-700"

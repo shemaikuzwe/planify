@@ -1,6 +1,4 @@
 "use client"
-
-import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { AddTaskSchema, type AddTaskValue } from "@/lib/types/schema"
@@ -12,14 +10,21 @@ import { FormControl, FormField, Form, FormItem, FormLabel } from "../ui/form"
 import { Input } from "../ui/input"
 import { TimePicker } from "../ui/time-picker"
 import { AddTodo } from "@/lib/actions"
+import { useTransition } from "react"
 
-export default function AddTaskForm({ categoryId }: { categoryId: string }) {
+interface Props {
+  categoryId: string,
+  setAddingTaskTo: (categoryId: string | null) => void
+}
+
+export default function AddTaskForm({ categoryId, setAddingTaskTo }: Props) {
   const form = useForm<AddTaskValue>({
     resolver: zodResolver(AddTaskSchema),
     defaultValues: {
       categoryId
     }
-  })
+  });
+  const [isPending, startTransition] = useTransition()
 
   const handleEmojiSelect = (newEmoji: string) => {
     const currentText = form.getValues("text") || ""
@@ -27,7 +32,11 @@ export default function AddTaskForm({ categoryId }: { categoryId: string }) {
   }
 
   const onSubmit = async (data: AddTaskValue) => {
-    await AddTodo(data)
+    startTransition(async () => {
+      await AddTodo(data)
+      form.reset()
+      setAddingTaskTo(null)
+    })
   }
 
   return (
@@ -38,7 +47,7 @@ export default function AddTaskForm({ categoryId }: { categoryId: string }) {
           name="text"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Task Name</FormLabel>
+              <FormLabel>Task Name <span className="text-red-500">*</span> </FormLabel>
               <FormControl>
                 <Input {...field} placeholder="Enter task name" className="w-full" />
               </FormControl>
@@ -83,36 +92,29 @@ export default function AddTaskForm({ categoryId }: { categoryId: string }) {
                 <FormLabel>Priority</FormLabel>
                 <FormControl>
                   <RadioGroup
-                    value={field.value || "null"}
+                    value={field.value}
                     onValueChange={(value) => field.onChange(value as AddTaskValue["priority"])}
                     className="grid grid-cols-2 gap-1"
                   >
                     <div className="flex items-center space-x-1">
-                      <RadioGroupItem value="high" id="high" />
-                      <label htmlFor="high" className="flex items-center text-xs">
+                      <RadioGroupItem value="HIGH" id="HIGH" />
+                      <label htmlFor="HIGH" className="flex items-center text-xs">
                         <Flag className="h-3 w-3 mr-1 text-red-500" />
                         <span>High</span>
                       </label>
                     </div>
                     <div className="flex items-center space-x-1">
-                      <RadioGroupItem value="medium" id="medium" />
-                      <label htmlFor="medium" className="flex items-center text-xs">
+                      <RadioGroupItem value="MEDIUM" id="MEDIUM" />
+                      <label htmlFor="MEDIUM" className="flex items-center text-xs">
                         <Flag className="h-3 w-3 mr-1 text-orange-500" />
                         <span>Medium</span>
                       </label>
                     </div>
                     <div className="flex items-center space-x-1">
-                      <RadioGroupItem value="low" id="low" />
-                      <label htmlFor="low" className="flex items-center text-xs">
+                      <RadioGroupItem value="LOW" id="LOW" />
+                      <label htmlFor="LOW" className="flex items-center text-xs">
                         <Flag className="h-3 w-3 mr-1 text-blue-500" />
                         <span>Low</span>
-                      </label>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <RadioGroupItem value="null" id="none" />
-                      <label htmlFor="none" className="flex items-center text-xs">
-                        <Flag className="h-3 w-3 mr-1 text-gray-400" />
-                        <span>None</span>
                       </label>
                     </div>
                   </RadioGroup>
@@ -131,11 +133,11 @@ export default function AddTaskForm({ categoryId }: { categoryId: string }) {
         </div>
 
         <div className="flex justify-end gap-2 pt-1">
-          <Button type="button" size="sm" variant="outline">
+          <Button type="button" size="sm" variant="outline" onClick={() => setAddingTaskTo(null)}>
             Cancel
           </Button>
-          <Button size="sm" type="submit">
-            Add
+          <Button size="sm" type="submit" disabled={isPending}>
+            {isPending ? "Adding..." : "Add"}
           </Button>
         </div>
       </form>

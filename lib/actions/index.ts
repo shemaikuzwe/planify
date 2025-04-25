@@ -20,6 +20,8 @@ export async function AddTodo(data: AddTaskValue) {
   revalidateTag("todos");
 }
 
+
+
 export async function AddCategory(formData: FormData) {
   const validate = AddCategorySchema.safeParse(
     Object.fromEntries(formData.entries())
@@ -38,4 +40,9 @@ export async function AddDailyTodo(formData: FormData) {
     return validate.error.flatten().fieldErrors;
   }
   await db.insert(categories).values(validate.data);
+}
+
+export async function editName(name:string){
+ 
+  
 }
