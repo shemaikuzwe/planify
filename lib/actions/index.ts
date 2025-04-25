@@ -8,6 +8,7 @@ import {
   AddTaskSchema,
   AddTaskValue,
 } from "../types/schema";
+import { eq } from "drizzle-orm";
 
 export async function AddTodo(data: AddTaskValue) {
   const validate = AddTaskSchema.safeParse(data);
@@ -19,8 +20,6 @@ export async function AddTodo(data: AddTaskValue) {
 
   revalidateTag("todos");
 }
-
-
 
 export async function AddCategory(formData: FormData) {
   const validate = AddCategorySchema.safeParse(
@@ -42,7 +41,44 @@ export async function AddDailyTodo(formData: FormData) {
   await db.insert(categories).values(validate.data);
 }
 
-export async function editName(name:string){
- 
-  
+export async function editName(
+  data: Omit<AddTaskValue, "time" | "priority" | "dueDate">
+) {
+  const validate = AddTaskSchema.omit({
+    time: true,
+    priority: true,
+    dueDate: true,
+  }).safeParse(data);
+  if (!validate.success) {
+    return validate.error.flatten().fieldErrors;
+  }
+  if (!validate.data.taskId) return;
+  await db
+    .update(tasks)
+    .set({ text: validate.data.text })
+    .where(eq(tasks.id, validate.data.taskId));
+}
+
+export async function EditTodo(data: AddTaskValue) {
+  const validate = AddTaskSchema.safeParse(data);
+  if (!validate.success) {
+    return validate.error.flatten().fieldErrors;
+  }
+  if (!validate.data.taskId) return;
+  await db
+    .update(tasks)
+    .set(validate.data)
+    .where(eq(tasks.id, validate.data.taskId));
+}
+
+export async function ToggleTaskStatus(taskId: string,status:boolean) {
+  await db
+    .update(tasks)
+    .set({ status: status ? "COMPLETED" : "PENDING" })
+    .where(eq(tasks.id, taskId));
+}
+
+
+export async function DeleteTodo(taskId: string) {
+  await db.delete(tasks).where(eq(tasks.id, taskId));
 }

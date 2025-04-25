@@ -10,14 +10,38 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 interface TimePickerProps {
   className?: string
-  value?: Date
-  onChange?: (date: Date) => void
+  value?: string
+  onChange?: (time: string) => void
 }
 
-export function TimePicker({ className, value = new Date(), onChange }: TimePickerProps) {
-  const [selectedHour, setSelectedHour] = React.useState<string>(formatHour(value.getHours()))
-  const [selectedMinute, setSelectedMinute] = React.useState<string>(formatMinute(value.getMinutes()))
-  const [selectedPeriod, setSelectedPeriod] = React.useState<"AM" | "PM">(value.getHours() >= 12 ? "PM" : "AM")
+export function TimePicker({ className, value, onChange }: TimePickerProps) {
+  // Parse the input string to get hours, minutes, and period
+  const parseTimeString = (timeString?: string) => {
+    if (!timeString) {
+      return { hour: "12", minute: "00", period: "AM" as const }
+    }
+
+    try {
+      // Expected format: "HH:MM AM/PM"
+      const [timePart, periodPart] = timeString.split(" ")
+      const [hourPart, minutePart] = timePart.split(":")
+
+      const hour = hourPart.padStart(2, "0")
+      const minute = minutePart.padStart(2, "0")
+      const period = (periodPart === "PM" ? "PM" : "AM") as "AM" | "PM"
+
+      return { hour, minute, period }
+    } catch (error) {
+      // Return default values if parsing fails
+      return { hour: "12", minute: "00", period: "AM" as const }
+    }
+  }
+
+  const { hour, minute, period } = parseTimeString(value)
+
+  const [selectedHour, setSelectedHour] = React.useState<string>(hour)
+  const [selectedMinute, setSelectedMinute] = React.useState<string>(minute)
+  const [selectedPeriod, setSelectedPeriod] = React.useState<"AM" | "PM">(period)
 
   // Generate hours (1-12)
   const hours = Array.from({ length: 12 }, (_, i) => {
@@ -48,20 +72,21 @@ export function TimePicker({ className, value = new Date(), onChange }: TimePick
   const updateTime = (hour: string, minute: string, period: "AM" | "PM") => {
     if (!onChange) return
 
-    const newDate = new Date(value)
-    let hours = Number.parseInt(hour, 10)
+    // Format the time as a string: "HH:MM AM/PM"
+    const formattedTime = `${hour}:${minute} ${period}`
+    onChange(formattedTime)
+  }
 
-    // Convert to 24-hour format
-    if (period === "PM" && hours < 12) {
-      hours += 12
-    } else if (period === "AM" && hours === 12) {
-      hours = 0
+  // Format the display time
+  const formatDisplayTime = (timeString?: string) => {
+    if (!timeString) return "Select time"
+
+    try {
+      const { hour, minute, period } = parseTimeString(timeString)
+      return `${hour}:${minute} ${period}`
+    } catch (error) {
+      return "Select time"
     }
-
-    newDate.setHours(hours)
-    newDate.setMinutes(Number.parseInt(minute, 10))
-    newDate.setSeconds(0)
-    onChange(newDate)
   }
 
   return (
@@ -69,7 +94,7 @@ export function TimePicker({ className, value = new Date(), onChange }: TimePick
       <PopoverTrigger asChild>
         <Button variant="outline" className={cn("w-[240px] justify-start text-left font-normal", className)}>
           <Clock className="mr-2 h-4 w-4" />
-          {formatTime(value)}
+          {value ? formatDisplayTime(value) : "Select time"}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-4">
@@ -112,22 +137,4 @@ export function TimePicker({ className, value = new Date(), onChange }: TimePick
       </PopoverContent>
     </Popover>
   )
-}
-
-
-function formatHour(hour: number): string {
-
-  const h = hour % 12 || 12
-  return h.toString().padStart(2, "0")
-}
-
-function formatMinute(minute: number): string {
-  return minute.toString().padStart(2, "0")
-}
-
-function formatTime(date: Date): string {
-  const hours = formatHour(date.getHours())
-  const minutes = formatMinute(date.getMinutes())
-  const period = date.getHours() >= 12 ? "PM" : "AM"
-  return `${hours}:${minutes} ${period}`
 }
