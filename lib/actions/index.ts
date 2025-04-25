@@ -7,8 +7,10 @@ import {
   AddCategorySchema,
   AddTaskSchema,
   AddTaskValue,
+  ToggleTaskStatusSchema,
 } from "../types/schema";
 import { eq } from "drizzle-orm";
+import { TaskStatus } from "../types";
 
 export async function AddTodo(data: AddTaskValue) {
   const validate = AddTaskSchema.safeParse(data);
@@ -71,13 +73,13 @@ export async function EditTodo(data: AddTaskValue) {
     .where(eq(tasks.id, validate.data.taskId));
 }
 
-export async function ToggleTaskStatus(taskId: string,status:boolean) {
-  await db
-    .update(tasks)
-    .set({ status: status ? "COMPLETED" : "PENDING" })
-    .where(eq(tasks.id, taskId));
+export async function ToggleTaskStatus(taskId: string, status: TaskStatus) {
+  const validate = ToggleTaskStatusSchema.safeParse({ taskId, status });
+  if (!validate.success) {
+    return validate.error.flatten().fieldErrors;
+  }
+  await db.update(tasks).set({ status }).where(eq(tasks.id, taskId));
 }
-
 
 export async function DeleteTodo(taskId: string) {
   await db.delete(tasks).where(eq(tasks.id, taskId));

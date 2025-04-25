@@ -5,9 +5,10 @@ export const AddTaskSchema = z.object({
   priority: z.enum(["HIGH", "MEDIUM", "LOW"]).optional(),
   dueDate: z.string().optional(),
   categoryId: z.string().uuid(),
-  taskId:z.string().uuid().optional()
+  taskId: z.string().uuid().optional(),
 });
-export type AddTaskValue=z.infer<typeof AddTaskSchema>
+export type AddTaskValue = z.infer<typeof AddTaskSchema>;
+
 export const AddCategorySchema = z.object({
   name: z
     .string({ required_error: "Category name is required" })
@@ -22,4 +23,9 @@ export const addDailyTodoSchema = z.object({
     .min(1)
     .max(50),
   userId: z.string().uuid(),
+});
+
+export const ToggleTaskStatusSchema = z.object({
+  taskId: z.string().uuid(),
+  status: z.enum(["COMPLETED", "IN_PROGRESS", "NOT_STARTED", "FAILED"]),
 });

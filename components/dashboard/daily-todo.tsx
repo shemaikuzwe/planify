@@ -5,10 +5,11 @@ import { Plus, Clock, Trash, Edit, Flag, CalendarIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { format, isToday, isTomorrow } from "date-fns"
 import { Todos } from "@/lib/data"
-import { Priority } from "@/lib/types"
+import { Priority, TaskStatus } from "@/lib/types"
 import AddTaskForm from "./add-task-form"
-import { DeleteTodo, editName } from "@/lib/actions"
+import { DeleteTodo, editName, ToggleTaskStatus } from "@/lib/actions"
 import EditTaskForm from "./edit-task-form"
+import { TaskStatusIndicator } from "../ui/task-status"
 
 
 interface Props {
@@ -28,8 +29,8 @@ export default function DailyTodo({ todos }: Props) {
     const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
     const [editCategoryName, setEditCategoryName] = useState("")
 
-    const toggleTaskCompletion = (categoryId: string, taskId: string) => {
-        //handle toggle task
+    const toggleTaskCompletion = async(taskId: string, status: TaskStatus) => {
+       await ToggleTaskStatus(taskId, status)
     }
 
     // Add a new category
@@ -58,7 +59,7 @@ export default function DailyTodo({ todos }: Props) {
     }
 
     const deleteTaskFxn = async (taskId: string) => {
-       await DeleteTodo(taskId)
+        await DeleteTodo(taskId)
     }
 
     const formatDueDate = (date?: Date) => {
@@ -169,15 +170,7 @@ export default function DailyTodo({ todos }: Props) {
                                         ) : (
                                             <>
                                                 <div className="mt-0.5">
-                                                    <button
-                                                        onClick={() => toggleTaskCompletion(category.id, task.id)}
-                                                        className={cn(
-                                                            "w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center",
-                                                            task.status === "COMPLETED" && "bg-gray-200",
-                                                        )}
-                                                    >
-                                                        {task.status === "COMPLETED" && <div className="w-2 h-2 rounded-full bg-gray-500" />}
-                                                    </button>
+                                                    <TaskStatusIndicator status={task.status} onChange={(status) => toggleTaskCompletion(task.id, status)} />
                                                 </div>
                                                 <div className="flex-1">
                                                     <div className="flex items-center">
@@ -261,7 +254,7 @@ export default function DailyTodo({ todos }: Props) {
                             )}
                         </div>
                     ))}
-                    
+
                     <div className="mt-4">
                         <button className="flex items-center text-gray-500 text-sm hover:text-gray-700" onClick={addNewCategory}>
                             <Plus className="w-4 h-4 mr-1" />

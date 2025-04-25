@@ -1,11 +1,24 @@
-import { pgTable, timestamp, primaryKey, uuid, text, integer, pgEnum } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  timestamp,
+  primaryKey,
+  uuid,
+  text,
+  integer,
+  pgEnum,
+} from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "@auth/core/adapters";
 import { relations } from "drizzle-orm";
 
 // enums
 export const priority = ["HIGH", "MEDIUM", "LOW"] as const;
 export const enumPriority = pgEnum("priority", priority);
-export const taskStatus = pgEnum("task_status", ["COMPLETED", "PENDING", "FAILED"]);
+export const taskStatus = pgEnum("task_status", [
+  "COMPLETED",
+  "IN_PROGRESS",
+  "NOT_STARTED",
+  "FAILED",
+]);
 
 // timestamps
 const timestamps = {
@@ -76,7 +89,7 @@ export const tasks = pgTable("tasks", {
     .references(() => categories.id, { onDelete: "cascade" }),
   text: text("text").notNull(),
   time: text("time"),
-  status: taskStatus().default("PENDING"),
+  status: taskStatus().default("NOT_STARTED").notNull(),
   priority: enumPriority().default("MEDIUM"),
   dueDate: timestamp("due_date", { mode: "date" }),
   ...timestamps,
