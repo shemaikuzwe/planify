@@ -2,8 +2,8 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Search } from "lucide-react"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Smile } from "lucide-react"
 
 interface EmojiPickerProps {
   onEmojiSelect: (emoji: string) => void
@@ -111,54 +111,42 @@ const emojiData = {
   Symbols: ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍", "🤎", "💔", "❣️", "💕", "💞", "💓", "💗", "💖", "💘"],
 }
 
-export default function EmojiPicker({ onEmojiSelect }: EmojiPickerProps) {
-  const [searchQuery, setSearchQuery] = useState("")
+function EmojiPickerContent({ onEmojiSelect }: EmojiPickerProps & { onClose?: () => void }) {
   const [activeCategory, setActiveCategory] = useState<string>("Smileys & Emotion")
 
   const handleEmojiClick = (emoji: string) => {
     onEmojiSelect(emoji)
   }
 
-  const filteredEmojis = searchQuery
-    ? Object.values(emojiData)
-        .flat()
-        .filter((emoji) => emoji.includes(searchQuery))
-    : emojiData[activeCategory as keyof typeof emojiData]
+  const filteredEmojis = emojiData[activeCategory as keyof typeof emojiData]
 
   return (
     <div className="w-64 max-h-72 flex flex-col">
-      <div className="relative mb-2">
-        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search emoji"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-8 h-9"
-        />
+      <div className="flex overflow-x-auto mb-2 pb-1 scrollbar-thin">
+        {Object.keys(emojiData).map((category) => (
+          <Button
+            key={category}
+            variant={activeCategory === category ? "default" : "ghost"}
+            size="sm"
+            className="text-xs whitespace-nowrap mr-1"
+            onClick={() => setActiveCategory(category)}
+            type="button"
+          >
+            {category}
+          </Button>
+        ))}
       </div>
-
-      {!searchQuery && (
-        <div className="flex overflow-x-auto mb-2 pb-1 scrollbar-thin">
-          {Object.keys(emojiData).map((category) => (
-            <Button
-              key={category}
-              variant={activeCategory === category ? "default" : "ghost"}
-              size="sm"
-              className="text-xs whitespace-nowrap mr-1"
-              onClick={() => setActiveCategory(category)}
-            >
-              {category}
-            </Button>
-          ))}
-        </div>
-      )}
 
       <div className="grid grid-cols-7 gap-1 overflow-y-auto">
         {filteredEmojis.map((emoji, index) => (
           <button
             key={index}
+            type="button" // Prevent form submission
             className="h-8 w-8 flex items-center justify-center hover:bg-muted rounded-md text-lg"
-            onClick={() => handleEmojiClick(emoji)}
+            onClick={(e) => {
+              e.preventDefault() // Prevent any default behavior
+              handleEmojiClick(emoji)
+            }}
           >
             {emoji}
           </button>
@@ -168,5 +156,32 @@ export default function EmojiPicker({ onEmojiSelect }: EmojiPickerProps) {
         )}
       </div>
     </div>
+  )
+}
+
+export default function EmojiPicker({ onEmojiSelect }: EmojiPickerProps) {
+  const [open, setOpen] = useState(false)
+
+  const handleEmojiSelect = (emoji: string) => {
+    onEmojiSelect(emoji)
+  
+  }
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="icon" type="button" className="h-10 w-10">
+          <Smile className="h-4 w-4" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="p-2 bg-background border border-input" side="top">
+        <EmojiPickerContent onEmojiSelect={handleEmojiSelect} />
+        <div className="flex justify-between mt-2 pt-2 border-t">
+          <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(false)} className="text-xs">
+            Done
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
   )
 }

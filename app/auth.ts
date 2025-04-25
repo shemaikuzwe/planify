@@ -13,11 +13,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [Google],
   events: {
     async createUser({ user }) {
-       if(!user.id) return;
+      if (!user.id) return;
       await seed(user.id);
     },
   },
   session: {
     strategy: "jwt",
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id=user.id;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      session.user.id=token.id;
+
+      return session;
+    },
   },
 });

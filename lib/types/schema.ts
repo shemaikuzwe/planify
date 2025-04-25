@@ -1,13 +1,12 @@
 import { z } from "zod";
 export const AddTaskSchema = z.object({
   text: z.string({ required_error: "Task name is required" }).min(1).max(50),
-  time: z.string().optional(),
-  emoji: z.string().optional(),
+  time: z.date().optional(),
   priority: z.enum(["HIGH", "MEDIUM", "LOW"]).optional(),
-  dueDate: z.date().optional(),
+  dueDate: z.string().optional(),
   categoryId: z.string().uuid(),
 });
-
+export type AddTaskValue=z.infer<typeof AddTaskSchema>
 export const AddCategorySchema = z.object({
   name: z
     .string({ required_error: "Category name is required" })

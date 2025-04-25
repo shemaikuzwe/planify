@@ -1,251 +1,154 @@
 "use client"
 
-import { useState, useRef, type KeyboardEvent, type FormEvent } from "react"
+import { useState, type KeyboardEvent, type FormEvent } from "react"
 import { Plus, Clock, Trash, Edit, Flag, CalendarIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
 import { format, isToday, isTomorrow, addDays } from "date-fns"
-import TimePicker from "../ui/time-picker"
 import EmojiPicker from "../ui/emoji-picker"
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
+import { Todos } from "@/lib/data"
+import { Priority } from "@/lib/types"
+import AddTaskForm from "./add-task-form"
 
-type Priority = "low" | "medium" | "high" | null
 
-type Task = {
-    id: number
-    text: string
-    time: string
-    emoji: string
-    completed: boolean
-    priority: Priority
-    dueDate?: Date
+
+interface Props {
+    todos: Todos
 }
 
-type Category = {
-    id: number
-    name: string
-    tasks: Task[]
-    isDefault?: boolean
-}
-
-export default function DailyTodo() {
-    // Unified categories state
-    const [categories, setCategories] = useState<Category[]>([
-        {
-            id: 1,
-            name: "My Projects",
-            isDefault: true,
-            tasks: [
-                { id: 1, text: "Do 30 minutes of yoga", time: "7:30 AM", emoji: "🧘‍♀️", completed: false, priority: "medium" },
-                { id: 2, text: "Dentist appointment", time: "10:00 AM", emoji: "", completed: false, priority: "high" },
-                { id: 3, text: "Buy bread", time: "", emoji: "🍞", completed: false, priority: "low" },
-            ],
-        },
-        {
-            id: 2,
-            name: "Team",
-            isDefault: true,
-            tasks: [
-                {
-                    id: 1,
-                    text: "Plan user research sessions",
-                    time: "2:00 PM",
-                    emoji: "📊",
-                    completed: false,
-                    priority: "high",
-                },
-                {
-                    id: 2,
-                    text: "Provide feedback on Amy's design",
-                    time: "",
-                    emoji: "🎨",
-                    completed: false,
-                    priority: "medium",
-                },
-                {
-                    id: 3,
-                    text: "All-hands meeting",
-                    time: "",
-                    emoji: "👥",
-                    completed: false,
-                    priority: "low",
-                },
-            ],
-        },
-        {
-            id: 3,
-            name: "Personal",
-            tasks: [
-                { id: 1, text: "Read a book", time: "8:00 PM", emoji: "📚", completed: false, priority: "low" },
-                { id: 2, text: "Go for a run", time: "6:00 AM", emoji: "🏃", completed: false, priority: "medium" },
-            ],
-        },
-    ])
-
+export default function DailyTodo({ todos }: Props) {
     // State to track which add task form is visible
-    const [addingTaskTo, setAddingTaskTo] = useState<number | null>(null)
+    const [addingTaskTo, setAddingTaskTo] = useState<string | null>(null)
 
     // State for editing tasks
-    const [editingTask, setEditingTask] = useState<{ categoryId: number; taskId: number } | null>(null)
+    const [editingTask, setEditingTask] = useState<{ categoryId: string; taskId: string } | null>(null)
 
     // State for new task input
     const [newTaskText, setNewTaskText] = useState("")
     const [newTaskTime, setNewTaskTime] = useState("")
     const [newTaskEmoji, setNewTaskEmoji] = useState("")
-    const [newTaskPriority, setNewTaskPriority] = useState<Priority>("medium")
+    const [newTaskPriority, setNewTaskPriority] = useState<Priority>("MEDIUM")
     const [newTaskDueDate, setNewTaskDueDate] = useState<Date | undefined>(undefined)
 
-    // Refs for time picker
-    // const timePickerRef = useRef<HTMLDivElement>(null)
+
 
     // State for inline editing
     const [inlineEditingTask, setInlineEditingTask] = useState<{
-        categoryId: number
-        taskId: number
+        categoryId: string
+        taskId: string
         field: "text" | "time" | "emoji"
     } | null>(null)
     const [inlineEditText, setInlineEditText] = useState("")
 
     // State for editing category name
-    const [editingCategoryId, setEditingCategoryId] = useState<number | null>(null)
+    const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
     const [editCategoryName, setEditCategoryName] = useState("")
 
-    const toggleTaskCompletion = (categoryId: number, taskId: number) => {
-        setCategories(
-            categories.map((category) =>
-                category.id === categoryId
-                    ? {
-                        ...category,
-                        tasks: category.tasks.map((task) =>
-                            task.id === taskId ? { ...task, completed: !task.completed } : task,
-                        ),
-                    }
-                    : category,
-            ),
-        )
+    const toggleTaskCompletion = (categoryId: string, taskId: string) => {
+        //handle toggle task
     }
 
     // Add a new category
     const addNewCategory = () => {
-        const newId = Math.max(...categories.map((cat) => cat.id)) + 1
-        setCategories([
-            ...categories,
-            {
-                id: newId,
-                name: "New Category",
-                tasks: [],
-            },
-        ])
+        //add category action
     }
 
     // Handle category name editing
-    const handleCategoryDoubleClick = (categoryId: number, name: string) => {
-        setEditingCategoryId(categoryId)
-        setEditCategoryName(name)
+    const handleCategoryDoubleClick = (categoryId: string, name: string) => {
+        //edit category
+        // setEditingCategoryId(categoryId)
+        // setEditCategoryName(name)
     }
 
     // Save category name edits
     const saveCategoryEdit = () => {
-        if (!editCategoryName.trim() || !editingCategoryId) return
+        //save edit category
 
-        setCategories(
-            categories.map((category) =>
-                category.id === editingCategoryId ? { ...category, name: editCategoryName } : category,
-            ),
-        )
+        // if (!editCategoryName.trim() || !editingCategoryId) return
 
-        setEditingCategoryId(null)
+        // setCategories(
+        //     categories.map((category) =>
+        //         category.id === editingCategoryId ? { ...category, name: editCategoryName } : category,
+        //     ),
+        // )
+
+        // setEditingCategoryId(null)
     }
 
     // Delete a category
-    const deleteCategory = (categoryId: number) => {
-        setCategories(categories.filter((category) => category.id !== categoryId))
+    const deleteCategory = (categoryId: string) => {
+        // setCategories(categories.filter((category) => category.id !== categoryId))
+
+        //delete category
     }
 
     // Add task to a category
-    const handleAddTask = (categoryId: number) => {
+    const handleAddTask = (categoryId: string) => {
         setAddingTaskTo(categoryId)
-        setEditingTask(null)
-        setNewTaskText("")
-        setNewTaskTime("")
-        setNewTaskEmoji("")
-        setNewTaskPriority("medium")
-        setNewTaskDueDate(undefined)
+        // setEditingTask(null)
+        // setNewTaskText("")
+        // setNewTaskTime("")
+        // setNewTaskEmoji("")
+        // setNewTaskPriority("medium")
+        // setNewTaskDueDate(undefined)
+
+        //add task
     }
 
     const cancelAddTask = () => {
-        setAddingTaskTo(null)
+        //cancel add
+        // setAddingTaskTo(null)
     }
 
     const submitNewTask = (e?: FormEvent) => {
-        if (e) e.preventDefault()
+        // if (e) e.preventDefault()
 
-        if (!newTaskText.trim() || addingTaskTo === null) {
-            return
-        }
+        // if (!newTaskText.trim() || addingTaskTo === null) {
+        //     return
+        // }
 
-        const categoryIndex = categories.findIndex((cat) => cat.id === addingTaskTo)
-        if (categoryIndex === -1) return
 
-        const newId =
-            categories[categoryIndex].tasks.length > 0
-                ? Math.max(...categories[categoryIndex].tasks.map((task) => task.id)) + 1
-                : 1
 
-        setCategories(
-            categories.map((category) =>
-                category.id === addingTaskTo
-                    ? {
-                        ...category,
-                        tasks: [
-                            ...category.tasks,
-                            {
-                                id: newId,
-                                text: newTaskText,
-                                time: newTaskTime,
-                                emoji: newTaskEmoji,
-                                completed: false,
-                                priority: newTaskPriority,
-                                dueDate: newTaskDueDate,
-                            },
-                        ],
-                    }
-                    : category,
-            ),
-        )
 
-        setAddingTaskTo(null)
+        // setAddingTaskTo(null)
+
+        // handle add task
     }
 
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === "Enter") {
-            submitNewTask()
-        } else if (e.key === "Escape") {
-            cancelAddTask()
-        }
+        // if (e.key === "Enter") {
+        //     submitNewTask()
+        // } else if (e.key === "Escape") {
+        //     cancelAddTask()
+        // }
+
+        //add task
     }
 
-    const deleteTask = (categoryId: number, taskId: number) => {
-        setCategories(
-            categories.map((category) =>
-                category.id === categoryId
-                    ? {
-                        ...category,
-                        tasks: category.tasks.filter((task) => task.id !== taskId),
-                    }
-                    : category,
-            ),
-        )
+    const deleteTask = (categoryId: string, taskId: string) => {
+        // setCategories(
+        //     categories.map((category) =>
+        //         category.id === categoryId
+        //             ? {
+        //                 ...category,
+        //                 tasks: category.tasks.filter((task) => task.id !== taskId),
+        //             }
+        //             : category,
+        //     ),
+        // )
+
+        //delete task
     }
 
-    const startEditingTask = (categoryId: number, taskId: number) => {
+    const startEditingTask = (categoryId: string, taskId: string) => {
         setEditingTask({ categoryId, taskId })
         setAddingTaskTo(null)
 
-        const category = categories.find((cat) => cat.id === categoryId)
+        const category = todos[0].categories.find((cat) => cat.id === categoryId)
         const task = category?.tasks.find((t) => t.id === taskId)
 
         if (task) {
@@ -264,31 +167,11 @@ export default function DailyTodo() {
     const submitEditTask = (e?: FormEvent) => {
         if (e) e.preventDefault()
 
+
         if (!editingTask || !newTaskText.trim()) return
 
         const { categoryId, taskId } = editingTask
 
-        setCategories(
-            categories.map((category) =>
-                category.id === categoryId
-                    ? {
-                        ...category,
-                        tasks: category.tasks.map((task) =>
-                            task.id === taskId
-                                ? {
-                                    ...task,
-                                    text: newTaskText,
-                                    time: newTaskTime,
-                                    emoji: newTaskEmoji,
-                                    priority: newTaskPriority,
-                                    dueDate: newTaskDueDate,
-                                }
-                                : task,
-                        ),
-                    }
-                    : category,
-            ),
-        )
 
         setEditingTask(null)
     }
@@ -319,11 +202,11 @@ export default function DailyTodo() {
 
     const getPriorityColor = (priority: Priority) => {
         switch (priority) {
-            case "high":
+            case "HIGH":
                 return "text-red-500"
-            case "medium":
+            case "MEDIUM":
                 return "text-orange-500"
-            case "low":
+            case "LOW":
                 return "text-blue-500"
             default:
                 return "text-gray-400"
@@ -332,11 +215,11 @@ export default function DailyTodo() {
 
     const getPriorityLabel = (priority: Priority) => {
         switch (priority) {
-            case "high":
+            case "HIGH":
                 return "High"
-            case "medium":
+            case "MEDIUM":
                 return "Medium"
-            case "low":
+            case "LOW":
                 return "Low"
             default:
                 return "None"
@@ -344,11 +227,11 @@ export default function DailyTodo() {
     }
 
     // Handle double-click events for inline editing
-    const handleDoubleClick = (categoryId: number, taskId: number, field: "text" | "time" | "emoji", value: string) => {
-        const category = categories.find((cat) => cat.id === categoryId)
+    const handleDoubleClick = (categoryId: string, taskId: string, field: "text" | "time" | "emoji", value: string) => {
+        const category = todos[0].categories.find((cat) => cat.id === categoryId)
         const task = category?.tasks.find((t) => t.id === taskId)
 
-        if (task?.completed) return
+        if (task?.status === "COMPLETED") return
 
         setInlineEditingTask({ categoryId, taskId, field })
         setInlineEditText(value)
@@ -360,16 +243,7 @@ export default function DailyTodo() {
 
         const { categoryId, taskId, field } = inlineEditingTask
 
-        setCategories(
-            categories.map((category) =>
-                category.id === categoryId
-                    ? {
-                        ...category,
-                        tasks: category.tasks.map((task) => (task.id === taskId ? { ...task, [field]: inlineEditText } : task)),
-                    }
-                    : category,
-            ),
-        )
+
 
         setInlineEditingTask(null)
     }
@@ -392,7 +266,7 @@ export default function DailyTodo() {
 
                 <div className="space-y-6">
                     {/* Render all categories */}
-                    {categories.map((category) => (
+                    {todos?.[0].categories.map((category) => (
                         <div key={category.id} className="mb-4">
                             <div className="flex justify-between items-center mb-2">
                                 {editingCategoryId === category.id ? (
@@ -416,16 +290,16 @@ export default function DailyTodo() {
                                         {category.name}
                                     </h3>
                                 )}
-                                {/* Only show delete button if it's not a default category or if we want to allow deleting default categories */}
+
                                 <div className="flex items-center">
-                                    {!category.isDefault && (
-                                        <button
-                                            onClick={() => deleteCategory(category.id)}
-                                            className="text-gray-400 hover:text-red-500 p-1"
-                                        >
-                                            <Trash className="w-3.5 h-3.5" />
-                                        </button>
-                                    )}
+
+                                    <button
+                                        onClick={() => deleteCategory(category.id)}
+                                        className="text-gray-400 hover:text-red-500 p-1"
+                                    >
+                                        <Trash className="w-3.5 h-3.5" />
+                                    </button>
+
                                 </div>
                             </div>
 
@@ -505,7 +379,7 @@ export default function DailyTodo() {
                                                             <RadioGroup
                                                                 value={newTaskPriority || "null"}
                                                                 onValueChange={(value) =>
-                                                                    setNewTaskPriority(value === "null" ? null : (value as Priority))
+                                                                    setNewTaskPriority(value as Priority)
                                                                 }
                                                                 className="flex flex-col gap-2"
                                                             >
@@ -724,166 +598,7 @@ export default function DailyTodo() {
                             </ul>
 
                             {addingTaskTo === category.id ? (
-                                <form onSubmit={submitNewTask} className="mt-3 space-y-2">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-5 h-5 rounded-full border border-gray-300 flex-shrink-0"></div>
-                                        <input
-                                            type="text"
-                                            value={newTaskText}
-                                            onChange={(e) => setNewTaskText(e.target.value)}
-                                            onKeyDown={handleKeyDown}
-                                            placeholder="Task name"
-                                            className="flex-1 border-b border-gray-200 bg-transparent py-1 text-sm focus:border-gray-400 focus:outline-none"
-                                            autoFocus
-                                        />
-                                    </div>
-                                    <div className="flex flex-wrap items-center gap-2 pl-7">
-                                        <div className="relative flex items-center">
-                                            <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        className="h-7 w-[120px] justify-start text-left font-normal text-xs"
-                                                    >
-                                                        <Clock className="mr-2 h-3 w-3" />
-                                                        {newTaskTime ? newTaskTime : "Select time"}
-                                                    </Button>
-                                                </PopoverTrigger>
-                                                <PopoverContent className="w-auto p-0" align="start">
-                                                    <TimePicker setTime={handleTimeChange} />
-                                                </PopoverContent>
-                                            </Popover>
-                                        </div>
-
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <Button variant="outline" size="sm" className="h-7 justify-start text-left font-normal text-xs">
-                                                    {newTaskEmoji ? (
-                                                        <span className="mr-2">{newTaskEmoji}</span>
-                                                    ) : (
-                                                        <span className="mr-2">😀</span>
-                                                    )}
-                                                    Emoji
-                                                </Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-2" align="start">
-                                                <EmojiPicker onEmojiSelect={handleEmojiSelect} />
-                                            </PopoverContent>
-                                        </Popover>
-                                    </div>
-
-                                    <div className="flex flex-wrap items-center gap-2 pl-7 mt-2">
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className={cn(
-                                                        "h-7 justify-start text-left font-normal text-xs",
-                                                        getPriorityColor(newTaskPriority),
-                                                    )}
-                                                >
-                                                    <Flag className={cn("mr-2 h-3 w-3", getPriorityColor(newTaskPriority))} />
-                                                    {getPriorityLabel(newTaskPriority)}
-                                                </Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-2" align="start">
-                                                <RadioGroup
-                                                    value={newTaskPriority || "null"}
-                                                    onValueChange={(value) => setNewTaskPriority(value === "null" ? null : (value as Priority))}
-                                                    className="flex flex-col gap-2"
-                                                >
-                                                    <div className="flex items-center space-x-2">
-                                                        <RadioGroupItem value="high" id={`high-new-${category.id}`} />
-                                                        <Label htmlFor={`high-new-${category.id}`} className="flex items-center">
-                                                            <Flag className="h-3 w-3 mr-1 text-red-500" />
-                                                            <span>High</span>
-                                                        </Label>
-                                                    </div>
-                                                    <div className="flex items-center space-x-2">
-                                                        <RadioGroupItem value="medium" id={`medium-new-${category.id}`} />
-                                                        <Label htmlFor={`medium-new-${category.id}`} className="flex items-center">
-                                                            <Flag className="h-3 w-3 mr-1 text-orange-500" />
-                                                            <span>Medium</span>
-                                                        </Label>
-                                                    </div>
-                                                    <div className="flex items-center space-x-2">
-                                                        <RadioGroupItem value="low" id={`low-new-${category.id}`} />
-                                                        <Label htmlFor={`low-new-${category.id}`} className="flex items-center">
-                                                            <Flag className="h-3 w-3 mr-1 text-blue-500" />
-                                                            <span>Low</span>
-                                                        </Label>
-                                                    </div>
-                                                    <div className="flex items-center space-x-2">
-                                                        <RadioGroupItem value="null" id={`none-new-${category.id}`} />
-                                                        <Label htmlFor={`none-new-${category.id}`} className="flex items-center">
-                                                            <Flag className="h-3 w-3 mr-1 text-gray-400" />
-                                                            <span>None</span>
-                                                        </Label>
-                                                    </div>
-                                                </RadioGroup>
-                                            </PopoverContent>
-                                        </Popover>
-
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <Button variant="outline" size="sm" className="h-7 justify-start text-left font-normal text-xs">
-                                                    <CalendarIcon className="mr-2 h-3 w-3" />
-                                                    {newTaskDueDate ? formatDueDate(newTaskDueDate) : "Due date"}
-                                                </Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-0" align="start">
-                                                <div className="p-2">
-                                                    <div className="flex flex-col gap-2 mb-2">
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="justify-start text-xs h-7"
-                                                            onClick={() => setNewTaskDueDate(new Date())}
-                                                        >
-                                                            Today
-                                                        </Button>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="justify-start text-xs h-7"
-                                                            onClick={() => setNewTaskDueDate(addDays(new Date(), 1))}
-                                                        >
-                                                            Tomorrow
-                                                        </Button>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="justify-start text-xs h-7"
-                                                            onClick={() => setNewTaskDueDate(undefined)}
-                                                        >
-                                                            No date
-                                                        </Button>
-                                                    </div>
-                                                    <CalendarComponent
-                                                        mode="single"
-                                                        selected={newTaskDueDate}
-                                                        onSelect={setNewTaskDueDate}
-                                                        className="border rounded-md"
-                                                    />
-                                                </div>
-                                            </PopoverContent>
-                                        </Popover>
-                                    </div>
-
-                                    <div className="flex justify-end gap-2 pt-1">
-                                        <button type="button" onClick={cancelAddTask} className="text-xs text-gray-500 hover:text-gray-700">
-                                            Cancel
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            className="text-xs bg-gray-800 text-white px-3 py-1 rounded-md hover:bg-gray-700"
-                                        >
-                                            Add
-                                        </button>
-                                    </div>
-                                </form>
+                                <AddTaskForm categoryId={category.id} />
                             ) : (
                                 <button
                                     className="flex items-center text-gray-500 mt-3 text-sm hover:text-gray-700"

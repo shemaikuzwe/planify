@@ -1,9 +1,12 @@
 import DailyTodo from '@/components/dashboard/daily-todo'
 import { Button } from '@/components/ui/button'
+import { GetUserTodos } from '@/lib/data'
 import { CalendarCheck, MessageSquare, Share, Star } from 'lucide-react'
+import { Suspense } from 'react';
 
 
-export default function page() {
+export default async function page() {
+  const todos = await GetUserTodos();
   return (
     <div className='flex flex-col w-full h-full'>
       <header className="flex items-center justify-between p-4 border-b">
@@ -25,7 +28,9 @@ export default function page() {
           </Button>
         </div>
       </header>
-      <DailyTodo />
+      <Suspense fallback={<div>Loading...</div>}>
+        <DailyTodo todos={todos} />
+      </Suspense>
     </div>
   )
 

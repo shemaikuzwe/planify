@@ -1,24 +1,13 @@
-import {
-  pgTable,
-  timestamp,
-  primaryKey,
-  uuid,
-  text,
-  integer,
-  pgEnum,
-} from "drizzle-orm/pg-core";
+import { pgTable, timestamp, primaryKey, uuid, text, integer, pgEnum } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "@auth/core/adapters";
+import { relations } from "drizzle-orm";
 
-//enums
+// enums
 export const priority = ["HIGH", "MEDIUM", "LOW"] as const;
 export const enumPriority = pgEnum("priority", priority);
+export const taskStatus = pgEnum("task_status", ["COMPLETED", "PENDING", "FAILED"]);
 
-export const taskStatus = pgEnum("task_status", [
-  "COMPLETED",
-  "PENDING",
-  "FAILED",
-]);
-
+// timestamps
 const timestamps = {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at")
@@ -26,6 +15,7 @@ const timestamps = {
     .$onUpdate(() => new Date()),
 };
 
+// tables
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom().notNull(),
   name: text("name"),
@@ -34,6 +24,7 @@ export const users = pgTable("users", {
   image: text("image"),
   ...timestamps,
 });
+
 export const accounts = pgTable(
   "account",
   {
@@ -85,9 +76,44 @@ export const tasks = pgTable("tasks", {
     .references(() => categories.id, { onDelete: "cascade" }),
   text: text("text").notNull(),
   time: text("time"),
-  emoji: text("emoji"),
   status: taskStatus().default("PENDING"),
   priority: enumPriority().default("MEDIUM"),
   dueDate: timestamp("due_date", { mode: "date" }),
   ...timestamps,
 });
+
+// relations
+export const userRelations = relations(users, ({ many }) => ({
+  accounts: many(accounts),
+  dailyTodos: many(dailyTodo),
+}));
+
+export const accountRelations = relations(accounts, ({ one }) => ({
+  user: one(users, {
+    fields: [accounts.userId],
+    references: [users.id],
+  }),
+}));
+
+export const dailyTodoRelations = relations(dailyTodo, ({ one, many }) => ({
+  user: one(users, {
+    fields: [dailyTodo.userId],
+    references: [users.id],
+  }),
+  categories: many(categories),
+}));
+
+export const categoryRelations = relations(categories, ({ one, many }) => ({
+  dailyTodo: one(dailyTodo, {
+    fields: [categories.dailyTodoId],
+    references: [dailyTodo.id],
+  }),
+  tasks: many(tasks),
+}));
+
+export const taskRelations = relations(tasks, ({ one }) => ({
+  category: one(categories, {
+    fields: [tasks.categoryId],
+    references: [categories.id],
+  }),
+}));

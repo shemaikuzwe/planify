@@ -1,20 +1,23 @@
 "use server";
 
+import { revalidateTag } from "next/cache";
 import db from "../drizzle";
 import { categories, tasks } from "../drizzle/schema";
-import { AddCategorySchema, AddTaskSchema } from "../types/schema";
+import {
+  AddCategorySchema,
+  AddTaskSchema,
+  AddTaskValue,
+} from "../types/schema";
 
-export async function AddTodo(formData: FormData) {
-  const validate = AddTaskSchema.safeParse(
-    Object.fromEntries(formData.entries())
-  );
+export async function AddTodo(data: AddTaskValue) {
+  const validate = AddTaskSchema.safeParse(data);
   if (!validate.success) {
     return validate.error.flatten().fieldErrors;
   }
-  const { text, time, emoji, priority, dueDate, categoryId } = validate.data;
-  await db
-    .insert(tasks)
-    .values({ text, time, emoji, priority, dueDate, categoryId });
+  const { text, time, priority, dueDate, categoryId } = validate.data;
+  await db.insert(tasks).values({ time, priority, dueDate, categoryId, text });
+
+  revalidateTag("todos");
 }
 
 export async function AddCategory(formData: FormData) {
@@ -26,7 +29,6 @@ export async function AddCategory(formData: FormData) {
   }
   await db.insert(categories).values(validate.data);
 }
-
 
 export async function AddDailyTodo(formData: FormData) {
   const validate = AddCategorySchema.safeParse(
