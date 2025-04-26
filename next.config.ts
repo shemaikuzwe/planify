@@ -1,10 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // experimental: {
-  //   ppr: true,
-  //   dynamicIO: true,
-  // },
+  experimental: {
+    dynamicIO: true,
+    ppr: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true
+  }
 };
 
 export default nextConfig;

@@ -1,16 +1,13 @@
-import { auth } from "@/app/auth";
 import db from "../drizzle";
 import { dailyTodo } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
+import { unstable_cacheTag as cacheTag } from "next/cache";
 
-
-export async function GetUserTodos() {
-  const session = await auth();
-  const user = session?.user;
-  if (!user || !user.id) throw new Error("User not found");
-  // cacheTag("todos", user.id);
+export async function GetUserTodos(userId: string) {
+  "use cache";
+  cacheTag("todos", userId);
   const todos = await db.query.dailyTodo.findMany({
-    where: eq(dailyTodo.userId, user.id),
+    where: eq(dailyTodo.userId, userId),
     with: {
       categories: {
         with: {

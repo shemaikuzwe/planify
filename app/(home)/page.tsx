@@ -3,10 +3,14 @@ import { Button } from '@/components/ui/button'
 import { GetUserTodos } from '@/lib/data'
 import { CalendarCheck, MessageSquare, Share, Star } from 'lucide-react'
 import { Suspense } from 'react';
+import { auth } from '../auth';
 
 
 export default async function page() {
-  const todos = await GetUserTodos();
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) throw new Error("User not found");
+  const todos = await GetUserTodos(userId);
   return (
     <div className='flex flex-col w-full h-full'>
       <header className="flex items-center justify-between p-4 border-b">

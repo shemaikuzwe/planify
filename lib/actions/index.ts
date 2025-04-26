@@ -59,6 +59,7 @@ export async function editName(
     .update(tasks)
     .set({ text: validate.data.text })
     .where(eq(tasks.id, validate.data.taskId));
+    revalidateTag("todos");  
 }
 
 export async function EditTodo(data: AddTaskValue) {
@@ -71,6 +72,7 @@ export async function EditTodo(data: AddTaskValue) {
     .update(tasks)
     .set(validate.data)
     .where(eq(tasks.id, validate.data.taskId));
+    revalidateTag("todos");  
 }
 
 export async function ToggleTaskStatus(taskId: string, status: TaskStatus) {
@@ -79,8 +81,10 @@ export async function ToggleTaskStatus(taskId: string, status: TaskStatus) {
     return validate.error.flatten().fieldErrors;
   }
   await db.update(tasks).set({ status }).where(eq(tasks.id, taskId));
+  revalidateTag("todos");
 }
 
 export async function DeleteTodo(taskId: string) {
   await db.delete(tasks).where(eq(tasks.id, taskId));
+  revalidateTag("todos");
 }
