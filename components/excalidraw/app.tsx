@@ -11,6 +11,7 @@ import React, {
 import type * as TExcalidraw from "@excalidraw/excalidraw";
 import type {
   NonDeletedExcalidrawElement,
+  OrderedExcalidrawElement,
   Theme,
 } from "@excalidraw/excalidraw/element/types";
 import type {
@@ -19,6 +20,7 @@ import type {
   ExcalidrawInitialDataState,
   Gesture,
   PointerDownState as ExcalidrawPointerDownState,
+  BinaryFiles,
 } from "@excalidraw/excalidraw/types";
 
 import {
@@ -34,6 +36,8 @@ import CustomFooter from "./footer";
 import type { ResolvablePromise } from "./utils";
 import { useSidebar } from "../ui/sidebar";
 import { cn } from "@/lib/utils";
+import { useTheme } from "next-themes";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 
 type Comment = {
   x: number;
@@ -65,7 +69,7 @@ export interface AppProps {
   excalidrawLib: typeof TExcalidraw;
 }
 
-export default function ExampleApp({
+export default function App({
 
   useCustom,
   customArgs,
@@ -86,10 +90,11 @@ export default function ExampleApp({
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const appRef = useRef<any>(null);
+  const [elements, setElements] = useLocalStorage < null | OrderedExcalidrawElement[]> ("excalidraw", null);
   const [viewModeEnabled, setViewModeEnabled] = useState(false);
   const [zenModeEnabled, setZenModeEnabled] = useState(false);
   const [gridModeEnabled, setGridModeEnabled] = useState(false);
-  const [theme, setTheme] = useState<Theme>("light");
+  const { theme } = useTheme()
   const [disableImageTool, setDisableImageTool] = useState(false);
   const [isCollaborating, setIsCollaborating] = useState(false);
   const [commentIcons, setCommentIcons] = useState<{ [id: string]: Comment }>(
@@ -151,10 +156,12 @@ export default function ExampleApp({
         excalidrawAPI: (api: ExcalidrawImperativeAPI) => setExcalidrawAPI(api),
         initialData: initialStatePromiseRef.current.promise,
         onChange: (
-          elements: NonDeletedExcalidrawElement[],
+          elements: OrderedExcalidrawElement[],
           state: AppState,
+          files: BinaryFiles
         ) => {
-          console.info("Elements :", elements, "State : ", state);
+
+          setElements(elements);
         },
         onPointerUpdate: (payload: {
           pointer: { x: number; y: number };
@@ -169,6 +176,7 @@ export default function ExampleApp({
         UIOptions: {
           canvasActions: {
             loadScene: false,
+            toggleTheme: true,
           },
           tools: { image: !disableImageTool },
         },
@@ -544,8 +552,8 @@ export default function ExampleApp({
 
   return (
     <div className={cn("h-full fixed px-4 py-2", {
-      "w-320": collapsed, 
-      "w-270": !collapsed  
+      "w-320": collapsed,
+      "w-270": !collapsed
     })}
       ref={appRef}>
       {renderExcalidraw(children)}

@@ -10,10 +10,10 @@ const ExcalidrawWrapper: React.FC = () => {
   return (
     <>
       <App
-        useCustom={(api: any, args?: any[]) => {}}
+        useCustom={(api: any, args?: any[]) => { }}
         excalidrawLib={excalidrawLib}
       >
-        <Excalidraw />
+        <Excalidraw  theme="dark"/>
       </App>
     </>
   );
