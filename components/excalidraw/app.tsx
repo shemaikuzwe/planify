@@ -12,8 +12,9 @@ import type * as TExcalidraw from "@excalidraw/excalidraw";
 import type {
   NonDeletedExcalidrawElement,
   OrderedExcalidrawElement,
-  Theme,
 } from "@excalidraw/excalidraw/element/types";
+import { loadFromBlob } from "@excalidraw/excalidraw/data/blob";
+
 import type {
   AppState,
   ExcalidrawImperativeAPI,
@@ -31,8 +32,6 @@ import {
 } from "./utils";
 
 import CustomFooter from "./footer";
-
-
 import type { ResolvablePromise } from "./utils";
 import { useSidebar } from "../ui/sidebar";
 import { cn } from "@/lib/utils";
@@ -61,7 +60,6 @@ type PointerDownState = {
 const COMMENT_ICON_DIMENSION = 32;
 const COMMENT_INPUT_HEIGHT = 50;
 const COMMENT_INPUT_WIDTH = 150;
-
 export interface AppProps {
   useCustom: (api: ExcalidrawImperativeAPI | null, customArgs?: any[]) => void;
   customArgs?: any[];
@@ -90,7 +88,9 @@ export default function App({
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const appRef = useRef<any>(null);
-  const [elements, setElements] = useLocalStorage < null | OrderedExcalidrawElement[]> ("excalidraw", null);
+  const [elements, setElements] = useLocalStorage<null | OrderedExcalidrawElement[]>("excalidraw", null);
+  const [appState, setAppState] = useLocalStorage<null | AppState>("appState", null);
+  const [files, setFiles] = useLocalStorage<null | BinaryFiles>("files", null);
   const [viewModeEnabled, setViewModeEnabled] = useState(false);
   const [zenModeEnabled, setZenModeEnabled] = useState(false);
   const [gridModeEnabled, setGridModeEnabled] = useState(false);
@@ -110,6 +110,7 @@ export default function App({
       resolvablePromise<ExcalidrawInitialDataState | null>();
   }
 
+
   const [excalidrawAPI, setExcalidrawAPI] =
     useState<ExcalidrawImperativeAPI | null>(null);
 
@@ -127,13 +128,14 @@ export default function App({
       const reader = new FileReader();
       reader.readAsDataURL(imageData);
 
-      reader.onload = function () {
-
-
-        //@ts-ignore
-        initialStatePromiseRef.current.promise.resolve();
-
-      };
+      // reader.onload = function () {
+      //   //@ts-ignore
+      //   initialStatePromiseRef.current.promise.resolve();
+      // };
+     // @ts-ignore
+      initialStatePromiseRef.current.promise.resolve({
+        elements
+      });
     };
     fetchData();
   }, [excalidrawAPI, convertToExcalidrawElements, MIME_TYPES]);
@@ -153,6 +155,7 @@ export default function App({
     const newElement = cloneElement(
       Excalidraw,
       {
+
         excalidrawAPI: (api: ExcalidrawImperativeAPI) => setExcalidrawAPI(api),
         initialData: initialStatePromiseRef.current.promise,
         onChange: (
@@ -160,7 +163,8 @@ export default function App({
           state: AppState,
           files: BinaryFiles
         ) => {
-
+          setAppState(state);
+          setFiles(files);
           setElements(elements);
         },
         onPointerUpdate: (payload: {
@@ -175,11 +179,16 @@ export default function App({
         name: "Custom name of drawing",
         UIOptions: {
           canvasActions: {
-            loadScene: false,
+            loadScene: async () => {
+              await initialStatePromiseRef.current.promise;
+            },
             toggleTheme: true,
+            theme: theme,
           },
+
           tools: { image: !disableImageTool },
         },
+
         renderTopRightUI,
         onLinkOpen,
         onPointerDown,
