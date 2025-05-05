@@ -15,6 +15,7 @@
     "@excalidraw/excalidraw": "^0.18.0",
     "@hookform/resolvers": "^5.0.1",
     "@neondatabase/serverless": "^1.0.0",
+    "@radix-ui/react-alert-dialog": "^1.1.11",
     "@radix-ui/react-avatar": "^1.1.7",
     "@radix-ui/react-checkbox": "^1.2.3",
     "@radix-ui/react-dialog": "^1.1.11",
@@ -64,7 +65,7 @@
       "@types/react-dom": "19.1.2"
     }
   },
-    "peerDependencies": {
+  "peerDependencies": {
     "react": ">=18",
     "react-dom": ">=18",
     "next": ">=14"

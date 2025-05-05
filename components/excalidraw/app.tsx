@@ -37,6 +37,8 @@ import { useSidebar } from "../ui/sidebar";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import { Button } from "../ui/button";
+import SaveDialog from "./save-dialog";
 
 type Comment = {
   x: number;
@@ -120,7 +122,7 @@ export default function App({
 
   useEffect(() => {
     if (!excalidrawAPI) {
-      return;
+      return; 
     }
     const fetchData = async () => {
       const res = await fetch("/images/rocket.jpeg");
@@ -132,8 +134,9 @@ export default function App({
       //   //@ts-ignore
       //   initialStatePromiseRef.current.promise.resolve();
       // };
-     // @ts-ignore
+      // @ts-ignore
       initialStatePromiseRef.current.promise.resolve({
+        
         elements
       });
     };
@@ -179,9 +182,6 @@ export default function App({
         name: "Custom name of drawing",
         UIOptions: {
           canvasActions: {
-            loadScene: async () => {
-              await initialStatePromiseRef.current.promise;
-            },
             toggleTheme: true,
             theme: theme,
           },
@@ -220,74 +220,11 @@ export default function App({
             }}
           />
         )}
-        <button
-          onClick={() => alert("This is an empty top right UI")}
-          style={{ height: "2.5rem" }}
-        >
-          Click me
-        </button>
+      <SaveDialog elements={elements}/>
       </>
     );
   };
 
-  // const loadSceneOrLibrary = async () => {
-  //   const file = await fileOpen({ description: "Excalidraw or library file" });
-  //   const contents = await loadSceneOrLibraryFromBlob(file, null, null);
-  //   if (contents.type === MIME_TYPES.excalidraw) {
-  //     excalidrawAPI?.updateScene(contents.data as any);
-  //   } else if (contents.type === MIME_TYPES.excalidrawlib) {
-  //     excalidrawAPI?.updateLibrary({
-  //       libraryItems: (contents.data as ImportedLibraryData).libraryItems!,
-  //       openLibraryMenu: true,
-  //     });
-  //   }
-  // };
-
-  // const updateScene = () => {
-  //   const sceneData = {
-  //     elements: restoreElements(
-  //       convertToExcalidrawElements([
-  //         {
-  //           type: "rectangle",
-  //           id: "rect-1",
-  //           fillStyle: "hachure",
-  //           strokeWidth: 1,
-  //           strokeStyle: "solid",
-  //           roughness: 1,
-  //           angle: 0,
-  //           x: 100.50390625,
-  //           y: 93.67578125,
-  //           strokeColor: "#c92a2a",
-  //           width: 186.47265625,
-  //           height: 141.9765625,
-  //           seed: 1968410350,
-  //           roundness: {
-  //             type: ROUNDNESS.ADAPTIVE_RADIUS,
-  //             value: 32,
-  //           },
-  //         },
-  //         {
-  //           type: "arrow",
-  //           x: 300,
-  //           y: 150,
-  //           start: { id: "rect-1" },
-  //           end: { type: "ellipse" },
-  //         },
-  //         {
-  //           type: "text",
-  //           x: 300,
-  //           y: 100,
-  //           text: "HELLO WORLD!",
-  //         },
-  //       ]),
-  //       null,
-  //     ),
-  //     appState: {
-  //       viewBackgroundColor: "#edf2ff",
-  //     },
-  //   };
-  //   excalidrawAPI?.updateScene(sceneData);
-  // };
 
   const onLinkOpen = useCallback(
     (
