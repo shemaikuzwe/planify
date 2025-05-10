@@ -1,11 +1,11 @@
 import db from "../drizzle";
-import { dailyTodo } from "../drizzle/schema";
+import { dailyTodo, drawings } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { unstable_cacheTag as cacheTag } from "next/cache";
 
 export async function GetUserTodos(userId: string) {
-  "use cache";
-  cacheTag("todos", userId);
+  // "use cache";
+  // cacheTag("todos", userId);
   const todos = await db.query.dailyTodo.findMany({
     where: eq(dailyTodo.userId, userId),
     with: {
@@ -20,3 +20,21 @@ export async function GetUserTodos(userId: string) {
 }
 
 export type Todos = Awaited<ReturnType<typeof GetUserTodos>>;
+
+export async function GetUserDrawings(userId: string) {
+  // "use cache";
+  // cacheTag("drawings", userId);
+  const userDrawings = await db.query.drawings.findMany({
+    where: eq(drawings.userId, userId),
+  });
+  return userDrawings;
+}
+
+export async function GetDrawingById(id: string) {
+  // "use cache";
+  // cacheTag("drawing", id);
+  const drawing = await db.query.drawings.findFirst({
+    where: eq(drawings.id, id),
+  });
+  return drawing;
+}

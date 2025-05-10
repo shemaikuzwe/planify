@@ -29,3 +29,14 @@ export const ToggleTaskStatusSchema = z.object({
   taskId: z.string().uuid(),
   status: z.enum(["COMPLETED", "IN_PROGRESS", "NOT_STARTED", "FAILED"]),
 });
+
+export const saveDrawingSchema = z.object({
+  elements: z.string(),
+  title: z.string().min(2),
+  description: z.string().optional(),
+});
+
+export const updateDrawingSchema = z.object({
+  elements: z.string(),
+   drawingId: z.string().uuid(),
+});

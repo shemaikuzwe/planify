@@ -6,9 +6,11 @@ import {
   text,
   integer,
   pgEnum,
+  json,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "@auth/core/adapters";
 import { relations } from "drizzle-orm";
+import { OrderedExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 
 // enums
 export const priority = ["HIGH", "MEDIUM", "LOW"] as const;
@@ -95,10 +97,22 @@ export const tasks = pgTable("tasks", {
   ...timestamps,
 });
 
+export const drawings = pgTable("drawings", {
+  id: uuid("id").primaryKey().defaultRandom().notNull(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  description: text("description"),
+  name: text("name").notNull(),
+  elements:json("elements"),
+  ...timestamps,
+});
+
 // relations
 export const userRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
   dailyTodos: many(dailyTodo),
+  drawings: many(drawings),
 }));
 
 export const accountRelations = relations(accounts, ({ one }) => ({
@@ -128,5 +142,12 @@ export const taskRelations = relations(tasks, ({ one }) => ({
   category: one(categories, {
     fields: [tasks.categoryId],
     references: [categories.id],
+  }),
+}));
+
+export const drawingsRelations = relations(drawings, ({ one }) => ({
+  user: one(users, {
+    fields: [drawings.userId],
+    references: [users.id],
   }),
 }));

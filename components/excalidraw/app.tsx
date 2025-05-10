@@ -37,7 +37,6 @@ import { useSidebar } from "../ui/sidebar";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import { Button } from "../ui/button";
 import SaveDialog from "./save-dialog";
 
 type Comment = {
@@ -62,18 +61,20 @@ type PointerDownState = {
 const COMMENT_ICON_DIMENSION = 32;
 const COMMENT_INPUT_HEIGHT = 50;
 const COMMENT_INPUT_WIDTH = 150;
+const initialData = {
+  scrollToContent: true,
+}
 export interface AppProps {
-  useCustom: (api: ExcalidrawImperativeAPI | null, customArgs?: any[]) => void;
-  customArgs?: any[];
+  apiElements?: OrderedExcalidrawElement[],
+  drawingId?: string,
   children: React.ReactNode;
   excalidrawLib: typeof TExcalidraw;
 }
 
 export default function App({
-
-  useCustom,
-  customArgs,
+  apiElements,
   children,
+  drawingId,
   excalidrawLib,
 }: AppProps) {
   const {
@@ -90,7 +91,7 @@ export default function App({
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const appRef = useRef<any>(null);
-  const [elements, setElements] = useLocalStorage<null | OrderedExcalidrawElement[]>("excalidraw", null);
+  const [elements, setElements] = useLocalStorage<null | OrderedExcalidrawElement[]>("excalidraw", apiElements ?? null);
   const [appState, setAppState] = useLocalStorage<null | AppState>("appState", null);
   const [files, setFiles] = useLocalStorage<null | BinaryFiles>("files", null);
   const [viewModeEnabled, setViewModeEnabled] = useState(false);
@@ -116,19 +117,18 @@ export default function App({
   const [excalidrawAPI, setExcalidrawAPI] =
     useState<ExcalidrawImperativeAPI | null>(null);
 
-  useCustom(excalidrawAPI, customArgs);
 
   useHandleLibrary({ excalidrawAPI });
 
   useEffect(() => {
     if (!excalidrawAPI) {
-      return; 
+      return;
     }
     const fetchData = async () => {
-      const res = await fetch("/images/rocket.jpeg");
-      const imageData = await res.blob();
-      const reader = new FileReader();
-      reader.readAsDataURL(imageData);
+      // const res = await fetch("/images/rocket.jpeg");
+      // const imageData = await res.blob();
+      // const reader = new FileReader();
+      // reader.readAsDataURL(imageData);
 
       // reader.onload = function () {
       //   //@ts-ignore
@@ -136,8 +136,8 @@ export default function App({
       // };
       // @ts-ignore
       initialStatePromiseRef.current.promise.resolve({
-        
-        elements
+        ...initialData,
+        elements,
       });
     };
     fetchData();
@@ -220,7 +220,7 @@ export default function App({
             }}
           />
         )}
-      <SaveDialog elements={elements}/>
+        <SaveDialog elements={elements} drawingId={drawingId} />
       </>
     );
   };

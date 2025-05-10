@@ -3,24 +3,40 @@ import { AlertDialog, AlertDialogHeader, AlertDialogTrigger, AlertDialogContent,
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { OrderedExcalidrawElement } from '@excalidraw/excalidraw/element/types'
+import { saveDrawing, UpdateDrawing } from '@/lib/actions'
+import { useFormStatus } from 'react-dom'
+import { Label } from '../ui/label'
 
 interface Props {
     elements: OrderedExcalidrawElement[] | null,
+    drawingId?: string
 }
-export default function SaveDialog({ elements }: Props) {
-    return (
+export default function SaveDialog({ elements,drawingId }: Props) {
+
+    return drawingId  ? (
+      <form action={UpdateDrawing}>
+        <input type='hidden' name='elements' value={JSON.stringify(elements)} />
+        <input type='hidden' name='drawingId' value={drawingId} />
+        <SubmitButton/>
+      </form>
+    ):(
         <AlertDialog>
             <AlertDialogTrigger asChild>
                 <Button>Save</Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <form className='flex flex-col gap-4'>
+                    <form className='flex flex-col gap-4' action={saveDrawing}>
                         <input type='hidden' name='elements' value={JSON.stringify(elements)} />
-                        <Input placeholder='Enter your Title' name='title' />
-                        <Input placeholder='Enter your description' name='description' />
+                        <input type='hidden' name='drawingId' value={drawingId} />
+                        <div className='space-y-2'>
+                            <Label>Title<span className='text-red-500'>*</span></Label>
+                            <Input placeholder='Enter your Title' name='title' />
+                            <Label>Description</Label>
+                            <Input placeholder='Enter your description' name='description' />
+                        </div>
                         <div className='flex gap-2 items-center justify-center'>
-                            <Button type="submit" size={"lg"}>Save</Button>
+                            <SubmitButton />
                             <AlertDialogCancel >
                                 cancel
 
@@ -31,5 +47,12 @@ export default function SaveDialog({ elements }: Props) {
             </AlertDialogContent>
 
         </AlertDialog>
+    )
+}
+
+export function SubmitButton() {
+    const { pending } = useFormStatus()
+    return (
+        <Button type="submit" disabled={pending} >{pending ? "Saving..." : "Save"}</Button>
     )
 }
