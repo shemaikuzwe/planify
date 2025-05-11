@@ -11,7 +11,7 @@ const ExcalidrawWithClientOnly = dynamic(
     },
 );
 
-export default function ExcalidrawClient({ drawing }: { drawing: Drawing }) {
+export default function ExcalidrawClient({ drawing }: { drawing?: Drawing }) {
 
     return (
         <div className="h-full w-fit">

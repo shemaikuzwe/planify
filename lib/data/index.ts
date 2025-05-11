@@ -1,7 +1,6 @@
 import db from "../drizzle";
 import { dailyTodo, drawings } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
-import { unstable_cacheTag as cacheTag } from "next/cache";
 
 export async function GetUserTodos(userId: string) {
   // "use cache";

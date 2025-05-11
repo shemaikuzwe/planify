@@ -142,6 +142,9 @@ export default function App({
     };
     fetchData();
   }, [excalidrawAPI, convertToExcalidrawElements, MIME_TYPES]);
+  useEffect(()=>{
+     setElements(apiElements ?? [] as OrderedExcalidrawElement[])
+  },[apiElements])
 
   const renderExcalidraw = (children: React.ReactNode) => {
     const Excalidraw: any = Children.toArray(children).find(

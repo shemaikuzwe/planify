@@ -1,7 +1,7 @@
+import ExcalidrawClient from "@/components/excalidraw/excalidraw";
+
 export default function Page() {
     return (
-        <div>
-            <h1>New Excalidraw</h1>
-        </div>
+        <ExcalidrawClient/>
     )
 }
