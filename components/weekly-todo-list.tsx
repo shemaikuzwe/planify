@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { List, Share, Star, MessageSquare } from "lucide-react"
+import Header from "./home/header"
 
 interface Todo {
   id: string
@@ -94,27 +95,9 @@ export function WeeklyTodoList() {
 
   return (
     <div className="min-h-screen w-full">
-      <header className="flex items-center justify-between p-4 border-b">
-        <div className="flex items-center gap-2">
-          <List className="h-5 w-5 " />
-          <h1 className="text-sm font-medium">Weekly To-do</h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-neutral-400 px-2 py-1 border border-neutral-700 rounded">Private</span>
-          <Button variant="ghost" size="sm" className="text-neutral-400">
-            <Share className="h-4 w-4 mr-1" />
-            Share
-          </Button>
-          <Button variant="ghost" size="sm" className="text-neutral-400">
-            <MessageSquare className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="sm" className="text-neutral-400">
-            <Star className="h-4 w-4" />
-          </Button>
-        </div>
-      </header>
+      <Header title="Weekly To-do" icon={<List className="h-5 w-5 " />} />
 
-      <div className="p-8 max-w-5xl mx-auto">
+      {/* <div className="p-8 max-w-5xl mx-auto">
 
         <Button variant="default" className="mb-8" onClick={createNewWeek}>
           <List className="h-4 w-4 mr-2" />
@@ -150,7 +133,7 @@ export function WeeklyTodoList() {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
     </div>
   )
 }
