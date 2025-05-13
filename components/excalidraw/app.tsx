@@ -38,6 +38,7 @@ import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import SaveDialog from "./save-dialog";
+import { useStore } from "@/lib/store";
 
 type Comment = {
   x: number;
@@ -91,9 +92,7 @@ export default function App({
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const appRef = useRef<any>(null);
-  const [elements, setElements] = useLocalStorage<null | OrderedExcalidrawElement[]>("excalidraw", apiElements ?? null);
-  const [appState, setAppState] = useLocalStorage<null | AppState>("appState", null);
-  const [files, setFiles] = useLocalStorage<null | BinaryFiles>("files", null);
+  const { updateElement, drawing, updateLastUpdated } = useStore()
   const [viewModeEnabled, setViewModeEnabled] = useState(false);
   const [zenModeEnabled, setZenModeEnabled] = useState(false);
   const [gridModeEnabled, setGridModeEnabled] = useState(false);
@@ -125,6 +124,8 @@ export default function App({
       return;
     }
     const fetchData = async () => {
+      console.log(drawing.elements);
+
       // const res = await fetch("/images/rocket.jpeg");
       // const imageData = await res.blob();
       // const reader = new FileReader();
@@ -134,18 +135,35 @@ export default function App({
       //   //@ts-ignore
       //   initialStatePromiseRef.current.promise.resolve();
       // };
+
+      // Make sure elements is in the correct format
+      let parsedElements = apiElements;
+
+      if (!parsedElements && drawing.elements) {
+        try {
+          if (typeof drawing.elements === 'string') {
+            parsedElements = JSON.parse(drawing.elements);
+          } else {
+            parsedElements = drawing.elements;
+          }
+
+          if (!Array.isArray(parsedElements)) {
+            parsedElements = [];
+          }
+        } catch (error) {
+          console.error('Error parsing elements:', error);
+          parsedElements = [];
+        }
+      }
+
       // @ts-ignore
       initialStatePromiseRef.current.promise.resolve({
         ...initialData,
-        elements,
+        elements: parsedElements,
       });
     };
     fetchData();
-  }, [excalidrawAPI, convertToExcalidrawElements, MIME_TYPES]);
-  useEffect(()=>{
-     setElements(apiElements ?? [] as OrderedExcalidrawElement[])
-  },[apiElements])
-
+  }, [excalidrawAPI, convertToExcalidrawElements, MIME_TYPES])
   const renderExcalidraw = (children: React.ReactNode) => {
     const Excalidraw: any = Children.toArray(children).find(
       (child) =>
@@ -169,9 +187,15 @@ export default function App({
           state: AppState,
           files: BinaryFiles
         ) => {
-          setAppState(state);
-          setFiles(files);
-          setElements(elements);
+          const elementsString = JSON.stringify(elements);
+          const currentElements = drawing?.elements || "";
+
+          // Only update if elements have actually changed
+          if (elementsString !== currentElements) {
+            console.log("Elements have changed");
+            updateElement(elementsString);
+            updateLastUpdated();
+          }
         },
         onPointerUpdate: (payload: {
           pointer: { x: number; y: number };
@@ -223,7 +247,7 @@ export default function App({
             }}
           />
         )}
-        <SaveDialog elements={elements} drawingId={drawingId} />
+        {/* <SaveDialog elements={apiElements} drawingId={drawingId} /> */}
       </>
     );
   };
