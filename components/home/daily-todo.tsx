@@ -6,10 +6,11 @@ import { cn } from "@/lib/utils"
 import { format, isToday, isTomorrow } from "date-fns"
 import { Todos } from "@/lib/data"
 import { Priority, TaskStatus } from "@/lib/types"
-import AddTaskForm from "./add-task-form"
 import { DeleteTodo, editName, ToggleTaskStatus } from "@/lib/actions"
-import EditTaskForm from "./edit-task-form"
 import { TaskStatusIndicator } from "../ui/task-status"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { getPriorityIcon } from "../ui/priority-icon"
 
 
 interface Props {
@@ -17,19 +18,18 @@ interface Props {
 }
 
 export default function DailyTodo({ todos }: Props) {
-    const [addingTaskTo, setAddingTaskTo] = useState<string | null>(null)
-    const [editingTask, setEditingTask] = useState<{ categoryId: string; taskId: string } | null>(null)
     const [inlineEditingTask, setInlineEditingTask] = useState<{
         categoryId: string
         taskId: string
     } | null>(null)
     const [inlineEditText, setInlineEditText] = useState<string | null>(null)
-    
+    const router=useRouter()
+
     const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
     const [editCategoryName, setEditCategoryName] = useState("")
 
-    const toggleTaskCompletion = async(taskId: string, status: TaskStatus) => {
-       await ToggleTaskStatus(taskId, status)
+    const toggleTaskCompletion = async (taskId: string, status: TaskStatus) => {
+        await ToggleTaskStatus(taskId, status)
     }
 
     // Add a new category
@@ -73,19 +73,6 @@ export default function DailyTodo({ todos }: Props) {
         }
     }
 
-    const getPriorityColor = (priority: Priority) => {
-        switch (priority) {
-            case "HIGH":
-                return "text-red-500"
-            case "MEDIUM":
-                return "text-orange-500"
-            case "LOW":
-                return "text-blue-500"
-            default:
-                return "text-gray-400"
-        }
-    }
-
     // Handle double-click events for inline editing
     const handleDoubleClick = (categoryId: string, taskId: string, field: "text" | "time" | "emoji", value: string) => {
         const category = todos[0].categories.find((cat) => cat.id === categoryId)
@@ -119,7 +106,7 @@ export default function DailyTodo({ todos }: Props) {
     }
 
     return (
-        <div className=" w-full flex justify-center items-center">
+        <div className="w-full flex justify-start items-start">
 
             <div className="p-6">
                 <div className="space-y-6">
@@ -150,7 +137,6 @@ export default function DailyTodo({ todos }: Props) {
                                 )}
 
                                 <div className="flex items-center">
-
                                     <button
                                         onClick={() => deleteCategory(category.id)}
                                         className="text-gray-400 hover:text-red-500 p-1"
@@ -163,94 +149,68 @@ export default function DailyTodo({ todos }: Props) {
 
                             <ul className="space-y-3">
                                 {category.tasks.map((task) => (
-                                    <li key={task.id} className="group flex items-start gap-3">
-                                        {editingTask && editingTask.categoryId === category.id && editingTask.taskId === task.id ? (
-                                            <EditTaskForm setEditingTask={setEditingTask} task={task} />
-                                        ) : (
-                                            <>
-                                                <div className="mt-0.5">
-                                                    <TaskStatusIndicator status={task.status} onChange={(status) => toggleTaskCompletion(task.id, status)} />
-                                                </div>
-                                                <div className="flex-1">
-                                                    <div className="flex items-center">
-                                                        {inlineEditingTask &&
-                                                            inlineEditingTask.categoryId === category.id &&
-                                                            inlineEditingTask.taskId === task.id
-                                                            ? (
-                                                                <input
-                                                                    type="text"
-                                                                    value={inlineEditText ?? undefined}
-                                                                    onChange={(e) => setInlineEditText(e.target.value)}
-                                                                    onKeyDown={handleInlineKeyDown}
-                                                                    onBlur={saveInlineEdit}
-                                                                    className="flex-1 border-b border-gray-200 bg-transparent py-0.5 text-sm focus:border-gray-400 focus:outline-none font-medium"
-                                                                    autoFocus
-                                                                />
-                                                            ) : (
-                                                                <span
-                                                                    className={cn("font-medium", task.status === "COMPLETED" && "line-through text-gray-400")}
-                                                                    onDoubleClick={() => handleDoubleClick(category.id, task.id, "text", task.text)}
-                                                                >
-                                                                    {task.text}
-                                                                </span>
-                                                            )}
+                                    <li key={task.id} className="group flex items-start gap-3 cursor-pointer" onClick={()=> router.push(`/task/${task.id}`)}>
+                                        <div className="mt-0.5">
+                                            <TaskStatusIndicator status={task.status} onChange={(status) => toggleTaskCompletion(task.id, status)} />
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="flex items-center">
+                                                {inlineEditingTask &&
+                                                    inlineEditingTask.categoryId === category.id &&
+                                                    inlineEditingTask.taskId === task.id
+                                                    ? (
+                                                        <input
+                                                            type="text"
+                                                            value={inlineEditText ?? undefined}
+                                                            onChange={(e) => setInlineEditText(e.target.value)}
+                                                            onKeyDown={handleInlineKeyDown}
+                                                            onBlur={saveInlineEdit}
+                                                            className="flex-1 border-b border-gray-200 bg-transparent py-0.5 text-sm focus:border-gray-400 focus:outline-none font-medium"
+                                                            autoFocus
+                                                        />
+                                                    ) : (
+                                                        <span
+                                                            className={cn("font-medium", task.status === "COMPLETED" && "line-through text-gray-400")}
+                                                            onDoubleClick={() => handleDoubleClick(category.id, task.id, "text", task.text)}
+                                                        >
+                                                            {task.text}
+                                                        </span>
+                                                    )}
 
-                                                        {task.priority && (
-                                                            <Flag className={cn("ml-1.5 h-3 w-3", getPriorityColor(task.priority))} />
-                                                        )}
+                                                {task.priority && (
+                                                    <div className="text-xs text-neutral-400">
+                                                        {getPriorityIcon(task.priority)}
                                                     </div>
-                                                    <div className="flex items-center mt-1 text-xs gap-2">
-                                                        {task.time && (
-                                                            <div className="flex items-center mt-1">
-                                                                <Clock className="w-3 h-3 mr-1" />
-                                                                <span
-                                                                    className="text-xs text-green-600 cursor-pointer"
+                                                )}
+                                            </div>
+                                            <div className="flex items-center mt-1 text-xs gap-2">
+                                                {task.time && (
+                                                    <div className="flex items-center mt-1">
+                                                        <Clock className="w-3 h-3 mr-1" />
+                                                        <span
+                                                            className="text-xs text-green-600 cursor-pointer"
 
-                                                                >
-                                                                    {task.time}
-                                                                </span>
+                                                        >
+                                                            {task.time}
+                                                        </span>
 
-                                                            </div>
-                                                        )}
-                                                        {task.dueDate && (
-                                                            <span className="text-gray-500 flex items-center">
-                                                                <CalendarIcon className="w-3 h-3 mr-1" />
-                                                                {formatDueDate(task.dueDate)}
-                                                            </span>
-                                                        )}
                                                     </div>
-                                                </div>
-                                                <div className="flex opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button
-                                                        onClick={() => setEditingTask({ categoryId: category.id, taskId: task.id })}
-                                                        className="text-gray-400 hover:text-gray-600 p-1"
-                                                    >
-                                                        <Edit className="w-3.5 h-3.5" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => deleteTaskFxn(task.id)}
-                                                        className="text-gray-400 hover:text-red-500 p-1"
-                                                    >
-                                                        <Trash className="w-3.5 h-3.5" />
-                                                    </button>
-                                                </div>
-                                            </>
-                                        )}
+                                                )}
+                                                {task.dueDate && (
+                                                    <span className="text-gray-500 flex items-center">
+                                                        <CalendarIcon className="w-3 h-3 mr-1" />
+                                                        {formatDueDate(task.dueDate)}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
                                     </li>
                                 ))}
                             </ul>
-
-                            {addingTaskTo === category.id ? (
-                                <AddTaskForm categoryId={category.id} setAddingTaskTo={setAddingTaskTo} />
-                            ) : (
-                                <button
-                                    className="flex items-center text-gray-500 mt-3 text-sm hover:text-gray-700"
-                                    onClick={() => setAddingTaskTo(category.id)}
-                                >
-                                    <Plus className="w-4 h-4 mr-1" />
-                                    Add task
-                                </button>
-                            )}
+                            <Link href={`/new/${category.id}`} className="flex gap-1 items-center text-sm text-gray-500 hover:text-gray-700">
+                                <Plus className="w-4 h-4 mr-1" />
+                                Add task
+                            </Link>
                         </div>
                     ))}
 
