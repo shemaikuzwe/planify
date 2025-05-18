@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Suspense } from "react"
 import { DrawingCard } from "@/components/ui/drawing-card"
 import { Drawing } from "@/lib/drizzle";
+import { LoadingCardSkeleton } from "../skelton/card"
 
 export default function Chat({ drawings }: { drawings: Drawing[] }) {
 
@@ -22,7 +23,7 @@ export default function Chat({ drawings }: { drawings: Drawing[] }) {
           </Button>
         </div>
 
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<LoadingCardSkeleton />}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {drawings.map((drawing) => (
               <DrawingCard

@@ -1,10 +1,10 @@
 import DailyTodo from '@/components/home/daily-todo'
-import { Button } from '@/components/ui/button'
 import { GetUserTodos } from '@/lib/data'
-import { CalendarCheck, MessageSquare, Share, Star } from 'lucide-react'
+import { CalendarCheck } from 'lucide-react'
 import { Suspense } from 'react';
-import { auth } from '../auth';
+import { auth } from '../../auth';
 import Header from '@/components/home/header';
+import { LoadingCardSkeleton } from '@/components/skelton/card';
 
 
 export default async function page() {
@@ -15,7 +15,7 @@ export default async function page() {
   return (
     <div className='flex flex-col w-full h-full'>
       <Header title="Daily To-do" icon={<CalendarCheck className="h-5 w-5 " />} />
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<LoadingCardSkeleton />}>
         <DailyTodo todos={todos} />
       </Suspense>
     </div>

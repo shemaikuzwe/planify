@@ -14,6 +14,7 @@ export async function GetUserTodos(userId: string) {
         },
       },
     },
+    orderBy: (dailyTodo, { desc }) => desc(dailyTodo.createdAt)
   });
   return todos;
 }
@@ -25,6 +26,7 @@ export async function GetUserDrawings(userId: string) {
   // cacheTag("drawings", userId);
   const userDrawings = await db.query.drawings.findMany({
     where: eq(drawings.userId, userId),
+    orderBy: (drawings, { desc }) => desc(drawings.createdAt)
   });
   return userDrawings;
 }

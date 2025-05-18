@@ -1,6 +1,5 @@
 import React from 'react';
-import { Button } from '@/components/ui/button'
-import {  ListTodo, MessageSquare, Share, Star } from 'lucide-react'
+import {  ListTodo } from 'lucide-react'
 import Header from '@/components/home/header';
 
 export default function page() {

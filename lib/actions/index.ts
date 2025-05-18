@@ -13,7 +13,7 @@ import {
 } from "../types/schema";
 import { eq } from "drizzle-orm";
 import { TaskStatus } from "../types";
-import { auth } from "@/app/auth";
+import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
 export async function AddTodo(data: AddTaskValue) {

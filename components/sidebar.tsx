@@ -26,9 +26,12 @@ export function Sidebar() {
       <SidebarHeader className="border-b">
         <SidebarMenu>
           <div className="flex items-center gap-2 px-3 py-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-neutral-800">
-              <LayoutDashboard className="h-4 w-4" />
-            </div>
+             <Image
+              src={"/logo2.png"}
+              alt="Logo"
+              width={50}
+              height={50}
+            />
             <span className="font-semibold text-lg sr-only">Planify</span>
           </div>
         </SidebarMenu>

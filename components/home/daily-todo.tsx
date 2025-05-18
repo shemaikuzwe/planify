@@ -24,8 +24,7 @@ export default function DailyTodo({ todos }: Props) {
         taskId: string
     } | null>(null)
     const [inlineEditText, setInlineEditText] = useState<string | null>(null)
-
-    // State for editing category name
+    
     const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
     const [editCategoryName, setEditCategoryName] = useState("")
 

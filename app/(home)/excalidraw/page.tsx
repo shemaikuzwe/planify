@@ -1,5 +1,5 @@
 import Chat from "@/components/excalidraw/chat";
-import {auth} from "@/app/auth";
+import {auth} from "@/auth";
 import {GetUserDrawings} from "@/lib/data";
 
 

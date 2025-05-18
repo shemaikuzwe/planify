@@ -7,6 +7,7 @@ import { ChevronRight, MessageSquare, Pencil, Trash2, MoreVertical } from "lucid
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { formatDate } from "@/lib/utils"
 
 interface DrawingCardProps {
     id: string
@@ -54,7 +55,7 @@ export function DrawingCard({ id, name, description, createdAt, onEdit, onDelete
                                 Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:text-destructive">
-                                <Trash2 size={16} className="mr-2" />
+                                <Trash2 size={16} className="mr-2 text-destructive" />
                                 Delete
                             </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -68,7 +69,7 @@ export function DrawingCard({ id, name, description, createdAt, onEdit, onDelete
                         {description && <p className="text-sm text-muted-foreground">{description}</p>}
                     </div>
                     <div className="flex items-center justify-between text-xs w-full">
-                        <span>{createdAt?.toDateString()}</span>
+                        <span>{createdAt ? formatDate(createdAt) : ""}</span>
                         <ChevronRight size={16} className="text-muted-foreground" />
                     </div>
                 </div>
