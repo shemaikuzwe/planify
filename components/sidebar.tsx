@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/sidebar"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
+import Logo from "./logo"
 
 export function Sidebar() {
   const pathName=usePathname()
@@ -25,14 +26,8 @@ export function Sidebar() {
     <ShadcnSidebar className="border-r" collapsible="icon">
       <SidebarHeader className="border-b">
         <SidebarMenu>
-          <div className="flex items-center gap-2 px-3 py-2">
-             <Image
-              src={"/logo2.png"}
-              alt="Logo"
-              width={50}
-              height={50}
-            />
-            <span className="font-semibold text-lg sr-only">Planify</span>
+          <div className="flex items-center gap-2 py-2">
+             <Logo className="bg-white" textClassName="text-white"/>
           </div>
         </SidebarMenu>
       </SidebarHeader>

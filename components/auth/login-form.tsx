@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import Logo from "../logo"
 import { signIn } from "next-auth/react"
+import GitHub from "./Github"
+import Google from "./Google"
 
 
 export default function LoginForm() {
@@ -11,17 +13,7 @@ export default function LoginForm() {
       <div className="hidden lg:flex flex-col justify-between bg-primary  w-full not-only:p-8 h-full">
         <Logo className="bg-white"/>
         <div className="my-8">
-          <div className="relative h-64 w-64 mx-auto">
-            <Image
-              src="/placeholder.svg?height=250&width=250"
-              alt="Dashboard illustration"
-              width={250}
-              height={250}
-              style={{
-                objectFit: "contain",
-              }}
-            />
-          </div>
+      
         </div>
 
         <div className="space-y-4">
@@ -49,10 +41,10 @@ export default function LoginForm() {
                signIn("github")
             }}>
               <Button
-                className="w-full h-12  bg-gray-300  text-gray-900 hover:bg-gray-300 hover:opacity-90 flex gap-2 items-center justify-center mb-4"
+                className="w-full h-12  bg-slate-300  text-gray-900 hover:bg-slate-300 hover:opacity-90 flex gap-2 items-center justify-center mb-4"
                 type="submit"
               >
-                {/* <GitHub /> */}
+                <GitHub />
                 Continue with GitHub
               </Button>
             </form>
@@ -61,10 +53,10 @@ export default function LoginForm() {
               signIn("google",{redirectTo:"/"})
             }}>
               <Button
-                className="w-full h-12 text-base  bg-gray-300 text-gray-900 hover:bg-gray-300  hover:opacity-90 flex gap-2 items-center justify-center"
+                className="w-full h-12 text-base  bg-slate-300 text-gray-900 hover:bg-slate-300  hover:opacity-90 flex gap-2 items-center justify-center"
                 type="submit"
               >
-                {/* <Google /> */}
+                <Google />
                 Continue with Google
               </Button>
             </form>
