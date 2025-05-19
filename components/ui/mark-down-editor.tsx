@@ -10,12 +10,14 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism"
 import { Bold, Italic, List, ListOrdered, Link, ImageIcon, Code, CheckSquare } from "lucide-react"
 
-export default function MarkdownEditor({ initialMarkdown, onChange }: { initialMarkdown: string, onChange: (markdown: string) => void }) {
-  const [markdown, setMarkdown] = useState<string>(initialMarkdown)
+interface Props{
+  markdown: string| null
+  onChange: (markdown: string) => void
+}
+export default function MarkdownEditor({ markdown, onChange }: Props) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setMarkdown(e.target.value)
+   
     onChange(e.target.value)
   }
 
@@ -25,7 +27,7 @@ export default function MarkdownEditor({ initialMarkdown, onChange }: { initialM
     const textarea = textareaRef.current
     const start = textarea.selectionStart
     const end = textarea.selectionEnd
-    const selectedText = markdown.substring(start, end)
+    const selectedText = markdown?.substring(start, end)
     let formattedText = ""
     let cursorOffset = 0
 
@@ -68,7 +70,7 @@ export default function MarkdownEditor({ initialMarkdown, onChange }: { initialM
 
         formattedText = `\`\`\`js\n${selectedText || "// Your code here"}\n\`\`\``
 
-        cursorOffset = selectedText ? 0 : selectedText.includes("\n") ? 13 : 11
+        cursorOffset = selectedText ? 0 : selectedText?.includes("\n") ? 13 : 11
         break
       case "checkbox":
         formattedText = selectedText
@@ -83,8 +85,8 @@ export default function MarkdownEditor({ initialMarkdown, onChange }: { initialM
         return
     }
 
-    const newText = markdown.substring(0, start) + formattedText + markdown.substring(end)
-    setMarkdown(newText)
+    const newText = markdown?.substring(0, start) + formattedText + markdown?.substring(end)
+    onChange(newText)
 
     // Set cursor position after the operation is complete
     setTimeout(() => {
@@ -159,10 +161,10 @@ export default function MarkdownEditor({ initialMarkdown, onChange }: { initialM
           </div>
           <Textarea
             ref={textareaRef}
-            value={markdown}
+            value={markdown??undefined}
             onChange={handleChange}
             className="min-h-[200px]  p-4 rounded-t-none "
-            placeholder="Write your markdown here..."
+            placeholder="Write your description here..."
           />
         </TabsContent>
 
@@ -207,9 +209,12 @@ export default function MarkdownEditor({ initialMarkdown, onChange }: { initialM
                   }
                   return <li {...props}>{children}</li>
                 },
+                h1: ({ node, ...props }) => <h1 className="text-2xl font-bold" {...props} />,
+                h2: ({ node, ...props }) => <h2 className="text-xl font-bold" {...props} />,
+                h3: ({ node, ...props }) => <h3 className="text-lg font-bold" {...props} />,
               }}
             >
-              {markdown}
+              {markdown?? "Write your description here..."}
             </ReactMarkdown>
           </div>
         </TabsContent>

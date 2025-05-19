@@ -9,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from "../ui/radio-group"
 import { FormControl, FormField, Form, FormItem, FormLabel } from "../ui/form"
 import { Input } from "../ui/input"
 import { TimePicker } from "../ui/time-picker"
-import { AddTodo } from "@/lib/actions"
+import { addTodo } from "@/lib/actions"
 import { useTransition } from "react"
 import { useRouter } from "next/navigation"
 
@@ -17,7 +17,7 @@ interface Props {
   categoryId: string,
 }
 
-export default function AddTaskForm({ categoryId}: Props) {
+export default function AddTaskForm({ categoryId }: Props) {
   const router = useRouter()
   const form = useForm<AddTaskValue>({
     resolver: zodResolver(AddTaskSchema),
@@ -34,9 +34,9 @@ export default function AddTaskForm({ categoryId}: Props) {
 
   const onSubmit = async (data: AddTaskValue) => {
     startTransition(async () => {
-      await AddTodo(data)
+      const id = await addTodo(data)
       form.reset()
-      router.push("/")
+      router.push(`/task/${id}`)
     })
   }
 

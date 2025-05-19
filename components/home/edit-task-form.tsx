@@ -11,7 +11,7 @@ import { Input } from "../ui/input"
 import { TimePicker } from "../ui/time-picker"
 import { use, useTransition } from "react"
 import { Task } from "@/lib/drizzle"
-import { EditTodo } from "@/lib/actions"
+import { editTodo } from "@/lib/actions"
 import { useRouter } from "next/navigation"
 
 interface Props {
@@ -41,9 +41,9 @@ export default function EditTaskForm({ taskPromise }: Props) {
 
     const onSubmit = async (data: AddTaskValue) => {
         startTransition(async () => {
-            await EditTodo(data)
+            await editTodo(data)
             form.reset()
-            router.push("/")
+            router.push(`/task/${task.id}`)
         })
     }
 

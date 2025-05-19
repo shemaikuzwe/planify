@@ -1,5 +1,5 @@
 
-import DailyTodo from '@/components/home/daily-todo'
+import DailyTodo from '@/components/home/daily-task'
 import { GetUserTodos } from '@/lib/data'
 import { CalendarCheck } from 'lucide-react'
 import { Suspense } from 'react';

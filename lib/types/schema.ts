@@ -40,3 +40,8 @@ export const updateDrawingSchema = z.object({
   elements: z.string(),
    drawingId: z.string().uuid(),
 });
+
+export const addGroupSchema = z.object({
+  name: z.string().min(2),
+  dailyTodoId: z.string().uuid(),
+});

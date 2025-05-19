@@ -1,0 +1,45 @@
+import { AlertDialog } from '@radix-ui/react-alert-dialog'
+import React, { useState, useTransition } from 'react'
+import { AlertDialogCancel, AlertDialogContent, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog'
+import { Button } from '../ui/button'
+import { Trash2 } from 'lucide-react'
+import { deleteGroup, deleteTask } from '@/lib/actions'
+
+interface Props {
+    id: string;
+    type: "group" | "task",
+    text: string
+}
+export default function DeleteDialog({ id, type, text }: Props) {
+    const [isOpen, setIsOpen] = useState(false)
+    const [isPending, startTransition] = useTransition()
+    const handleDelete = () => {
+        startTransition(async () => {
+            if (type === "group") {
+                await deleteGroup(id)
+            } else if (type === "task") {
+                await deleteTask(id)
+            }
+            setIsOpen(false)
+        })
+    }
+    return (
+        <AlertDialog open={isOpen} onOpenChange={setIsOpen} >
+            <AlertDialogTrigger asChild >
+                <Button size={"sm"} variant={`${type === "group" ? "ghost" : "destructive"}`} className='w-7 h-7' >
+                    <Trash2 className="w-3.5 h-3.5" />
+                </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className='w-100'>
+                <AlertDialogTitle className='text-base'>Are you sure you want to delete  {text}?</AlertDialogTitle>
+                <div className='flex gap-2'>
+                    <AlertDialogCancel>
+                        Cancel
+                    </AlertDialogCancel>
+                    <Button disabled={isPending} variant={"destructive"} onClick={handleDelete}>{isPending ? "Deleting..." : "Delete"}</Button>
+                </div>
+
+            </AlertDialogContent>
+        </AlertDialog>
+    )
+}

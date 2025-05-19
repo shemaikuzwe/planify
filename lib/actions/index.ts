@@ -5,6 +5,7 @@ import db from "../drizzle";
 import { categories, drawings, tasks } from "../drizzle/schema";
 import {
   AddCategorySchema,
+  addGroupSchema,
   AddTaskSchema,
   AddTaskValue,
   saveDrawingSchema,
@@ -16,16 +17,17 @@ import { TaskStatus } from "../types";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
-export async function AddTodo(data: AddTaskValue) {
+export async function addTodo(data: AddTaskValue) {
   const validate = AddTaskSchema.safeParse(data);
   if (!validate.success) {
     return validate.error.flatten().fieldErrors;
   }
   const { text, time, priority, dueDate, categoryId } = validate.data;
-  await db.insert(tasks).values({ time, priority, dueDate, categoryId, text });
+  const [task] = await db.insert(tasks).values({ time, priority, dueDate, categoryId, text }).returning({ id: tasks.id });
 
   // revalidateTag("todos");
   revalidatePath("/")
+  return task.id
 }
 export async function AddCategory(formData: FormData) {
   const validate = AddCategorySchema.safeParse(
@@ -49,12 +51,13 @@ export async function AddDailyTodo(formData: FormData) {
 }
 
 export async function editName(
-  data: Omit<AddTaskValue, "time" | "priority" | "dueDate">
+  data: Omit<AddTaskValue, "time" | "priority" | "dueDate"|"categoryId">
 ) {
   const validate = AddTaskSchema.omit({
     time: true,
     priority: true,
     dueDate: true,
+    categoryId: true,
   }).safeParse(data);
   if (!validate.success) {
     return validate.error.flatten().fieldErrors;
@@ -68,7 +71,7 @@ export async function editName(
   revalidatePath("/")
 }
 
-export async function EditTodo(data: AddTaskValue) {
+export async function editTodo(data: AddTaskValue) {
   const validate = AddTaskSchema.safeParse(data);
   if (!validate.success) {
     return validate.error.flatten().fieldErrors;
@@ -100,6 +103,11 @@ export async function ToggleTaskStatus(taskId: string, status: TaskStatus) {
 }
 
 export async function DeleteTodo(taskId: string) {
+  await db.delete(tasks).where(eq(tasks.id, taskId));
+  //revalidateTag("todos");
+  revalidatePath("/")
+}
+export async function deleteTask(taskId: string) {
   await db.delete(tasks).where(eq(tasks.id, taskId));
   //revalidateTag("todos");
   revalidatePath("/")
@@ -144,5 +152,35 @@ export async function UpdateDrawing(formData: FormData): Promise<void> {
 
   }).where(eq(drawings.id, drawingId))
   //revalidateTag("drawings");
+  revalidatePath("/")
+}
+
+
+export async function saveTaskDescription(taskId: string, description: string) {
+  await db.update(tasks).set({ description }).where(eq(tasks.id, taskId));
+  //revalidateTag("todos");
+  revalidatePath("/")
+}
+
+// Group
+
+export async function addGroup(data: { name: string, dailyTodoId: string }) {
+  const validate = addGroupSchema.safeParse(data);
+  if (!validate.success) {
+    return validate.error.flatten().fieldErrors;
+  }
+  await db.insert(categories).values(validate.data);
+  //revalidateTag("todos");
+  revalidatePath("/")
+}
+
+export async function deleteGroup(categoryId: string) {
+  await db.delete(categories).where(eq(categories.id, categoryId));
+  //revalidateTag("todos");
+  revalidatePath("/")
+}
+export async function editGroupName(categoryId: string, name: string) {
+  await db.update(categories).set({ name }).where(eq(categories.id, categoryId));
+  //revalidateTag("todos");
   revalidatePath("/")
 }

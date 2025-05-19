@@ -90,6 +90,7 @@ export const tasks = pgTable("tasks", {
     .notNull()
     .references(() => categories.id, { onDelete: "cascade" }),
   text: text("text").notNull(),
+  description:text("description"),
   time: text("time"),
   status: taskStatus().default("NOT_STARTED").notNull(),
   priority: enumPriority().default("MEDIUM"),
