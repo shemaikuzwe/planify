@@ -74,10 +74,17 @@ export async function EditTodo(data: AddTaskValue) {
     return validate.error.flatten().fieldErrors;
   }
   if (!validate.data.taskId) return;
+  const { text, time, priority, dueDate, taskId, categoryId } = validate.data
   await db
     .update(tasks)
-    .set(validate.data)
-    .where(eq(tasks.id, validate.data.taskId));
+    .set({
+      text,
+      time,
+      priority,
+      dueDate: dueDate ? new Date(dueDate) : null,
+      categoryId,
+    })
+    .where(eq(tasks.id, taskId));
   //revalidateTag("todos");
   revalidatePath("/")
 }

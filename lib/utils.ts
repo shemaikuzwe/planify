@@ -18,3 +18,10 @@ export function formatDate(date: Date | string): string {
   }
 }
 
+export function capitalize(str: string) {
+  return str.replaceAll("_", " ").charAt(0).toUpperCase() + str.slice(1).toLowerCase()
+}
+
+export function capitalizeWords(str: string) {
+  return str.split(" ").map(capitalize).join(" ")
+}

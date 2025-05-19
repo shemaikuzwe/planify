@@ -27,7 +27,7 @@ export function Sidebar() {
       <SidebarHeader className="border-b">
         <SidebarMenu>
           <div className="flex items-center gap-2 py-2">
-             <Logo className="bg-white" textClassName="text-white"/>
+             <Logo className="bg-black dark:bg-white" textClassName="text-black dark:text-white"/>
           </div>
         </SidebarMenu>
       </SidebarHeader>

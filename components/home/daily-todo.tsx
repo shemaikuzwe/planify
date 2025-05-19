@@ -10,7 +10,7 @@ import { DeleteTodo, editName, ToggleTaskStatus } from "@/lib/actions"
 import { TaskStatusIndicator } from "../ui/task-status"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { getPriorityIcon } from "../ui/priority-icon"
+import { getPriorityIcon } from "../ui/variants"
 
 
 interface Props {
