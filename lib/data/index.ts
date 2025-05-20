@@ -14,7 +14,7 @@ export async function GetUserTodos(userId: string) {
         },
       },
     },
-    orderBy: (dailyTodo, { desc }) => desc(dailyTodo.createdAt)
+    orderBy: (dailyTodo, { desc,asc }) => [desc(dailyTodo.createdAt)]
   });
   return todos;
 }

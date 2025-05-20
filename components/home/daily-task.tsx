@@ -13,6 +13,7 @@ import { Button } from "../ui/button"
 import DeleteDialog from "../ui/delete-dialog"
 import { formatShortDate } from "@/lib/utils"
 import AddGroup from "./add-group"
+import { Input } from "../ui/input"
 
 interface Props {
   todosPromise:Promise<Todos>
@@ -56,7 +57,7 @@ export default function DailyTask({ todosPromise}: Props) {
               <div className="grid grid-cols-12 items-center bg-muted/30 px-3 py-2">
                 <div className="col-span-6 flex items-center">
                   {editingCategoryId === category.id ? (
-                    <input
+                    <Input
                       type="text"
                       value={editCategoryName}
                       onChange={(e) => setEditCategoryName(e.target.value)}
@@ -65,7 +66,7 @@ export default function DailyTask({ todosPromise}: Props) {
                         if (e.key === "Enter") saveCategoryEdit()
                         if (e.key === "Escape") setEditingCategoryId(null)
                       }}
-                      className="text-sm font-medium border-b focus:outline-none bg-transparent"
+                      className="text-sm font-medium border-b w-fit "
                       autoFocus
                     />
                   ) : (

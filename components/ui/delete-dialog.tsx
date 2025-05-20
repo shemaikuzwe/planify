@@ -3,11 +3,11 @@ import React, { useState, useTransition } from 'react'
 import { AlertDialogCancel, AlertDialogContent, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog'
 import { Button } from '../ui/button'
 import { Trash2 } from 'lucide-react'
-import { deleteGroup, deleteTask } from '@/lib/actions'
+import { deleteDrawing, deleteGroup, deleteTask } from '@/lib/actions'
 
 interface Props {
     id: string;
-    type: "group" | "task"|"drawing",
+    type: "group" | "task" | "drawing",
     text: string
 }
 export default function DeleteDialog({ id, type, text }: Props) {
@@ -19,6 +19,8 @@ export default function DeleteDialog({ id, type, text }: Props) {
                 await deleteGroup(id)
             } else if (type === "task") {
                 await deleteTask(id)
+            } else if (type === "drawing") {
+                await deleteDrawing(id)
             }
             setIsOpen(false)
         })
@@ -31,7 +33,7 @@ export default function DeleteDialog({ id, type, text }: Props) {
                 </Button>
             </AlertDialogTrigger>
             <AlertDialogContent className='w-100'>
-                <AlertDialogTitle className='text-base'>Are you sure you want to delete  {text}?</AlertDialogTitle>
+                <AlertDialogTitle className='font-light'>Are you sure you want to delete  <span className='font-bold'>{text}</span>?</AlertDialogTitle>
                 <div className='flex gap-2'>
                     <AlertDialogCancel>
                         Cancel

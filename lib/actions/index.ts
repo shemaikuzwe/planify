@@ -184,3 +184,15 @@ export async function editGroupName(categoryId: string, name: string) {
   //revalidateTag("todos");
   revalidatePath("/")
 }
+
+export async function editDrawingName(drawingId: string, name: string) {
+  await db.update(drawings).set({ name }).where(eq(drawings.id, drawingId));
+  //revalidateTag("drawings");
+  revalidatePath("/")
+}
+
+export async function deleteDrawing(drawingId: string) {
+  await db.delete(drawings).where(eq(drawings.id, drawingId));
+  //revalidateTag("drawings");
+  revalidatePath("/")
+}

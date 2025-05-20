@@ -12,6 +12,7 @@ import { TaskStatusIndicator } from "../ui/task-status"
 import { TaskStatus } from "@/lib/types"
 import { editName, saveTaskDescription, ToggleTaskStatus } from "@/lib/actions"
 import DeleteDialog from "../ui/delete-dialog"
+import { Input } from "../ui/input"
 
 interface Props {
   taskPromise: Promise<Task>
@@ -84,7 +85,7 @@ export function TaskView({ taskPromise }: Props) {
           <div className="flex items-start gap-2">
             {task.priority && <div className="mt-0.5">{getPriorityIcon(task.priority)}</div>}
           {inlineEditText ?(
-            <input
+            <Input
               type="text"
               value={inlineEditText}
               onChange={(e) => setInlineEditText(e.target.value)}
@@ -93,7 +94,7 @@ export function TaskView({ taskPromise }: Props) {
                 if(e.key ==="Escape") setInlineEditText(null)
               }}
               onBlur={saveInlineEdit}
-              className="flex-1 border-b border-gray-200 bg-transparent py-0.5 text-sm focus:border-gray-400 focus:outline-none font-medium"
+              className="text-sm w-55 font-medium"
               autoFocus
             />
           ):(  <h3 className="text-sm font-medium" onDoubleClick={() => setInlineEditText(task.text)}>{task.text}</h3>)}
