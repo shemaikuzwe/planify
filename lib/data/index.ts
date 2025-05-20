@@ -1,5 +1,5 @@
 import db from "../drizzle";
-import { dailyTodo, drawings, tasks } from "../drizzle/schema";
+import { categories, dailyTodo, drawings, tasks } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 
 export async function GetUserTodos(userId: string) {
@@ -14,7 +14,7 @@ export async function GetUserTodos(userId: string) {
         },
       },
     },
-    orderBy: (dailyTodo, { desc,asc }) => [desc(dailyTodo.createdAt)]
+    orderBy: (dailyTodo, { desc, asc }) => [desc(dailyTodo.createdAt), asc(categories.createdAt)]
   });
   return todos;
 }
@@ -45,6 +45,6 @@ export async function getTaskById(taskId: string) {
   const task = await db.query.tasks.findFirst({
     where: eq(tasks.id, taskId),
   });
-   if(!task) throw new Error("Task not found")
+  if (!task) throw new Error("Task not found")
   return task;
 }

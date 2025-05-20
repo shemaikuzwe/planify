@@ -21,7 +21,7 @@ export default function LoginForm() {
           <p >Everything you need to plan and create.</p>
         </div>
 
-        <div className="mt-8 text-sm text-muted-foreground">Copyright © {new Date().getFullYear()} Planify</div>
+        <div className="mt-8 text-sm text-muted-foreground">Copyright © 2025 Planify</div>
       </div>
 
       <div className="flex flex-col items-center justify-center p-6 md:p-8 h-full  bg-white">
@@ -66,4 +66,5 @@ export default function LoginForm() {
     </div>
   )
 }
+
 

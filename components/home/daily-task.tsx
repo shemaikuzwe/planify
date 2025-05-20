@@ -78,7 +78,7 @@ export default function DailyTask({ todosPromise}: Props) {
                     </h3>
                   )}
                 </div>
-                <div className="col-span-6 flex items-center justify-end gap-2">
+                <div className="col-span-6 flex items-center justify-end gap-1">
                   <Button asChild size="sm" variant="ghost" className="h-8">
                     <Link href={`/new/${category.id}`}>
                       <Plus className="w-4 h-4 mr-1" />
@@ -95,7 +95,7 @@ export default function DailyTask({ todosPromise}: Props) {
                   className="grid grid-cols-12 items-center border-t hover:bg-muted/20 cursor-pointer transition-colors"
                   onClick={() => router.push(`/task/${task.id}`)}
                 >
-                  <div className="col-span-1 p-3">
+                  <div className="col-span-2 p-3">
                     <TaskStatusIndicator
                       status={task.status}
                       onChange={(status) => {
