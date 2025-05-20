@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import Script from "next/script";
 
 
-
 const ExcalidrawWithClientOnly = dynamic(
     async () => (await import("@/components/excalidraw/excalidraw-wrapper")).default,
     {

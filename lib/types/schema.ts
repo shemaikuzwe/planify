@@ -4,8 +4,8 @@ export const AddTaskSchema = z.object({
   time: z.string().optional(),
   priority: z.enum(["HIGH", "MEDIUM", "LOW"]).optional(),
   dueDate: z.string().optional(),
-  categoryId: z.string().uuid(),
   taskId: z.string().uuid().optional(),
+  categoryId: z.string().uuid().optional(),
 });
 export type AddTaskValue = z.infer<typeof AddTaskSchema>;
 
@@ -39,4 +39,9 @@ export const saveDrawingSchema = z.object({
 export const updateDrawingSchema = z.object({
   elements: z.string(),
    drawingId: z.string().uuid(),
+});
+
+export const addGroupSchema = z.object({
+  name: z.string().min(2),
+  dailyTodoId: z.string().uuid(),
 });

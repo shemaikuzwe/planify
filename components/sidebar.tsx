@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/sidebar"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
+import Logo from "./logo"
 
 export function Sidebar() {
   const pathName=usePathname()
@@ -25,11 +26,8 @@ export function Sidebar() {
     <ShadcnSidebar className="border-r" collapsible="icon">
       <SidebarHeader className="border-b">
         <SidebarMenu>
-          <div className="flex items-center gap-2 px-3 py-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-neutral-800">
-              <LayoutDashboard className="h-4 w-4" />
-            </div>
-            <span className="font-semibold text-lg sr-only">Planify</span>
+          <div className="flex items-center gap-2 py-2">
+             <Logo className="bg-black dark:bg-white" textClassName="text-black dark:text-white"/>
           </div>
         </SidebarMenu>
       </SidebarHeader>
@@ -70,14 +68,14 @@ export function Sidebar() {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
+              {/* <SidebarMenuItem>
                 <SidebarMenuButton asChild  tooltip="Weekly To-do List" isActive={pathName.includes("/weeklytodo")}>
                   <Link href="/weeklytodo" className="flex items-center gap-2 ">
                     <List className="h-4 w-4" />
                     <span>Weekly Todo</span>
                   </Link>
                 </SidebarMenuButton>
-              </SidebarMenuItem>
+              </SidebarMenuItem> */}
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Project Planner" isActive={pathName.includes("/project-planner")}>
                   <Link href="/project-planner" className="flex items-center gap-2 ">

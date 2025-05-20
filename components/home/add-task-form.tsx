@@ -9,15 +9,16 @@ import { RadioGroup, RadioGroupItem } from "../ui/radio-group"
 import { FormControl, FormField, Form, FormItem, FormLabel } from "../ui/form"
 import { Input } from "../ui/input"
 import { TimePicker } from "../ui/time-picker"
-import { AddTodo } from "@/lib/actions"
+import { addTodo } from "@/lib/actions"
 import { useTransition } from "react"
+import { useRouter } from "next/navigation"
 
 interface Props {
   categoryId: string,
-  setAddingTaskTo: (categoryId: string | null) => void
 }
 
-export default function AddTaskForm({ categoryId, setAddingTaskTo }: Props) {
+export default function AddTaskForm({ categoryId }: Props) {
+  const router = useRouter()
   const form = useForm<AddTaskValue>({
     resolver: zodResolver(AddTaskSchema),
     defaultValues: {
@@ -33,15 +34,15 @@ export default function AddTaskForm({ categoryId, setAddingTaskTo }: Props) {
 
   const onSubmit = async (data: AddTaskValue) => {
     startTransition(async () => {
-      await AddTodo(data)
+      const id = await addTodo(data)
       form.reset()
-      setAddingTaskTo(null)
+      router.push(`/task/${id}`)
     })
   }
 
   return (
-    <Form {...form}>
-      <form className="mt-2 space-y-3" onSubmit={form.handleSubmit(onSubmit)}>
+    <Form {...form} >
+      <form className="w-full space-y-3 border rounded-xl h-fit p-6" onSubmit={form.handleSubmit(onSubmit)}>
         <FormField
           control={form.control}
           name="text"
@@ -94,7 +95,7 @@ export default function AddTaskForm({ categoryId, setAddingTaskTo }: Props) {
                   <RadioGroup
                     value={field.value}
                     onValueChange={(value) => field.onChange(value as AddTaskValue["priority"])}
-                    className="grid grid-cols-2 gap-1"
+                    className="grid grid-cols-1 gap-1"
                   >
                     <div className="flex items-center space-x-1">
                       <RadioGroupItem value="HIGH" id="HIGH" />
@@ -133,7 +134,7 @@ export default function AddTaskForm({ categoryId, setAddingTaskTo }: Props) {
         </div>
 
         <div className="flex justify-end gap-2 pt-1">
-          <Button type="button" size="sm" variant="outline" onClick={() => setAddingTaskTo(null)}>
+          <Button type="button" size="sm" variant="outline" onClick={() => router.back()}>
             Cancel
           </Button>
           <Button size="sm" type="submit" disabled={isPending}>

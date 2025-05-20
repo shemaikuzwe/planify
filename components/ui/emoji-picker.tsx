@@ -128,7 +128,7 @@ function EmojiPickerContent({ onEmojiSelect }: EmojiPickerProps & { onClose?: ()
             key={category}
             variant={activeCategory === category ? "default" : "ghost"}
             size="sm"
-            className="text-xs whitespace-nowrap "
+            className="text-xs whitespace-nowrap h-7"
             onClick={() => setActiveCategory(category)}
             type="button"
           >
@@ -170,17 +170,13 @@ export default function EmojiPicker({ onEmojiSelect }: EmojiPickerProps) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="icon" type="button" className="h-10 w-10">
+        <Button variant="outline" size="icon" type="button" className="h-7 w-10">
           <Smile className="h-4 w-4" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-2 bg-background border border-input" side="top">
         <EmojiPickerContent onEmojiSelect={handleEmojiSelect} />
-        <div className="flex justify-between mt-2 pt-2 border-t">
-          <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(false)} className="text-xs">
-            Done
-          </Button>
-        </div>
+       
       </PopoverContent>
     </Popover>
   )

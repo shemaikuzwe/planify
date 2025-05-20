@@ -92,7 +92,7 @@ export function TimePicker({ className, value, onChange }: TimePickerProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" className={cn("w-[240px] justify-start text-left font-normal", className)}>
+        <Button variant="outline" className={cn("w-35 justify-start text-left font-normal", className)}>
           <Clock className="mr-2 h-4 w-4" />
           {value ? formatDisplayTime(value) : "Select time"}
         </Button>

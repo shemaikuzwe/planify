@@ -10,7 +10,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     usersTable: users,
     accountsTable: accounts,
   }),
-  providers: [Google],
+  providers: [Google({
+    clientId:process.env.AUTH_GOOGLE_ID,
+    clientSecret:process.env.AUTH_GOOGLE_SECRET,
+  })],
   events: {
     async createUser({ user }) {
       if (!user.id) return;
@@ -23,12 +26,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id=user.id;
+        token.id = user.id;
       }
       return token;
     },
     async session({ session, token }) {
-      session.user.id=token.id;
+      session.user.id = token.id;
 
       return session;
     },

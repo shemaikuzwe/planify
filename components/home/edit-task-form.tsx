@@ -9,23 +9,21 @@ import { RadioGroup, RadioGroupItem } from "../ui/radio-group"
 import { FormControl, FormField, Form, FormItem, FormLabel } from "../ui/form"
 import { Input } from "../ui/input"
 import { TimePicker } from "../ui/time-picker"
-import { useTransition } from "react"
+import { use, useTransition } from "react"
 import { Task } from "@/lib/drizzle"
-import { EditTodo } from "@/lib/actions"
+import { editTodo } from "@/lib/actions"
+import { useRouter } from "next/navigation"
 
 interface Props {
-    setEditingTask: React.Dispatch<React.SetStateAction<{
-        categoryId: string;
-        taskId: string;
-    } | null>>,
-    task: Task
+    taskPromise: Promise<Task>
 }
 
-export default function EditTaskForm({ setEditingTask, task }: Props) {
+export default function EditTaskForm({ taskPromise }: Props) {
+    const task = use(taskPromise)
+    const router = useRouter()
     const form = useForm<AddTaskValue>({
         resolver: zodResolver(AddTaskSchema),
         defaultValues: {
-            categoryId: task.categoryId,
             taskId: task.id,
             time: task.time ?? undefined,
             priority: task.priority ?? undefined,
@@ -43,15 +41,15 @@ export default function EditTaskForm({ setEditingTask, task }: Props) {
 
     const onSubmit = async (data: AddTaskValue) => {
         startTransition(async () => {
-            await EditTodo(data)
+            await editTodo(data)
             form.reset()
-            setEditingTask(null)
+            router.push(`/task/${task.id}`)
         })
     }
 
     return (
-        <Form {...form}>
-            <form className="mt-2 space-y-3" onSubmit={form.handleSubmit(onSubmit)}>
+        <Form {...form} >
+            <form className="w-full space-y-3 border rounded-xl h-fit p-6" onSubmit={form.handleSubmit(onSubmit)}>
                 <FormField
                     control={form.control}
                     name="text"
@@ -104,7 +102,7 @@ export default function EditTaskForm({ setEditingTask, task }: Props) {
                                     <RadioGroup
                                         value={field.value}
                                         onValueChange={(value) => field.onChange(value as AddTaskValue["priority"])}
-                                        className="grid grid-cols-2 gap-1"
+                                        className="grid grid-cols-1 gap-1"
                                     >
                                         <div className="flex items-center space-x-1">
                                             <RadioGroupItem value="HIGH" id="HIGH" />
@@ -143,7 +141,7 @@ export default function EditTaskForm({ setEditingTask, task }: Props) {
                 </div>
 
                 <div className="flex justify-end gap-2 pt-1">
-                    <Button type="button" size="sm" variant="outline" onClick={() => setEditingTask(null)}>
+                    <Button type="button" size="sm" variant="outline" onClick={() => router.back()}>
                         Cancel
                     </Button>
                     <Button size="sm" type="submit" disabled={isPending}>
