@@ -97,7 +97,7 @@ export function WeeklyTodoList() {
     <div className="min-h-screen w-full">
       <Header title="Weekly To-do" icon={<List className="h-5 w-5 " />} />
 
-      {/* <div className="p-8 max-w-5xl mx-auto">
+      <div className="p-8 max-w-5xl mx-auto">
 
         <Button variant="default" className="mb-8" onClick={createNewWeek}>
           <List className="h-4 w-4 mr-2" />
@@ -133,7 +133,7 @@ export function WeeklyTodoList() {
             </div>
           ))}
         </div>
-      </div> */}
+      </div>
     </div>
   )
 }

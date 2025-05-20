@@ -68,14 +68,14 @@ export function Sidebar() {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
+              {/* <SidebarMenuItem>
                 <SidebarMenuButton asChild  tooltip="Weekly To-do List" isActive={pathName.includes("/weeklytodo")}>
                   <Link href="/weeklytodo" className="flex items-center gap-2 ">
                     <List className="h-4 w-4" />
                     <span>Weekly Todo</span>
                   </Link>
                 </SidebarMenuButton>
-              </SidebarMenuItem>
+              </SidebarMenuItem> */}
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Project Planner" isActive={pathName.includes("/project-planner")}>
                   <Link href="/project-planner" className="flex items-center gap-2 ">

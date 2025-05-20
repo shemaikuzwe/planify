@@ -48,8 +48,8 @@ export default function EditTaskForm({ taskPromise }: Props) {
     }
 
     return (
-        <Form {...form}>
-            <form className="w-full mt-2 space-y-3" onSubmit={form.handleSubmit(onSubmit)}>
+        <Form {...form} >
+            <form className="w-150 space-y-3 border rounded-xl h-fit p-6" onSubmit={form.handleSubmit(onSubmit)}>
                 <FormField
                     control={form.control}
                     name="text"
