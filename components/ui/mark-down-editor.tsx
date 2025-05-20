@@ -102,7 +102,7 @@ export default function MarkdownEditor({ markdown, onChange }: Props) {
 
   return (
     <div className="w-full mt-2">
-      <Tabs defaultValue="preview" className="w-90">
+      <Tabs defaultValue="preview" className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-4">
           <TabsTrigger value="editor">Edit</TabsTrigger>
           <TabsTrigger value="preview">Preview</TabsTrigger>

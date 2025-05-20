@@ -14,7 +14,7 @@ export default async function layout({ children }: { children: React.ReactNode }
     return (
         <div className='flex flex-col w-full h-full'>
             <Header title="Daily To-do" icon={<CalendarCheck className="h-5 w-5 " />} />
-            <div className='flex w-full h-full justify-between gap-2 mt-2 px-3'>
+            <div className='flex w-full h-full max-md:flex-col-reverse justify-between gap-2 mt-2 px-3'>
                 <Suspense fallback={<LoadingCardSkeleton />}>
                     <DailyTask todos={todos} />
                 </Suspense>

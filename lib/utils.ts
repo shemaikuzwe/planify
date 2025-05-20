@@ -18,6 +18,11 @@ export function formatDate(date: Date | string): string {
   }
 }
 
+export function formatShortDate(date: Date | string): string {
+  const parsedDate = typeof date === 'string' ? parseISO(date) : date
+  return format(parsedDate, 'MMM d')
+}
+
 export function capitalize(str: string) {
   return str.replaceAll("_", " ").charAt(0).toUpperCase() + str.slice(1).toLowerCase()
 }

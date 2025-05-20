@@ -49,7 +49,7 @@ export default function EditTaskForm({ taskPromise }: Props) {
 
     return (
         <Form {...form} >
-            <form className="w-150 space-y-3 border rounded-xl h-fit p-6" onSubmit={form.handleSubmit(onSubmit)}>
+            <form className="w-full space-y-3 border rounded-xl h-fit p-6" onSubmit={form.handleSubmit(onSubmit)}>
                 <FormField
                     control={form.control}
                     name="text"
@@ -102,7 +102,7 @@ export default function EditTaskForm({ taskPromise }: Props) {
                                     <RadioGroup
                                         value={field.value}
                                         onValueChange={(value) => field.onChange(value as AddTaskValue["priority"])}
-                                        className="grid grid-cols-2 gap-1"
+                                        className="grid grid-cols-1 gap-1"
                                     >
                                         <div className="flex items-center space-x-1">
                                             <RadioGroupItem value="HIGH" id="HIGH" />

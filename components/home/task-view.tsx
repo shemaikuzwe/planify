@@ -1,12 +1,11 @@
 "use client"
 
-import { use, useEffect, useState, useTransition } from "react"
-import { Check, Edit2, Trash2, CheckCheck, X, Clock, Calendar1 } from "lucide-react"
+import { use, useEffect, useState } from "react"
+import { Check, Edit2, CheckCheck, X, Clock, Calendar1 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { capitalizeWords, cn, formatDate } from "@/lib/utils"
+import { capitalizeWords, cn,  formatShortDate } from "@/lib/utils"
 import { Task } from "@/lib/drizzle"
 import { getPriorityIcon, getTaskStatusVariants } from "../ui/variants"
-import { useRouter } from "next/navigation"
 import Link from "next/link"
 import MarkdownEditor from "../ui/mark-down-editor"
 import { TaskStatusIndicator } from "../ui/task-status"
@@ -44,12 +43,12 @@ export function TaskView({ taskPromise }: Props) {
 
   return (
     <div
-      className="rounded-md w-120"
+      className="rounded-md w-full"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
-      <div className="flex items-center justify-between p-2 bg-primary/30 rounded-md">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between p-2 bg-primary/30 rounded-md w-full">
+        <div className="flex items-center gap-2 ">
           <TaskStatusIndicator status={task.status} onChange={(status) => toggleTaskCompletion(task.id, status)} />
           <div
             className={cn(
@@ -110,7 +109,7 @@ export function TaskView({ taskPromise }: Props) {
               task.dueDate && (
                 <div className="flex items-center gap-1 text-xs text-neutral-400">
                   <Calendar1 className="h-3 w-3" />
-                  <span>{formatDate(task.dueDate)}</span>
+                  <span>{formatShortDate(task.dueDate)}</span>
                 </div>
               )
             }

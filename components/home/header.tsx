@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button'
-import {  MessageSquare, Share, Star } from 'lucide-react'
+import { Share } from 'lucide-react'
 
 interface Props{
     title:string;
@@ -18,12 +18,6 @@ export default function Header({title,icon}:Props) {
            <Button variant="ghost" size="sm" >
                <Share className="h-4 w-4 mr-1" />
                Share
-           </Button>
-           <Button variant="ghost" size="sm" >
-               <MessageSquare className="h-4 w-4" />
-           </Button>
-           <Button variant="ghost" size="sm" >
-               <Star className="h-4 w-4" />
            </Button>
        </div>
    </header>

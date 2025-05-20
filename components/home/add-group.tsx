@@ -38,11 +38,11 @@ export default function AddGroup({ dailyTodoId }: { dailyTodoId: string }) {
             <AlertDialogTrigger asChild>
                 <Button size={"sm"} variant={"ghost"} >
                     <Plus className="w-4 h-4 mr-1" />
-                    Add Group
+                    New Group
                 </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
-                <AlertDialogTitle>Add Group</AlertDialogTitle>
+                <AlertDialogTitle>New Group</AlertDialogTitle>
                 <Form {...form}>
                     <form className="space-y-3 w-full" onSubmit={form.handleSubmit(onSubmit)}>
                         <div className='space-y-3 flex  gap-4 w-full'>
