@@ -8,28 +8,22 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { formatDate } from "@/lib/utils"
+import DeleteDialog from "./delete-dialog"
 
 interface DrawingCardProps {
     id: string
     name: string
-    description: string|null
-    createdAt: Date|null
+    description: string | null
+    createdAt: Date | null
     onEdit: (id: string) => void
-    onDelete: (id: string) => void
 }
 
-export function DrawingCard({ id, name, description, createdAt, onEdit, onDelete }: DrawingCardProps) {
+export function DrawingCard({ id, name, description, createdAt, onEdit }: DrawingCardProps) {
     const router = useRouter()
     const handleEdit = (e: React.MouseEvent) => {
         e.stopPropagation()
         onEdit(id)
     }
-
-    const handleDelete = (e: React.MouseEvent) => {
-        e.stopPropagation()
-        onDelete(id)
-    }
-
     return (
         <Card
             className="px-3 shadow-none cursor-pointer border rounded-lg"
@@ -54,9 +48,8 @@ export function DrawingCard({ id, name, description, createdAt, onEdit, onDelete
                                 <Pencil size={16} className="mr-2" />
                                 Edit
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:text-destructive">
-                                <Trash2 size={16} className="mr-2 text-destructive" />
-                                Delete
+                            <DropdownMenuItem asChild >
+                                <DeleteDialog text={name ?? "Drawing"} id={id} type="drawing" />
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>

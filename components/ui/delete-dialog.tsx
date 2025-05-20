@@ -7,7 +7,7 @@ import { deleteGroup, deleteTask } from '@/lib/actions'
 
 interface Props {
     id: string;
-    type: "group" | "task",
+    type: "group" | "task"|"drawing",
     text: string
 }
 export default function DeleteDialog({ id, type, text }: Props) {

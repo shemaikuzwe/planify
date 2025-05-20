@@ -30,3 +30,7 @@ export function capitalize(str: string) {
 export function capitalizeWords(str: string) {
   return str.split(" ").map(capitalize).join(" ")
 }
+
+export function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}

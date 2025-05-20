@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { Plus, Trash2 } from "lucide-react"
+import { use, useState } from "react"
+import { Calendar1, Check, Clock, Loader, Pen, Plus} from "lucide-react"
 import type { Todos } from "@/lib/data"
 import type { TaskStatus } from "@/lib/types"
 import { editGroupName, ToggleTaskStatus } from "@/lib/actions"
@@ -15,10 +15,11 @@ import { formatShortDate } from "@/lib/utils"
 import AddGroup from "./add-group"
 
 interface Props {
-  todos: Todos
+  todosPromise:Promise<Todos>
 }
 
-export default function DailyTodoTable({ todos }: Props) {
+export default function DailyTask({ todosPromise}: Props) {
+ const todos=use(todosPromise)
   const router = useRouter()
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
   const [editCategoryName, setEditCategoryName] = useState("")
@@ -43,11 +44,11 @@ export default function DailyTodoTable({ todos }: Props) {
       <div className="overflow-x-auto">
         <div className="min-w-170 rounded-md border bg-background">
           <div className="grid grid-cols-12 border-b text-sm">
-            <div className="col-span-1 p-3 font-medium">Status</div>
-            <div className="col-span-4 p-3 font-medium">Project</div>
-            <div className="col-span-2 p-3 font-medium">Time</div>
-            <div className="col-span-2 p-3 font-medium">Due Date</div>
-            <div className="col-span-1 p-3 font-medium text-center">Actions</div>
+            <div className="col-span-2 p-3 font-medium flex gap-1 items-center"><Loader className="h-4 w-4"/>Status</div>
+            <div className="col-span-4 p-3 font-medium flex gap-1 items-center"><Check className="h-4 w-4"/> Task</div>
+            <div className="col-span-2 p-3 font-medium flex gap-1 items-center"><Clock className="h-4 w-4"/>Time</div>
+            <div className="col-span-2 p-3 font-medium flex gap-1 items-center"><Calendar1 className="h-4 w-4" />Due Date</div>
+            <div className="col-span-2 p-3 font-medium text-center flex gap-1 items-center"><Pen className="h-4 w-4"/>Actions</div>
           </div>
 
           {todos?.[0].categories.map((category) => (
