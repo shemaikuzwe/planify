@@ -38,7 +38,7 @@ export default function LoginForm() {
           </div>
           <div className="space-y-4 pt-0">
             <form className="w-full" action={() => {
-              signIn("github")
+              signIn("github",{ redirectTo: "/" })
             }}>
               <Button
                 className="w-full h-12  bg-slate-300  text-gray-900 hover:bg-slate-300 hover:opacity-90 flex gap-2 items-center justify-center mb-4"
