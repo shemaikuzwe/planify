@@ -3,7 +3,7 @@ import { Home, Settings, LayoutDashboard, List, ListTodo, CalendarCheck } from "
 import Link from "next/link"
 import User from "@/components/task/user"
 import {
-  Sidebar as ShadcnSidebar,
+  Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
@@ -23,7 +23,7 @@ export function Navbar() {
   const pathName=usePathname()
 
   return (
-    <ShadcnSidebar className="border-r" collapsible="icon">
+    <Sidebar className="border-r" collapsible="icon">
       <SidebarHeader className="border-b">
         <SidebarMenu>
           <div className="flex items-center gap-2 py-2">
@@ -122,6 +122,6 @@ export function Navbar() {
         </SidebarMenu>
       </SidebarFooter>
       <SidebarRail />
-    </ShadcnSidebar>
+    </Sidebar>
   )
 }
