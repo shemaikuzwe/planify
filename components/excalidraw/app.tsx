@@ -130,12 +130,28 @@ export default function App({
 
   // Initialize elements from storage when component mounts or drawingStorage changes
   useEffect(() => {
+    console.log(`🔧 App initialization: drawingId=${drawingId || 'default'}, apiElements=${apiElements?.length || 0} elements`);
+
     const storedElements = drawingStorage.getElementsArray();
+    console.log(`📋 localStorage check: ${storedElements.length} elements found`);
+
     if (storedElements.length > 0) {
+      // Use localStorage elements if they exist
+      console.log(`📋 Loading ${storedElements.length} elements from localStorage for drawing ${drawingId || 'default'}`);
       setElements(storedElements);
     } else if (apiElements && apiElements.length > 0) {
-      setElements(apiElements);
+      // If localStorage is empty but API has elements, sync them to localStorage and use them
+      console.log(`🔄 Syncing ${apiElements.length} API elements to localStorage for drawing ${drawingId || 'default'}`);
+      const syncResult = drawingStorage.syncWithApiElements(apiElements);
+      console.log(`✅ Sync complete:`, syncResult.summary);
+
+      // Get the merged elements after sync
+      const mergedElements = drawingStorage.getElementsArray();
+      console.log(`📦 After sync: ${mergedElements.length} elements available`);
+      setElements(mergedElements);
     } else {
+      // Both localStorage and API are empty
+      console.log(`📝 No elements found, starting with empty canvas for drawing ${drawingId || 'default'}`);
       setElements([]);
     }
   }, [drawingStorage, apiElements, drawingId]);
@@ -164,14 +180,6 @@ export default function App({
     };
     fetchData();
   }, [excalidrawAPI, convertToExcalidrawElements, MIME_TYPES, elements, drawingId]);
-
-  // Sync with API elements when they change
-  useEffect(() => {
-    if (apiElements && apiElements.length > 0) {
-      const mergedElements = drawingStorage.getMergedElements();
-      setElements(mergedElements);
-    }
-  }, [apiElements, drawingStorage, drawingId])
 
 
   const renderExcalidraw = (children: React.ReactNode) => {
