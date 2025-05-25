@@ -1,7 +1,7 @@
 "use client"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
-import Logo from "../logo"
+import Logo from "../ui/logo"
 import { signIn } from "next-auth/react"
 import GitHub from "./Github"
 import Google from "./Google"
@@ -38,7 +38,7 @@ export default function LoginForm() {
           </div>
           <div className="space-y-4 pt-0">
             <form className="w-full" action={() => {
-              signIn("github")
+              signIn("github",{ redirectTo: "/" })
             }}>
               <Button
                 className="w-full h-12  bg-slate-300  text-gray-900 hover:bg-slate-300 hover:opacity-90 flex gap-2 items-center justify-center mb-4"

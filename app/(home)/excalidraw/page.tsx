@@ -2,7 +2,7 @@ import Chat from "@/components/excalidraw/chat";
 import { auth } from "@/auth";
 import { GetUserDrawings } from "@/lib/data";
 import { Suspense } from "react";
-import { LoadingCardSkeleton } from "@/components/skelton/card";
+import { LoadingCardSkeleton } from "@/components/ui/skelton/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { MessageSquare } from "lucide-react";

@@ -1,7 +1,7 @@
 "use client"
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 import Image from "next/image";
-import { useSidebar } from "./ui/sidebar";
+import { useSidebar } from "./sidebar";
 interface Props {
     className?: string,
     textClassName?: string

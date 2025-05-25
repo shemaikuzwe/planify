@@ -17,7 +17,7 @@ interface Props{
 export default function MarkdownEditor({ markdown, onChange }: Props) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-   
+
     onChange(e.target.value)
   }
 
@@ -161,7 +161,7 @@ export default function MarkdownEditor({ markdown, onChange }: Props) {
           </div>
           <Textarea
             ref={textareaRef}
-            value={markdown??undefined}
+            value={markdown ?? ""}
             onChange={handleChange}
             className="min-h-[200px]  p-4 rounded-t-none "
             placeholder="Write your description here..."

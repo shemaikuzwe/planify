@@ -1,11 +1,11 @@
 
-import DailyTask from '@/components/home/daily-task'
+import DailyTask from '@/components/task/daily-task'
 import { GetUserTodos } from '@/lib/data'
 import { CalendarCheck } from 'lucide-react'
 import { Suspense } from 'react';
 import { auth } from '@/auth';
-import Header from '@/components/home/header';
-import DailyTaskSkeleton from '@/components/skelton/task-table';
+import Header from '@/components/ui/header';
+import DailyTaskSkeleton from '@/components/ui/skelton/task-table';
 export default async function layout({ children }: { children: React.ReactNode }) {
     const session = await auth();
     const userId = session?.user?.id;

@@ -4,6 +4,7 @@ import React, {
   useState,
   useRef,
   useCallback,
+  useMemo,
   Children,
   cloneElement,
 } from "react";
@@ -34,9 +35,10 @@ import {
 import CustomFooter from "./footer";
 import type { ResolvablePromise } from "./utils";
 import { useSidebar } from "../ui/sidebar";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 import { useTheme } from "next-themes";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import { createDrawingElementsStorage } from "@/lib/store/excali-store";
 import SaveDialog from "./save-dialog";
 
 type Comment = {
@@ -91,9 +93,13 @@ export default function App({
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const appRef = useRef<any>(null);
-  const [elements, setElements] = useLocalStorage<null | OrderedExcalidrawElement[]>("excalidraw", apiElements ?? null);
+
+  // feat add react-compiler
+  const drawingStorage = useMemo(() => createDrawingElementsStorage(drawingId), [drawingId]);
+
+
+  const [elements, setElements] = useState<OrderedExcalidrawElement[] | null>(null);
   const [appState, setAppState] = useLocalStorage<null | AppState>("appState", null);
-  const [files, setFiles] = useLocalStorage<null | BinaryFiles>("files", null);
   const [viewModeEnabled, setViewModeEnabled] = useState(false);
   const [zenModeEnabled, setZenModeEnabled] = useState(false);
   const [gridModeEnabled, setGridModeEnabled] = useState(false);
@@ -107,10 +113,12 @@ export default function App({
 
   const initialStatePromiseRef = useRef<{
     promise: ResolvablePromise<ExcalidrawInitialDataState | null>;
-  }>({ promise: null! });
+    resolved: boolean;
+  }>({ promise: null!, resolved: false });
   if (!initialStatePromiseRef.current.promise) {
     initialStatePromiseRef.current.promise =
       resolvablePromise<ExcalidrawInitialDataState | null>();
+    initialStatePromiseRef.current.resolved = false;
   }
 
 
@@ -120,8 +128,20 @@ export default function App({
 
   useHandleLibrary({ excalidrawAPI });
 
+  // Initialize elements from storage when component mounts or drawingStorage changes
   useEffect(() => {
-    if (!excalidrawAPI) {
+    const storedElements = drawingStorage.getElementsArray();
+    if (storedElements.length > 0) {
+      setElements(storedElements);
+    } else if (apiElements && apiElements.length > 0) {
+      setElements(apiElements);
+    } else {
+      setElements([]);
+    }
+  }, [drawingStorage, apiElements, drawingId]);
+
+  useEffect(() => {
+    if (!excalidrawAPI || elements === null || initialStatePromiseRef.current.resolved) {
       return;
     }
     const fetchData = async () => {
@@ -134,17 +154,25 @@ export default function App({
       //   //@ts-ignore
       //   initialStatePromiseRef.current.promise.resolve();
       // };
+      console.log(`🎯 Resolving initial data with ${elements.length} elements for drawing ${drawingId || 'default'}`);
       // @ts-ignore
       initialStatePromiseRef.current.promise.resolve({
         ...initialData,
         elements,
       });
+      initialStatePromiseRef.current.resolved = true;
     };
     fetchData();
-  }, [excalidrawAPI, convertToExcalidrawElements, MIME_TYPES]);
-  useEffect(()=>{
-     setElements(apiElements ?? [] as OrderedExcalidrawElement[])
-  },[apiElements])
+  }, [excalidrawAPI, convertToExcalidrawElements, MIME_TYPES, elements, drawingId]);
+
+  // Sync with API elements when they change
+  useEffect(() => {
+    if (apiElements && apiElements.length > 0) {
+      const mergedElements = drawingStorage.getMergedElements();
+      setElements(mergedElements);
+    }
+  }, [apiElements, drawingStorage, drawingId])
+
 
   const renderExcalidraw = (children: React.ReactNode) => {
     const Excalidraw: any = Children.toArray(children).find(
@@ -163,15 +191,23 @@ export default function App({
       {
 
         excalidrawAPI: (api: ExcalidrawImperativeAPI) => setExcalidrawAPI(api),
-        initialData: initialStatePromiseRef.current.promise,
+        initialData: elements ? { ...initialData, elements } : initialStatePromiseRef.current.promise,
         onChange: (
-          elements: OrderedExcalidrawElement[],
+          newElements: OrderedExcalidrawElement[],
           state: AppState,
           files: BinaryFiles
         ) => {
           setAppState(state);
-          setFiles(files);
-          setElements(elements);
+          // Update local state
+          setElements(newElements);
+
+          // Store each element individually with timestamp
+          newElements.forEach(element => {
+            drawingStorage.saveElement(element.id, element);
+          });
+
+          // Also save all elements as a batch for easy retrieval
+          drawingStorage.saveElements(newElements);
         },
         onPointerUpdate: (payload: {
           pointer: { x: number; y: number };

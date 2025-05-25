@@ -12,7 +12,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     }
     return (
         <div className="h-full w-fit">
-            <Suspense fallback={<div>Loading...</div>}>
+            <Suspense>
                 <ExcalidrawClient drawing={drawing} />
             </Suspense>
         </div>

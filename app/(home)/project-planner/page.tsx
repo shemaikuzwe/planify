@@ -1,6 +1,6 @@
 import React from 'react';
 import {  ListTodo } from 'lucide-react'
-import Header from '@/components/home/header';
+import Header from '@/components/ui/header';
 
 export default function page() {
   return (

@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { List, Share, Star, MessageSquare } from "lucide-react"
-import Header from "./home/header"
+import Header from "@/components/ui/header"
 
 interface Todo {
   id: string
@@ -16,7 +16,7 @@ interface DayTodos {
   [key: string]: Todo[]
 }
 
-export function WeeklyTodoList() {
+export function WeeklyTask() {
   const [todos, setTodos] = useState<DayTodos>({
     Mon: [
       { id: "mon-1", text: "Call Mom", completed: false },

@@ -1,9 +1,9 @@
 "use client"
 import { Home, Settings, LayoutDashboard, List, ListTodo, CalendarCheck } from "lucide-react"
 import Link from "next/link"
-import User from "./home/user"
+import User from "@/components/task/user"
 import {
-  Sidebar as ShadcnSidebar,
+  Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
@@ -19,11 +19,11 @@ import Image from "next/image"
 import { usePathname } from "next/navigation"
 import Logo from "./logo"
 
-export function Sidebar() {
+export function Navbar() {
   const pathName=usePathname()
 
   return (
-    <ShadcnSidebar className="border-r" collapsible="icon">
+    <Sidebar className="border-r" collapsible="icon">
       <SidebarHeader className="border-b">
         <SidebarMenu>
           <div className="flex items-center gap-2 py-2">
@@ -38,7 +38,7 @@ export function Sidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Home">
-                  <Link href="/" className="flex items-center gap-2 ">
+                  <Link href="/public" className="flex items-center gap-2 ">
                     <Home className="h-4 w-4" />
                     <span>Home</span>
                   </Link>
@@ -54,7 +54,7 @@ export function Sidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip={"Daily Todo"} isActive={pathName==="/"}>
-                  <Link href={"/"} className="flex gap-2 items-center w-full">
+                  <Link href={"/public"} className="flex gap-2 items-center w-full">
                     <CalendarCheck className="h-4 w-4" />
                     <span>Daily Todo</span>
                   </Link>
@@ -122,6 +122,6 @@ export function Sidebar() {
         </SidebarMenu>
       </SidebarFooter>
       <SidebarRail />
-    </ShadcnSidebar>
+    </Sidebar>
   )
 }

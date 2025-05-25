@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation"
 import { getPriorityIcon } from "../ui/variants"
 import { Button } from "../ui/button"
 import DeleteDialog from "../ui/delete-dialog"
-import { formatShortDate } from "@/lib/utils"
+import { formatShortDate } from "@/lib/utils/utils"
 import AddGroup from "./add-group"
 import { Input } from "../ui/input"
 
@@ -52,7 +52,7 @@ export default function DailyTask({ todosPromise}: Props) {
             <div className="col-span-2 p-3 font-medium text-center flex gap-1 items-center"><Pen className="h-4 w-4"/>Actions</div>
           </div>
 
-          {todos?.[0].categories.map((category) => (
+          {todos?.[0]?.categories.map((category) => (
             <div key={category.id} className="border-b last:border-0">
               <div className="grid grid-cols-12 items-center bg-muted/30 px-3 py-2">
                 <div className="col-span-6 flex items-center">
