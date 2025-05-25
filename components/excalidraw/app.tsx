@@ -35,10 +35,10 @@ import {
 import CustomFooter from "./footer";
 import type { ResolvablePromise } from "./utils";
 import { useSidebar } from "../ui/sidebar";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 import { useTheme } from "next-themes";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import { createDrawingElementsStorage } from "@/stores/drawing-elements-store";
+import { createDrawingElementsStorage } from "@/lib/store/excali-store";
 import SaveDialog from "./save-dialog";
 
 type Comment = {
@@ -94,14 +94,12 @@ export default function App({
   const collapsed = state === "collapsed";
   const appRef = useRef<any>(null);
 
-  // Create drawing-specific storage instance using drawing ID
+  // feat add react-compiler
   const drawingStorage = useMemo(() => createDrawingElementsStorage(drawingId), [drawingId]);
 
-  // Use simple storage for drawing elements with individual element storage
-  // Initialize elements from storage or API elements
+
   const [elements, setElements] = useState<OrderedExcalidrawElement[] | null>(null);
   const [appState, setAppState] = useLocalStorage<null | AppState>("appState", null);
-  const [files, setFiles] = useLocalStorage<null | BinaryFiles>("files", null);
   const [viewModeEnabled, setViewModeEnabled] = useState(false);
   const [zenModeEnabled, setZenModeEnabled] = useState(false);
   const [gridModeEnabled, setGridModeEnabled] = useState(false);
@@ -134,13 +132,10 @@ export default function App({
   useEffect(() => {
     const storedElements = drawingStorage.getElementsArray();
     if (storedElements.length > 0) {
-      console.log(`🔄 Loading ${storedElements.length} elements from storage for drawing ${drawingId || 'default'}`);
       setElements(storedElements);
     } else if (apiElements && apiElements.length > 0) {
-      console.log(`🔄 Loading ${apiElements.length} elements from API for drawing ${drawingId || 'default'}`);
       setElements(apiElements);
     } else {
-      console.log(`🔄 No elements found for drawing ${drawingId || 'default'}`);
       setElements([]);
     }
   }, [drawingStorage, apiElements, drawingId]);
@@ -173,9 +168,6 @@ export default function App({
   // Sync with API elements when they change
   useEffect(() => {
     if (apiElements && apiElements.length > 0) {
-      console.log(`🔄 Syncing ${apiElements.length} API elements with localStorage for drawing ${drawingId || 'default'}`);
-      const syncResult = drawingStorage.syncWithApiElements(apiElements);
-      console.log('📊 Sync result:', syncResult.summary);
       const mergedElements = drawingStorage.getMergedElements();
       setElements(mergedElements);
     }
@@ -206,8 +198,6 @@ export default function App({
           files: BinaryFiles
         ) => {
           setAppState(state);
-          setFiles(files);
-
           // Update local state
           setElements(newElements);
 
@@ -218,9 +208,6 @@ export default function App({
 
           // Also save all elements as a batch for easy retrieval
           drawingStorage.saveElements(newElements);
-
-          console.log(`💾 Saved ${newElements.length} elements to storage for drawing ${drawingId || 'default'}`);
-          console.log(`🔑 Storage key: drawing-elements-storage${drawingId ? `-${drawingId}` : ''}`);
         },
         onPointerUpdate: (payload: {
           pointer: { x: number; y: number };

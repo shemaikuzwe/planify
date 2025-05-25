@@ -28,13 +28,12 @@ class DrawingElementsStorage {
     this.storageKey = drawingId
       ? `drawing-${drawingId}`
       : 'drawing-new';
-    console.log(`🔧 DrawingElementsStorage created with key: ${this.storageKey}`);
   }
 
   private getStoredElements(): Record<string, DrawingElementData> {
     try {
       const stored = localStorage.getItem(this.storageKey);
-      console.log(`📖 Reading from ${this.storageKey}:`, stored ? `${stored.length} chars` : 'null');
+  
       if (!stored) return {};
 
       const parsed = JSON.parse(stored);
@@ -45,15 +44,10 @@ class DrawingElementsStorage {
       Object.entries(parsed).forEach(([key, value]: [string, any]) => {
         if (value && typeof value === 'object' && value.element && value.lastUpdated) {
           cleaned[key] = value as DrawingElementData;
-        } else {
-          console.warn(`Removing invalid element data for key ${key}:`, value);
         }
       });
-
-      console.log(`✅ Cleaned data from ${this.storageKey}:`, Object.keys(cleaned).length, 'valid elements');
       return cleaned;
     } catch (error) {
-      console.error('Failed to parse localStorage data, clearing storage:', error);
       this.clearAllElements();
       return {};
     }
@@ -103,7 +97,7 @@ class DrawingElementsStorage {
   getElementsArray(): OrderedExcalidrawElement[] {
     const stored = this.getStoredElements();
     const elements = Object.values(stored).map(data => data.element);
-    console.log(`📋 getElementsArray() from ${this.storageKey}: found ${elements.length} elements`);
+   
     return elements;
   }
 
@@ -232,9 +226,7 @@ class DrawingElementsStorage {
           result.onlyInLocal.push(localElementData.element);
           result.summary.onlyInLocalCount++;
         }
-      } else {
-        console.warn('Invalid element data found in localStorage:', localElementData);
-      }
+      } 
     });
 
     // Save the updated storage

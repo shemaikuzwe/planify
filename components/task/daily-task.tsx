@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation"
 import { getPriorityIcon } from "../ui/variants"
 import { Button } from "../ui/button"
 import DeleteDialog from "../ui/delete-dialog"
-import { formatShortDate } from "@/lib/utils"
+import { formatShortDate } from "@/lib/utils/utils"
 import AddGroup from "./add-group"
 import { Input } from "../ui/input"
 

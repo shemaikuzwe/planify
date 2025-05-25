@@ -1,7 +1,7 @@
 "use client"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
-import Logo from "../logo"
+import Logo from "../ui/logo"
 import { signIn } from "next-auth/react"
 import GitHub from "./Github"
 import Google from "./Google"

@@ -1,4 +1,4 @@
-import AddTaskForm from '@/components/home/add-task-form';
+import AddTaskForm from '@/components/task/add-task-form';
 import { notFound } from 'next/navigation';
 import React from 'react'
 

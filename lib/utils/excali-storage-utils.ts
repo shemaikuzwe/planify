@@ -1,4 +1,4 @@
-import { drawingElementsStorage, createDrawingElementsStorage } from '@/stores/drawing-elements-store';
+import { drawingElementsStorage, createDrawingElementsStorage } from '@/lib/store/excali-store';
 import { OrderedExcalidrawElement } from '@excalidraw/excalidraw/element/types';
 
 /**

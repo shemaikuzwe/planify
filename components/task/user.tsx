@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import { signOut, useSession } from 'next-auth/react'
 import { useSidebar } from '../ui/sidebar'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils/utils'
 import ThemeToggle from '../ui/theme-toggle'
 
 export default function User() {

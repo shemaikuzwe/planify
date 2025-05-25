@@ -1,5 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton"
-import { Card, CardContent } from "../ui/card"
+import { Card, CardContent } from "../card"
 
 export function LoadingCardSkeleton() {
   return (
