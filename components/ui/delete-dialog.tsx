@@ -4,13 +4,14 @@ import { AlertDialogCancel, AlertDialogContent, AlertDialogTitle, AlertDialogTri
 import { Button } from '../ui/button'
 import { Trash2 } from 'lucide-react'
 import { deleteDrawing, deleteGroup, deleteTask } from '@/lib/actions'
-
+import { useRouter } from 'next/navigation'
 interface Props {
     id: string;
     type: "group" | "task" | "drawing",
     text: string
 }
 export default function DeleteDialog({ id, type, text }: Props) {
+    const router = useRouter()
     const [isOpen, setIsOpen] = useState(false)
     const [isPending, startTransition] = useTransition()
     const handleDelete = () => {
@@ -23,6 +24,7 @@ export default function DeleteDialog({ id, type, text }: Props) {
                 await deleteDrawing(id)
             }
             setIsOpen(false)
+            router.push("/")
         })
     }
     return (

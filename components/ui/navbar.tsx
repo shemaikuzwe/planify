@@ -54,7 +54,7 @@ export function Navbar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip={"Daily Todo"} isActive={pathName==="/"}>
-                  <Link href={"/public"} className="flex gap-2 items-center w-full">
+                  <Link href="/" className="flex gap-2 items-center w-full">
                     <CalendarCheck className="h-4 w-4" />
                     <span>Daily Todo</span>
                   </Link>
