@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
-import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism"
+import vscDarkPlus from "react-syntax-highlighter/dist/cjs/styles/prism"
 import { Bold, Italic, List, ListOrdered, Link, ImageIcon, Code, CheckSquare } from "lucide-react"
 
 interface Props{
@@ -85,7 +85,7 @@ export default function MarkdownEditor({ markdown, onChange }: Props) {
         return
     }
 
-    const newText = markdown?.substring(0, start) + formattedText + markdown?.substring(end)
+    const newText = (markdown || "").substring(0, start) + formattedText + (markdown || "").substring(end)
     onChange(newText)
 
     // Set cursor position after the operation is complete
