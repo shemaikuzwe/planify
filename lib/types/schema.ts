@@ -45,3 +45,11 @@ export const addGroupSchema = z.object({
   name: z.string().min(2),
   dailyTodoId: z.string().uuid(),
 });
+
+export const meetSchema = z.object({
+  name: z.string().min(2).max(100),
+  description: z.string().min(2).optional(),
+  date: z.string().datetime().optional(),
+});
+
+export type MeetData = z.infer<typeof meetSchema>;

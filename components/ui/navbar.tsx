@@ -1,5 +1,5 @@
 "use client"
-import { Home, Settings, LayoutDashboard, List, ListTodo, CalendarCheck } from "lucide-react"
+import { Home, Settings, LayoutDashboard, List, ListTodo, CalendarCheck, Presentation } from "lucide-react"
 import Link from "next/link"
 import User from "@/components/task/user"
 import {
@@ -81,6 +81,14 @@ export function Navbar() {
                   <Link href="/project-planner" className="flex items-center gap-2 ">
                     <ListTodo className="h-4 w-4" />
                     <span>Project Planner</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Meet" isActive={pathName.includes("/meet")}>
+                  <Link href="/meet" className="flex items-center gap-2 ">
+                    <Presentation className="h-4 w-4" />
+                    <span>Meet</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

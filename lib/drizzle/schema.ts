@@ -7,10 +7,9 @@ import {
   integer,
   pgEnum,
   json,
+  varchar,
 } from "drizzle-orm/pg-core";
-import type { AdapterAccountType } from "@auth/core/adapters";
 import { relations } from "drizzle-orm";
-import { OrderedExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 
 // enums
 export const priority = ["HIGH", "MEDIUM", "LOW"] as const;
@@ -46,7 +45,7 @@ export const accounts = pgTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    type: text("type").$type<AdapterAccountType>().notNull(),
+    type: text("type").notNull(),
     provider: text("provider").notNull(),
     providerAccountId: text("providerAccountId").notNull(),
     refresh_token: text("refresh_token"),
@@ -109,11 +108,24 @@ export const drawings = pgTable("drawings", {
   ...timestamps,
 });
 
+export const meeting=pgTable("meeting",{
+  id:uuid("id").primaryKey().defaultRandom().notNull(),
+  name:varchar("name"),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  meetingId:varchar("meeting_id"), 
+  description:text("description"),
+  startTime:timestamp("start_time").notNull(),
+  ...timestamps,
+})
+
 // relations
 export const userRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
   dailyTodos: many(dailyTodo),
   drawings: many(drawings),
+  meetings: many(meeting),
 }));
 
 export const accountRelations = relations(accounts, ({ one }) => ({
@@ -149,6 +161,13 @@ export const taskRelations = relations(tasks, ({ one }) => ({
 export const drawingsRelations = relations(drawings, ({ one }) => ({
   user: one(users, {
     fields: [drawings.userId],
+    references: [users.id],
+  }),
+}));
+
+export const meetingRelations = relations(meeting, ({ one }) => ({
+  user: one(users, {
+    fields: [meeting.userId],
     references: [users.id],
   }),
 }));
