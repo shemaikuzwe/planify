@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Plus, Users } from "lucide-react"
+import { Merge, Plus, Users } from "lucide-react"
 import { StartMeetingDialog, JoinMeetingDialog } from "./meet-form"
 import MeetingCreated from "./meeting-created"
 import RecentMeetings from "./recent-meetings"
@@ -20,9 +20,7 @@ export default function MeetPage({ recentMeetings }: { recentMeetings: Meeting[]
     setMeetingCreatedOpen(true)
   }
 
-  const handleJoinMeeting = (meetingId: string) => {
-    router.push(`/meeting/${meetingId}`)
-  }
+
   return (
     <div className="min-h-screen flex">
 
@@ -47,6 +45,7 @@ export default function MeetPage({ recentMeetings }: { recentMeetings: Meeting[]
                     <h3 className="text-lg font-semibold mb-2">Start Meeting</h3>
                     <p className="text-foreground/60 text-sm mb-4">Create an instant or scheduled meeting</p>
                     <Button onClick={() => setStartMeetingOpen(true)} className="w-full">
+                      <Plus className="w-4 h-4 mr-2" />
                       Start
                     </Button>
                   </CardContent>
@@ -54,7 +53,7 @@ export default function MeetPage({ recentMeetings }: { recentMeetings: Meeting[]
                 <Card>
                   <CardContent className="p-6 text-center">
                     <div className="w-12 h-12 bg-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Users className="w-6 h-6 text-white" />
+                      <Merge className="w-6 h-6 text-white" />
                     </div>
                     <h3 className="text-lg font-semibold mb-2">Join Meeting</h3>
                     <p className="text-foreground/60 text-sm mb-4">Enter a meeting ID to join</p>
@@ -63,6 +62,7 @@ export default function MeetPage({ recentMeetings }: { recentMeetings: Meeting[]
                       variant="secondary"
                       className="w-full"
                     >
+                      <Merge className="w-4 h-4 mr-2" />
                       Join
                     </Button>
                   </CardContent>
@@ -80,7 +80,7 @@ export default function MeetPage({ recentMeetings }: { recentMeetings: Meeting[]
         onCreateMeeting={handleCreateMeeting}
       />
       <MeetingCreated open={meetingCreatedOpen} onOpenChange={setMeetingCreatedOpen} />
-      <JoinMeetingDialog open={joinMeetingOpen} onOpenChange={setJoinMeetingOpen} onJoinMeeting={handleJoinMeeting} />
+      <JoinMeetingDialog open={joinMeetingOpen} onOpenChange={setJoinMeetingOpen} />
     </div>
   )
 }

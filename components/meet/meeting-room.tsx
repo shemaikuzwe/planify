@@ -29,9 +29,13 @@ export default function MeetingRoom() {
   const router = useRouter();
   const callingState = useCallCallingState();
   if (callingState !== CallingState.JOINED) {
-    return <MeetingSetupSkeleton />;
+    return <div className="min-h-screen bg-background flex flex-col w-full">
+      <div className="flex-1">
+        <MeetingSetupSkeleton />
+      </div>
+    </div>;
   }
-  const CallLayout = () => {
+  const CallLayout = () => {  
     switch (layout) {
       case "Grid":
         return <PaginatedGridLayout />;
@@ -43,7 +47,7 @@ export default function MeetingRoom() {
     }
   };
   return (
-    <section className="min-h-screen w-full">
+    <section className="min-h-screen  w-full">
       <div className="h-screen flex size-full items-center justify-center">
         <div className=" flex size-full max-w-[1000px] items-center">
           <CallLayout />

@@ -49,7 +49,7 @@ export const addGroupSchema = z.object({
 export const meetSchema = z.object({
   name: z.string().min(2).max(100),
   description: z.string().min(2).optional(),
-  date: z.string().datetime().optional(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, { message: "Invalid datetime" }).optional(),
 });
 
 export type MeetData = z.infer<typeof meetSchema>;

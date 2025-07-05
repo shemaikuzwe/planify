@@ -3,7 +3,7 @@
 import { StreamVideo, StreamVideoClient } from "@stream-io/video-react-sdk";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { generateToken } from "@/lib/actions/meet";
+import { generateToken } from "@/lib/data/meet";
 
 const apiKey = process.env.NEXT_PUBLIC_STREAM_API_KEY;
 

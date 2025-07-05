@@ -12,19 +12,19 @@ import { Calendar, Loader2, Video } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { MeetData, meetSchema } from "@/lib/types/schema"
-import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form"
 import { useStreamVideoClient } from "@stream-io/video-react-sdk"
 import { useSession } from "next-auth/react"
 import { nanoid } from "nanoid"
-import { createMeeting } from "@/lib/actions/meet"
+import { createMeeting, joinMeeting } from "@/lib/actions/meet"
 import { useRouter } from "next/navigation"
 interface StartMeetingDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onCreateMeeting: (meetingId :string,name: string) => void
+  onCreateMeeting: (meetingId: string, name: string) => void
 }
 
-export function StartMeetingDialog({ open, onOpenChange,onCreateMeeting }: StartMeetingDialogProps) {
+export function StartMeetingDialog({ open, onOpenChange, onCreateMeeting }: StartMeetingDialogProps) {
   const [activeTab, setActiveTab] = useState("instant")
   const form = useForm({
     resolver: zodResolver(meetSchema)
@@ -35,34 +35,41 @@ export function StartMeetingDialog({ open, onOpenChange,onCreateMeeting }: Start
 
   const [isCreating, setIsCreating] = useState(false)
   const handleSubmit = async (data: MeetData) => {
-    if (!client || !user) return;
-    setIsCreating(true)
-    const callId = nanoid(5)
-    const call = client.call("default", callId)
-    const description = data.description
-    await call.getOrCreate({
-      data: {
-        starts_at: data.date,
-        custom: {
-          description
+    try {
+      if (!client || !user) return;
+      setIsCreating(true)
+      const callId = nanoid(6)
+      const call = client.call("default", callId)
+      const description = data.description
+      await call.getOrCreate({
+        data: {
+          starts_at: data.date ? new Date(data.date).toISOString() : undefined,
+          custom: {
+            description
+          }
         }
+      })
+      const res = await createMeeting(data, call.id)
+      if (res?.error) {
+        console.error("Error creating meeting:")
+        return
       }
-    })
-    const res = await createMeeting(data, call.id)
-    if (res?.error) {
-      console.error("Error creating meeting:")
-      return
-    }
-    if( activeTab === "instant") {
+      if (activeTab === "instant") {
+        onOpenChange(false)
+        form.reset()
+        setIsCreating(false)
+        return router.push(`/meet/${call.id}`)
+      }
       onOpenChange(false)
-      form.reset()
+      onCreateMeeting(call.id, data.name)
       setIsCreating(false)
-     return router.push(`/meet/${call.id}`)
+      form.reset()
+    } catch (err) {
+      console.error("Error creating meeting:", err)
+      // TODO: show error to user
+    } finally {
+      setIsCreating(false)
     }
-    onOpenChange(false)
-    onCreateMeeting(call.id, data.name)
-    setIsCreating(false)
-    form.reset()
   }
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -135,10 +142,10 @@ export function StartMeetingDialog({ open, onOpenChange,onCreateMeeting }: Start
                         <Input
                           id="meeting-date"
                           type="datetime-local"
-                          min={new Date().toISOString().split("T")[0]}
                           {...field}
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -149,8 +156,8 @@ export function StartMeetingDialog({ open, onOpenChange,onCreateMeeting }: Start
                 </Button>
                 <Button type="submit" disabled={isCreating}>
                   {isCreating ? (<div className="flex gap-2 justify-center">
-                    <Loader2 className="h-4 w-4 animate-spin"/>
-                   <span> Creating</span>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span> Creating</span>
                   </div>) : activeTab === "instant" ? "Start Now" : "Schedule Meeting"}
                 </Button>
               </DialogFooter>
@@ -167,25 +174,28 @@ export function StartMeetingDialog({ open, onOpenChange,onCreateMeeting }: Start
 interface JoinMeetingDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onJoinMeeting: (meetingId: string) => void
 }
 
-export function JoinMeetingDialog({ open, onOpenChange, onJoinMeeting }: JoinMeetingDialogProps) {
+export function JoinMeetingDialog({ open, onOpenChange}: JoinMeetingDialogProps) {
   const [meetingId, setMeetingId] = useState("")
   const [isJoining, setIsJoining] = useState(false)
-
+  const router = useRouter()
   const handleJoin = async () => {
     if (!meetingId.trim()) return
-
+     
     setIsJoining(true)
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    onJoinMeeting(meetingId)
-    setIsJoining(false)
+    try {
+      const res = await joinMeeting(meetingId)
+      setMeetingId("")
+      onOpenChange(false)
+      return router.push(`/meet/${res.meetingId}`)
+    } catch (err) {
+      console.error("Error joining meeting:", err)
+      // TODO: show error to user
+    } finally {
+      setIsJoining(false)
+    }
 
-    // Reset form
-    setMeetingId("")
-    onOpenChange(false)
   }
 
   return (
@@ -193,19 +203,19 @@ export function JoinMeetingDialog({ open, onOpenChange, onJoinMeeting }: JoinMee
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Join Meeting</DialogTitle>
-          <DialogDescription>Enter the meeting ID to join an existing meeting</DialogDescription>
+          <DialogDescription>Enter the meeting Link to join an existing meeting</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="meeting-id">Meeting ID *</Label>
+            <Label htmlFor="meeting-id">Meeting Link *</Label>
             <Input
               id="meeting-id"
-              placeholder="Enter meeting ID"
+              placeholder="Enter meeting ID or Link"
               value={meetingId}
               onChange={(e) => setMeetingId(e.target.value)}
               className="font-mono"
             />
-            <p className="text-sm text-muted-foreground">Ask the meeting organizer for the meeting ID</p>
+            <p className="text-sm text-muted-foreground">Ask the meeting organizer for the meeting Link</p>
           </div>
         </div>
         <DialogFooter>
