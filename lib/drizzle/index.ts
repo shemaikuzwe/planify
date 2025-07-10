@@ -8,5 +8,6 @@ export type Category = typeof tables.categories.$inferSelect;
 export type DailyTodo = typeof tables.dailyTodo.$inferSelect;
 export type Drawing = typeof tables.drawings.$inferSelect;
 export type Meeting = typeof tables.meeting.$inferSelect;
+export type Team = typeof tables.team.$inferSelect;
 const db = drizzle(process.env.DATABASE_URL!, { schema: tables });
 export default db;

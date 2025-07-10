@@ -89,7 +89,7 @@ export const tasks = pgTable("tasks", {
     .notNull()
     .references(() => categories.id, { onDelete: "cascade" }),
   text: text("text").notNull(),
-  description:text("description"),
+  description: text("description"),
   time: text("time"),
   status: taskStatus().default("NOT_STARTED").notNull(),
   priority: enumPriority().default("MEDIUM"),
@@ -104,21 +104,51 @@ export const drawings = pgTable("drawings", {
     .references(() => users.id, { onDelete: "cascade" }),
   description: text("description"),
   name: text("name").notNull(),
-  elements:json("elements"),
+  elements: json("elements"),
   ...timestamps,
 });
 
-export const meeting=pgTable("meeting",{
-  id:uuid("id").primaryKey().defaultRandom().notNull(),
-  name:varchar("name"),
+export const meetingStatus = pgEnum("status", ["ACTIVE", "ENDED", "CANCELLED"]);
+
+export const meeting = pgTable("meeting", {
+  id: uuid("id").primaryKey().defaultRandom().notNull(),
+  name: varchar("name"),
   userId: uuid("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  meetingId:varchar("meeting_id"), 
-  description:text("description"),
-  startTime:timestamp("start_time").notNull(),
+  meetingId: varchar("meeting_id"),
+  description: text("description"),
+  startTime: timestamp("start_time").notNull(),
+  status: meetingStatus().default("ACTIVE"),
   ...timestamps,
-})
+});
+
+export const team = pgTable("team", {
+  id: uuid("id").primaryKey().defaultRandom().notNull(),
+  name: varchar("name").notNull(),
+  slogan: text("slogan"),
+  createdBy: uuid("created_by")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  // Removed members array – membership handled via join table `teamMembers`
+  ...timestamps,
+});
+
+// Join table mapping teams to users (many-to-many)
+export const teamMembers = pgTable(
+  "team_members",
+  {
+    teamId: uuid("team_id")
+      .notNull()
+      .references(() => team.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.teamId, table.userId] }),
+  })
+);
 
 // relations
 export const userRelations = relations(users, ({ many }) => ({
@@ -126,6 +156,8 @@ export const userRelations = relations(users, ({ many }) => ({
   dailyTodos: many(dailyTodo),
   drawings: many(drawings),
   meetings: many(meeting),
+  teamMembers: many(teamMembers),
+  createdTeams: many(team),
 }));
 
 export const accountRelations = relations(accounts, ({ one }) => ({
@@ -171,3 +203,23 @@ export const meetingRelations = relations(meeting, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+export const teamRelations = relations(team, ({ many, one }) => ({
+  teamMembers: many(teamMembers),
+  creator: one(users, {
+    fields: [team.createdBy],
+    references: [users.id],
+  }),
+}));
+
+export const teamMembersRelations = relations(teamMembers, ({ one }) => ({
+  team: one(team, {
+    fields: [teamMembers.teamId],
+    references: [team.id],
+  }),
+  user: one(users, {
+    fields: [teamMembers.userId],
+    references: [users.id],
+  }),
+}));
+

@@ -1,8 +1,7 @@
 import { auth } from "@/auth";
 import db from "../drizzle";
-import { meeting } from "../drizzle/schema";
+import { meeting, team} from "../drizzle/schema";
 import { desc, eq } from "drizzle-orm";
-import { StreamClient } from "@stream-io/node-sdk";
 
 export async function getRecentMeetings() {
     const session = await auth();
@@ -21,28 +20,39 @@ export async function getRecentMeetings() {
     return meetings;
 }
 
-export async function generateToken() {
+export async function getUserTeams() {
     const session = await auth();
-    const user = session?.user;
-    const apiSecret = process.env.STREAM_API_SECRET;
-    const apiKey = process.env.NEXT_PUBLIC_STREAM_API_KEY;
-    if (!user || !user.id || !user.name) throw new Error("User not found");
-    if (!apiKey || !apiSecret) throw new Error("Invalid api key or secret");
-    const client = new StreamClient(apiKey, apiSecret);
-    const exp = Math.round(new Date().getTime() / 1000) + 60 * 60;
-    const issued = Math.floor(Date.now() / 1000) - 60;
-    // const token = client.createToken(user.id, exp, issued)
-    await client.upsertUsers([
-        {
-            id: user.id,
-            image: user.image as string | undefined,
-            name: user.name,
-        },
-    ]);
-    const token = client.generateUserToken({
-        user_id: user.id,
-        validity_in_seconds: exp,
-        iat: issued,
+    const userId = session?.user.id;
+    if (!userId) {
+        throw new Error("Unauthorized");
+    }
+    const teams = await db.query.team.findMany({
+        where: eq(team.createdBy, userId),
+        with: {
+            teamMembers: {
+                with: {
+                    user: {
+                        columns: {
+                            id: true,
+                            name: true,
+                            email: true,
+                            image: true,
+                        }
+                    }
+                }
+            },
+            creator: {
+                columns: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    image: true,
+                }
+            }
+        }
     });
-    return token;
+
+    return teams;
 }
+
+export type UserTeam = Awaited<ReturnType<typeof getUserTeams>>[number];

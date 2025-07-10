@@ -1,26 +1,27 @@
+
+
 "use client"
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Calendar, Copy, Play } from "lucide-react"
-import { Meeting } from "@/lib/drizzle"
+import { Recording } from "@/lib/types"
 import { formatDate } from "@/lib/utils/utils"
 import { useRouter } from "next/navigation"
+import { CallRecording } from "@stream-io/video-react-sdk"
 
-interface MeetingCardProps {
-  meeting: Meeting,
-  additionalParticipants?: number
+interface RecordingCardProps {
+ recording: CallRecording,
   onCopyInvitation?: () => void
   className?: string
-}
+}   
 
-export default function MeetingCard({
-  meeting,
-  additionalParticipants = 0,
+export default function RecordingCard({
+  recording,
   onCopyInvitation,
   className = "",
-}: MeetingCardProps) {
+}: RecordingCardProps) {
   const [copied, setCopied] = useState(false)
   const router = useRouter()
 
@@ -30,7 +31,7 @@ export default function MeetingCard({
     }
 
     // Default copy behavior
-    const invitationText = `${process.env.NEXT_PUBLIC_BASE_URL}/meet/${meeting.meetingId}`
+    const invitationText = `${recording.url}`
 
     try {
       await navigator.clipboard.writeText(invitationText)
@@ -51,17 +52,16 @@ export default function MeetingCard({
 
         {/* Meeting Title */}
         <div className="flex flex-col gap-1 flex-grow">
-          <h3 className="text-xl font-bold leading-tight">{meeting.name}</h3>
-          <p className="text-sm">{meeting.description}</p>
-          <p className="text-sm">{formatDate(meeting.startTime)}</p>
+          <h3 className="text-xl font-bold leading-tight">{recording.filename.split(".")[0]}</h3>
+          <p className="text-sm">{formatDate(recording.start_time)}</p>
         </div>
 
         {/* Action Buttons */}
-        {meeting.status === "ACTIVE" && (
+        {recording.url && (
           <div className="flex gap-3 mt-4">
-            <Button onClick={() => router.push(`/meet/${meeting.meetingId}`)} className="py-2 font-medium">
+            <Button onClick={() => router.push(`${recording.url}`)} className="py-2 font-medium">
               <Play className="w-4 h-4 mr-2" />
-              Start
+              Play
             </Button>
 
             <Button

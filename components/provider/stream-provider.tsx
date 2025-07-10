@@ -3,7 +3,7 @@
 import { StreamVideo, StreamVideoClient } from "@stream-io/video-react-sdk";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { generateToken } from "@/lib/data/meet";
+import { generateToken } from "@/lib/actions/meet";
 
 const apiKey = process.env.NEXT_PUBLIC_STREAM_API_KEY;
 
@@ -15,7 +15,6 @@ export const StreamVideoProvider = ({
     const [videoClient, setVideoClient] = useState<StreamVideoClient>();
     const session = useSession()
     const user = session.data?.user
-    console.log("user", user)
     useEffect(() => {
         if (!user || !user.id) return;
         if (!apiKey) throw new Error("stream api key missing");

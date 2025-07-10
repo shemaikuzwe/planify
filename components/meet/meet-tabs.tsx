@@ -1,12 +1,18 @@
 "use client"
-
-import { useSearchParams } from 'next/navigation'
-import React from 'react'
+import React, { use } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 import MeetPage from './meet-page'
 import { Meeting } from '@/lib/drizzle'
-
-export default function MeetTabs({ recentMeetings }: { recentMeetings: Meeting[] }) {
+import Recordings from './recordings'
+import TeamsPage from './teams-page'
+import { useSearchParams } from 'next/navigation'
+import { UserTeam } from '@/lib/data/meet'
+interface Props {
+    teamsPromise: Promise<UserTeam[]>
+    recentMeetingsPromise: Promise<Meeting[]>
+}
+export default function MeetTabs({ recentMeetingsPromise, teamsPromise }: Props) {
+    const recentMeetings = use(recentMeetingsPromise)
     const searchParams = useSearchParams()
     const tab = searchParams.get('tab') || 'meet'
     return (
@@ -21,13 +27,13 @@ export default function MeetTabs({ recentMeetings }: { recentMeetings: Meeting[]
                 <MeetPage recentMeetings={recentMeetings} />
             </TabsContent>
             <TabsContent value="room">
-                {/* <Chat /> */}
+                <TeamsPage teamsPromise={teamsPromise} />
             </TabsContent>
             <TabsContent value="recordings">
-                {/* <Recordings /> */}
+                <Recordings />
             </TabsContent>
             <TabsContent value="recent-meetings">
-                {/* <RecentMeetings /> */}
+                {/* <RecentMeetings /> */}  
             </TabsContent>
         </Tabs>
     )
