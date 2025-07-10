@@ -10,6 +10,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+import { nanoid } from "nanoid";
 
 // enums
 export const priority = ["HIGH", "MEDIUM", "LOW"] as const;
@@ -130,7 +131,7 @@ export const team = pgTable("team", {
   createdBy: uuid("created_by")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  // Removed members array – membership handled via join table `teamMembers`
+  teamId:varchar("team_id").$default(()=>nanoid(6)),
   ...timestamps,
 });
 

@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { Check, CheckCheck, Copy } from "lucide-react"
+import { CheckCheck, Copy } from "lucide-react"
 
 interface MeetingCreatedProps {
   open: boolean
@@ -16,8 +16,8 @@ interface MeetingCreatedProps {
 export default function MeetingCreated({
   open,
   onOpenChange,
-  meetingId = "abc123def456",
-  meetingName = "Team Meeting",
+  meetingId,
+  meetingName,
 }: MeetingCreatedProps) {
   const [copied, setCopied] = useState(false)   
 
@@ -45,7 +45,7 @@ export default function MeetingCreated({
                 <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center relative">
                   {/* Star points */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <CheckCheck className="w-8 h-8 text-white" />
+                    <CheckCheck className="w-8 h-8 " />
                   </div>
         
                 </div>

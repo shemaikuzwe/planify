@@ -4,15 +4,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
 import { UserTeam } from "@/lib/data/meet"
 import { Button } from "../ui/button"
-import { Copy, EditIcon, Play, TrashIcon } from "lucide-react"
+import { EditIcon, Play, TrashIcon } from "lucide-react"
+import Link from "next/link"
+import CopyLink from "./copy-link"
 
 interface TeamCardProps {
-    team:UserTeam,
+    team: UserTeam,
     onClick?: () => void
-    className?: string
+    className?: string  
 }
 export function TeamCard({
-     team,
+    team,
     onClick,
     className = "",
 }: TeamCardProps) {
@@ -50,14 +52,13 @@ export function TeamCard({
                     <p className="text-sm text-muted-foreground">{team.slogan}</p>
                     <p className="text-sm text-muted-foreground">{team.creator.name}</p>
                     <div className="flex items-center gap-2">
-                    <Button size={"sm"}>
-                        <Play className="h-4 w-4"/>
-                        Start
-                    </Button>
-                    <Button variant="outline" size={"sm"}>
-                      <Copy className="h-4 w-4"/>
-                      Copy Link
-                    </Button>
+                        <Button size={"sm"} asChild>
+                            <Link href={`/meet/${team.teamId}?room=true`}>
+                                <Play className="h-4 w-4" />
+                                Start
+                            </Link>
+                        </Button>
+                        <CopyLink link={`/meet/${team.teamId}?room=true`} />
                     </div>
                 </div>
 

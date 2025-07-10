@@ -7,17 +7,16 @@ import { Calendar, Copy, Play } from "lucide-react"
 import { Meeting } from "@/lib/drizzle"
 import { formatDate } from "@/lib/utils/utils"
 import { useRouter } from "next/navigation"
+import CopyLink from "./copy-link"
 
 interface MeetingCardProps {
   meeting: Meeting,
-  additionalParticipants?: number
   onCopyInvitation?: () => void
   className?: string
 }
 
 export default function MeetingCard({
   meeting,
-  additionalParticipants = 0,
   onCopyInvitation,
   className = "",
 }: MeetingCardProps) {
@@ -64,14 +63,7 @@ export default function MeetingCard({
               Start
             </Button>
 
-            <Button
-              onClick={handleCopyInvitation}
-              variant="secondary"
-              className="border-none px-4 py-2"
-            >
-              <Copy className="w-4 h-4 mr-2" />
-              {copied ? "Copied!" : "Copy Link"}
-            </Button>
+            <CopyLink link={`/meet/${meeting.meetingId}`} />
           </div>
         )}
       </CardContent>
