@@ -6,8 +6,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
-import vscDarkPlus from "react-syntax-highlighter/dist/cjs/styles/prism"
+import { Light as SyntaxHighlighter } from "react-syntax-highlighter"
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism"
 import { Bold, Italic, List, ListOrdered, Link, ImageIcon, Code, CheckSquare } from "lucide-react"
 
 interface Props{

@@ -45,3 +45,19 @@ export const addGroupSchema = z.object({
   name: z.string().min(2),
   dailyTodoId: z.string().uuid(),
 });
+
+export const meetSchema = z.object({
+  name: z.string().min(2).max(100),
+  description: z.string().min(2).optional(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, { message: "Invalid datetime" }).optional(),
+});
+
+export type MeetData = z.infer<typeof meetSchema>;
+
+export const teamSchema = z.object({
+  name: z.string().min(2).max(100),
+  slogan: z.string().min(2).optional(),
+  members: z.array(z.string().email()).min(1),
+});
+
+export type TeamData = z.infer<typeof teamSchema>;
