@@ -13,12 +13,13 @@ import { Users, Loader2 } from "lucide-react"
 import { DialogClose, DialogFooter } from "../ui/dialog"
 import { teamSchema } from "@/lib/types/schema"
 import { createTeam } from "@/lib/actions/meet"
+import { toast } from "sonner"
 
 
 
 type TeamFormData = z.infer<typeof teamSchema>
 
-export default function CreateTeam() {
+export default function CreateTeam({ setIsCreatingTeam }: { setIsCreatingTeam: (isCreatingTeam: boolean) => void }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm<TeamFormData>({
@@ -35,11 +36,11 @@ export default function CreateTeam() {
     setIsSubmitting(true)
     try {
       await createTeam(data)
-      // Reset form
       form.reset()
+      setIsCreatingTeam(false)
     } catch (error) {
       console.error("Error creating team:", error)
-      alert("Failed to create team. Please try again.")
+      toast.error("Failed to create team. Please try again.")
     } finally {
       setIsSubmitting(false)
     }
@@ -48,7 +49,7 @@ export default function CreateTeam() {
   return (
     <div className="flex items-center w-full">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               {/* Team Name Field */}
               <FormField
                 control={form.control}
@@ -61,7 +62,6 @@ export default function CreateTeam() {
                     </FormControl>
                     <div className="flex justify-between text-xs">
                       <FormMessage />
-                      
                     </div>
                   </FormItem>
                 )}
@@ -105,7 +105,7 @@ export default function CreateTeam() {
                 )}
               />
 
-              <DialogFooter className="flex items-center justify-end pt-6">
+              <DialogFooter className="flex items-center justify-end pt-4">
                 <DialogClose asChild>
                   <Button variant="outline">Cancel</Button>
                 </DialogClose>
@@ -128,8 +128,6 @@ export default function CreateTeam() {
               </DialogFooter>
             </form>
           </Form>
-        
-   
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { format, isToday, isTomorrow, isYesterday, parseISO } from "date-fns"
+import { format, formatDistance, isToday, isTomorrow, isYesterday, parseISO } from "date-fns"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -23,7 +23,7 @@ export function formatDate(date: Date | string): string {
 
 export function formatShortDate(date: Date | string): string {
   const parsedDate = typeof date === 'string' ? parseISO(date) : date
-  return format(parsedDate, 'MMM d')
+ return formatDistance(parsedDate, new Date(), { addSuffix: true })
 }
 
 export function capitalize(str: string) {

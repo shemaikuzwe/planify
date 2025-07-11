@@ -36,8 +36,7 @@ export default function MeetingCreated({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
-        <Card className="border-none shadow-none">
-          <CardContent className="p-4 text-center space-y-4">
+          <div className="p-4 text-center space-y-4">
             {/* Success Icon */}
             <div className="flex justify-center">
               <div className="relative">
@@ -78,8 +77,7 @@ export default function MeetingCreated({
                 Close
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
       </DialogContent>
     </Dialog>
   )

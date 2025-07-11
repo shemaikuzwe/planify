@@ -1,9 +1,8 @@
 "use client"
 
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Calendar, Copy, Play } from "lucide-react"
+import { Calendar, Play } from "lucide-react"
 import { Meeting } from "@/lib/drizzle"
 import { formatDate } from "@/lib/utils/utils"
 import { useRouter } from "next/navigation"
@@ -11,35 +10,14 @@ import CopyLink from "./copy-link"
 
 interface MeetingCardProps {
   meeting: Meeting,
-  onCopyInvitation?: () => void
   className?: string
 }
 
 export default function MeetingCard({
   meeting,
-  onCopyInvitation,
   className = "",
 }: MeetingCardProps) {
-  const [copied, setCopied] = useState(false)
   const router = useRouter()
-
-  const handleCopyInvitation = async () => {
-    if (onCopyInvitation) {
-      onCopyInvitation()
-    }
-
-    // Default copy behavior
-    const invitationText = `${process.env.NEXT_PUBLIC_BASE_URL}/meet/${meeting.meetingId}`
-
-    try {
-      await navigator.clipboard.writeText(invitationText)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch (err) {
-      console.error("Failed to copy invitation:", err)
-    }
-  }
-
   return (
     <Card className={className}>
       <CardContent className="p-4 flex flex-col h-full">

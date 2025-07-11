@@ -5,19 +5,13 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Merge, Plus } from "lucide-react"
-import { StartMeetingDialog, JoinMeetingDialog } from "./meet-form"
-import MeetingCreated from "./meeting-created"
+import { StartMeetingDialog, JoinMeetingDialog } from "./meet-form" 
 import RecentMeetings from "./recent-meetings"
 import { Meeting } from "@/lib/drizzle"
 
 export default function MeetPage({ recentMeetings }: { recentMeetings: Meeting[] }) {
   const [startMeetingOpen, setStartMeetingOpen] = useState(false)
   const [joinMeetingOpen, setJoinMeetingOpen] = useState(false)
-  const [meetingCreatedOpen, setMeetingCreatedOpen] = useState(false)
-
-  const handleCreateMeeting = (id:string,name: string) => {
-    setMeetingCreatedOpen(true)
-  }
 
 
   return (
@@ -74,9 +68,8 @@ export default function MeetPage({ recentMeetings }: { recentMeetings: Meeting[]
       <StartMeetingDialog
         open={startMeetingOpen}
         onOpenChange={setStartMeetingOpen}
-        onCreateMeeting={handleCreateMeeting}
       />
-      <MeetingCreated open={meetingCreatedOpen} onOpenChange={setMeetingCreatedOpen} />
+  
       <JoinMeetingDialog open={joinMeetingOpen} onOpenChange={setJoinMeetingOpen} />
     </div>
   )

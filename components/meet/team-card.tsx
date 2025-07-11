@@ -7,11 +7,12 @@ import { Button } from "../ui/button"
 import { EditIcon, Play, TrashIcon } from "lucide-react"
 import Link from "next/link"
 import CopyLink from "./copy-link"
+import { useSession } from "next-auth/react"
 
 interface TeamCardProps {
     team: UserTeam,
     onClick?: () => void
-    className?: string  
+    className?: string
 }
 export function TeamCard({
     team,
@@ -28,7 +29,8 @@ export function TeamCard({
     }
     const displayMembers = team.teamMembers?.slice(0, 4)
     const totalAdditional = Math.max(0, (team.teamMembers?.length || 0) - 4)
-
+    const user = useSession()
+    const isCreator = user.data?.user.id === team.createdBy
     return (
         <Card
             className={`cursor-pointer hover:shadow-lg ${className}`}
@@ -37,16 +39,18 @@ export function TeamCard({
             <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                     <h2 className="text-lg font-semibold">{team.name}</h2>
-                    <div className="flex items-center gap-2">
-                        <Button variant="outline" size="icon">
-                            <EditIcon className="w-4 h-4" />
-                            <span className="sr-only">Edit Team</span>
-                        </Button>
-                        <Button variant="destructive" size="icon">
-                            <TrashIcon className="w-4 h-4" />
-                            <span className="sr-only">Delete Team</span>
-                        </Button>
-                    </div>
+                    {isCreator && (
+                        <div className="flex items-center gap-2">
+                            <Button variant="outline" size="icon">
+                                <EditIcon className="w-4 h-4" />
+                                <span className="sr-only">Edit Team</span>
+                            </Button>
+                            <Button variant="destructive" size="icon">
+                                <TrashIcon className="w-4 h-4" />
+                                <span className="sr-only">Delete Team</span>
+                            </Button>
+                        </div>
+                    )}
                 </div>
                 <div className="flex justify-center gap-2 flex-col">
                     <p className="text-sm text-muted-foreground">{team.slogan}</p>

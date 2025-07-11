@@ -7,6 +7,7 @@ import { MeetData, TeamData } from "../types/schema";
 import { StreamClient } from "@stream-io/node-sdk";
 import { cleanMeetingLink } from "../utils/meet";
 import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 
 async function createMeeting(data: MeetData, id: string) {
     const session = await auth();
@@ -29,6 +30,7 @@ async function createMeeting(data: MeetData, id: string) {
     if (!meet?.id) {
         throw new Error("Failed to create meeting");
     }
+    revalidatePath("/meet")
     return {
         error: null,
     }
@@ -136,6 +138,7 @@ async function createTeam(data: TeamData) {
             }))
         );
     }
+    revalidatePath("/meet")
 }
 
 export {

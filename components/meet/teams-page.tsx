@@ -5,25 +5,27 @@ import { PlusIcon } from 'lucide-react'
 import { UserTeam } from '@/lib/data/meet'
 import { TeamCard } from './team-card'
 import { use } from 'react'
+import { useState } from 'react'
 
 interface Props {
     teamsPromise: Promise<UserTeam[]>
 }
 export default function TeamsPage({ teamsPromise }: Props) {
     const teams = use(teamsPromise)
+    const [isCreatingTeam, setIsCreatingTeam] = useState(false)
     return (
         <div className='flex flex-col gap-4'>
             <div className='flex justify-end'>
-                <Dialog>
+                <Dialog open={isCreatingTeam} onOpenChange={setIsCreatingTeam}>
                     <DialogTrigger asChild>
                         <Button><PlusIcon className='w-4 h-4' /> Create Team</Button>
                     </DialogTrigger>
-                    <DialogContent className='sm:max-w-[450px]'>
+                    <DialogContent className='sm:max-w-[430px] flex flex-col justify-center'>
                         <DialogHeader>
                             <DialogTitle>Create Team</DialogTitle>
                             <DialogDescription>Create a new team</DialogDescription>
                         </DialogHeader>
-                        <CreateTeam />
+                        <CreateTeam setIsCreatingTeam={setIsCreatingTeam} />
                     </DialogContent>
                 </Dialog>
             </div>

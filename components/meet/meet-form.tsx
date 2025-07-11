@@ -18,14 +18,17 @@ import { useSession } from "next-auth/react"
 import { nanoid } from "nanoid"
 import { createMeeting, joinMeeting } from "@/lib/actions/meet"
 import { useRouter } from "next/navigation"
+import MeetingCreated from "./meeting-created"
+import { toast } from "sonner"
 interface StartMeetingDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onCreateMeeting: (meetingId: string, name: string) => void
 }
 
-export function StartMeetingDialog({ open, onOpenChange, onCreateMeeting }: StartMeetingDialogProps) {
+export function StartMeetingDialog({ open, onOpenChange }: StartMeetingDialogProps) {
   const [activeTab, setActiveTab] = useState("instant")
+  const [meetingCreatedOpen, setMeetingCreatedOpen] = useState(false)
+  const [meetingId, setMeetingId] = useState("")
   const form = useForm({
     resolver: zodResolver(meetSchema)
   });
@@ -61,113 +64,116 @@ export function StartMeetingDialog({ open, onOpenChange, onCreateMeeting }: Star
         return router.push(`/meet/${call.id}`)
       }
       onOpenChange(false)
-      onCreateMeeting(call.id, data.name)
+      setMeetingCreatedOpen(true)
+      setMeetingId(call.id)
       setIsCreating(false)
       form.reset()
     } catch (err) {
       console.error("Error creating meeting:", err)
-      // TODO: show error to user
+      toast.error("Failed to create meeting. Please try again.")
+      onOpenChange(false)
     } finally {
       setIsCreating(false)
     }
   }
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Start Meeting</DialogTitle>
-          <DialogDescription>Create a new meeting</DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Start Meeting</DialogTitle>
+            <DialogDescription>Create a new meeting</DialogDescription>
+          </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="instant" className="flex items-center gap-2">
-              <Video className="w-4 h-4" />
-              Instant
-            </TabsTrigger>
-            <TabsTrigger value="later" className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              Schedule
-            </TabsTrigger>
-          </TabsList>
-          <Form {...form}>
-            <form className="mt-4 flex flex-col gap-2" onSubmit={form.handleSubmit(handleSubmit)}>
-              <div className="space-y-4 ">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="instant" className="flex items-center gap-2">
+                <Video className="w-4 h-4" />
+                Instant
+              </TabsTrigger>
+              <TabsTrigger value="later" className="flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                Schedule
+              </TabsTrigger>
+            </TabsList>
+            <Form {...form}>
+              <form className="mt-4 flex flex-col gap-2" onSubmit={form.handleSubmit(handleSubmit)}>
+                <div className="space-y-4 ">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel htmlFor="name">Meeting Name *</FormLabel>
+                        <FormControl>
+                          <Input
+                            id="instant-meeting-name"
+                            placeholder="Enter meeting name"
+                            {...field}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 <FormField
                   control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel htmlFor="name">Meeting Name *</FormLabel>
-                      <FormControl>
-                        <Input
-                          id="instant-meeting-name"
-                          placeholder="Enter meeting name"
-                          {...field}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem className="space-y-2">
-                    <FormLabel htmlFor="instant-meeting-description">Description (Optional)</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        id="instant-meeting-description"
-                        placeholder="What's this meeting about?"
-                        rows={3}
-                        {...field}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              <TabsContent value="later" className="space-y-2">
-                <FormField
-                  control={form.control}
-                  name="date"
+                  name="description"
                   render={({ field }) => (
                     <FormItem className="space-y-2">
-                      <FormLabel htmlFor="meeting-date" className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4" />
-                        Date *
-                      </FormLabel>
+                      <FormLabel htmlFor="instant-meeting-description">Description (Optional)</FormLabel>
                       <FormControl>
-                        <Input
-                          id="meeting-date"
-                          type="datetime-local"
+                        <Textarea
+                          id="instant-meeting-description"
+                          placeholder="What's this meeting about?"
+                          rows={3}
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
-              </TabsContent>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isCreating}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isCreating}>
-                  {isCreating ? (<div className="flex gap-2 justify-center">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span> Creating</span>
-                  </div>) : activeTab === "instant" ? "Start Now" : "Schedule Meeting"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </Tabs>
 
-
-      </DialogContent>
-    </Dialog>
+                <TabsContent value="later" className="space-y-2">
+                  <FormField
+                    control={form.control}
+                    name="date"
+                    render={({ field }) => (
+                      <FormItem className="space-y-2">
+                        <FormLabel htmlFor="meeting-date" className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4" />
+                          Date *
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            id="meeting-date"
+                            type="datetime-local"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TabsContent>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isCreating}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isCreating}>
+                    {isCreating ? (<div className="flex gap-2 justify-center">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span> Creating</span>
+                    </div>) : activeTab === "instant" ? "Start Now" : "Schedule Meeting"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
+      <MeetingCreated open={meetingCreatedOpen} onOpenChange={setMeetingCreatedOpen} meetingId={meetingId} />
+    </>
   )
 }
 
@@ -176,13 +182,13 @@ interface JoinMeetingDialogProps {
   onOpenChange: (open: boolean) => void
 }
 
-export function JoinMeetingDialog({ open, onOpenChange}: JoinMeetingDialogProps) {
+export function JoinMeetingDialog({ open, onOpenChange }: JoinMeetingDialogProps) {
   const [meetingId, setMeetingId] = useState("")
   const [isJoining, setIsJoining] = useState(false)
   const router = useRouter()
   const handleJoin = async () => {
     if (!meetingId.trim()) return
-     
+
     setIsJoining(true)
     try {
       const res = await joinMeeting(meetingId)
@@ -191,7 +197,8 @@ export function JoinMeetingDialog({ open, onOpenChange}: JoinMeetingDialogProps)
       return router.push(`/meet/${res.meetingId}`)
     } catch (err) {
       console.error("Error joining meeting:", err)
-      // TODO: show error to user
+      toast.error("Failed to join meeting. Please try again.")
+      onOpenChange(false) 
     } finally {
       setIsJoining(false)
     }

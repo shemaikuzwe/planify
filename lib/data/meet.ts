@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import db from "../drizzle";
-import { meeting, team} from "../drizzle/schema";
-import { desc, eq } from "drizzle-orm";
+import { meeting, team, teamMembers} from "../drizzle/schema";
+import { desc, eq, or, exists, and } from "drizzle-orm";
 
 export async function getRecentMeetings() {
     const session = await auth();
@@ -27,7 +27,10 @@ export async function getUserTeams() {
         throw new Error("Unauthorized");
     }
     const teams = await db.query.team.findMany({
-        where: eq(team.createdBy, userId),
+        where: or(
+            eq(team.createdBy, userId),
+            exists(db.select().from(teamMembers).where(and(eq(teamMembers.userId, userId), eq(teamMembers.teamId, team.id))))
+        ),
         with: {
             teamMembers: {
                 with: {
