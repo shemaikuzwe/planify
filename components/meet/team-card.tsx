@@ -8,6 +8,8 @@ import { EditIcon, Play, TrashIcon } from "lucide-react"
 import Link from "next/link"
 import CopyLink from "./copy-link"
 import { useSession } from "next-auth/react"
+import { getInitials } from "@/lib/utils/utils"
+import { useCall } from "@/hooks/use-call"
 
 interface TeamCardProps {
     team: UserTeam,
@@ -19,18 +21,12 @@ export function TeamCard({
     onClick,
     className = "",
 }: TeamCardProps) {
-    const getInitials = (name: string) => {
-        return name
-            .split(" ")
-            .map((n) => n[0])
-            .join("")
-            .toUpperCase()
-            .slice(0, 2)
-    }
+
     const displayMembers = team.teamMembers?.slice(0, 4)
     const totalAdditional = Math.max(0, (team.teamMembers?.length || 0) - 4)
     const user = useSession()
     const isCreator = user.data?.user.id === team.createdBy
+    // const call=useCall(team.teamId)
     return (
         <Card
             className={`cursor-pointer hover:shadow-lg ${className}`}

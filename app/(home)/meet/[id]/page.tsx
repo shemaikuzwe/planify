@@ -12,6 +12,7 @@ import {
 } from "@stream-io/video-react-sdk";
 import { notFound, useParams, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { sendTeamNotification } from "@/lib/actions/push";
 export default function Meeting() {
   const searchParams = useSearchParams()
   const [isSetup, setIsSetUp] = useState(false);
@@ -35,6 +36,9 @@ export default function Meeting() {
       }
     })
     roomCall = newCall
+    sendTeamNotification(id).then(() => {
+      console.log("Notifications sent")
+    })
   }
 
   if (loading) return <MeetingSetupSkeleton />;

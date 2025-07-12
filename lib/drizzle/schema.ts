@@ -131,7 +131,7 @@ export const team = pgTable("team", {
   createdBy: uuid("created_by")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  teamId:varchar("team_id").$default(()=>nanoid(6)),
+  teamId: varchar("team_id").$default(() => nanoid(6)),
   ...timestamps,
 });
 
@@ -150,15 +150,26 @@ export const teamMembers = pgTable(
     pk: primaryKey({ columns: [table.teamId, table.userId] }),
   })
 );
-
+export const subscription = pgTable("subscription", {
+  id: uuid("id").primaryKey().defaultRandom().notNull(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  sub: json("sub").$type<PushSubscription>(),
+  ...timestamps,
+});
 // relations
-export const userRelations = relations(users, ({ many }) => ({
+export const userRelations = relations(users, ({ many, one }) => ({
   accounts: many(accounts),
   dailyTodos: many(dailyTodo),
   drawings: many(drawings),
   meetings: many(meeting),
   teamMembers: many(teamMembers),
   createdTeams: many(team),
+  subscription: one(subscription, {
+    fields: [users.id],
+    references: [subscription.userId],
+  }),
 }));
 
 export const accountRelations = relations(accounts, ({ one }) => ({
@@ -224,3 +235,9 @@ export const teamMembersRelations = relations(teamMembers, ({ one }) => ({
   }),
 }));
 
+export const subscriptionRelations = relations(subscription, ({ one }) => ({
+  user: one(users, {
+    fields: [subscription.userId],
+    references: [users.id],
+  }),
+}));

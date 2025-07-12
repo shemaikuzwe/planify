@@ -1,7 +1,10 @@
+import UserProfile from '@/components/profile/user-profile'
 import React from 'react'
 
 export default function page() {
   return (
-    <div>Settings</div>
+    <div className="w-full">
+      <UserProfile />
+    </div>
   )
 }
