@@ -8,9 +8,11 @@ import {
   pgEnum,
   json,
   varchar,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import { PushSubscription } from "web-push";
 
 // enums
 export const priority = ["HIGH", "MEDIUM", "LOW"] as const;
@@ -155,21 +157,23 @@ export const subscription = pgTable("subscription", {
   userId: uuid("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
+  endpoint: text("endpoint").notNull().unique(),
   sub: json("sub").$type<PushSubscription>(),
   ...timestamps,
-});
+},
+  (sub) => [
+    uniqueIndex("unique_endpoint").on(sub.endpoint),
+  ]
+);
 // relations
-export const userRelations = relations(users, ({ many, one }) => ({
+export const userRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
   dailyTodos: many(dailyTodo),
   drawings: many(drawings),
   meetings: many(meeting),
   teamMembers: many(teamMembers),
   createdTeams: many(team),
-  subscription: one(subscription, {
-    fields: [users.id],
-    references: [subscription.userId],
-  }),
+  subscription: many(subscription),
 }));
 
 export const accountRelations = relations(accounts, ({ one }) => ({

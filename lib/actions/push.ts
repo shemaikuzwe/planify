@@ -1,6 +1,6 @@
 'use server'
 
-import webpush from 'web-push'
+import webpush, { PushSubscription } from 'web-push'
 import db from '../drizzle'
 import { auth } from '@/auth'
 import { subscription as subscriptionTable, teamMembers as teamMembersTable, team as teamTable } from '../drizzle/schema'
@@ -18,17 +18,18 @@ export async function subscribeUser(sub: PushSubscription) {
   const userId = session?.user?.id
   if (!userId) throw new Error("User not found")
   await db.insert(subscriptionTable).values({
+    endpoint: sub.endpoint,
     userId: userId,
     sub: sub,
   })
   return { success: true }
 }
 
-export async function unsubscribeUser() {
+export async function unsubscribeUser(sub: PushSubscription) {
   const session = await auth()
   const userId = session?.user?.id
   if (!userId) throw new Error("User not found")
-  await db.delete(subscriptionTable).where(eq(subscriptionTable.userId, userId))
+  await db.delete(subscriptionTable).where(eq(subscriptionTable.endpoint, sub.endpoint))
   return { success: true }
 }
 
@@ -61,30 +62,31 @@ export async function sendTeamNotification(teamId: string) {
   const userId = session?.user?.id
   if (!userId) throw new Error("User not found")
   const team = await db.query.team.findFirst({
-      where: eq(teamTable.teamId, teamId),
-    })
-    if (!team) throw new Error("No team found")
+    where: eq(teamTable.teamId, teamId),
+  })
+  if (!team) throw new Error("No team found")
   const teamMembers = await db.query.teamMembers.findMany({
     where: eq(teamMembersTable.teamId, team.id),
   })
   if (!teamMembers) throw new Error("No team members found")
+  const filteredMembers = teamMembers.filter(member => member.userId != userId)
   const subscriptions = await db.query.subscription.findMany({
-    where: inArray(subscriptionTable.userId, teamMembers.map((member) => member.userId)),
+    where: inArray(subscriptionTable.userId, filteredMembers.map((member) => member.userId)),
   })
-  if (!subscriptions)  return
- 
+  if (!subscriptions) return
+
   const tittle = `${team.name} new meeting`
   const message = `New meeting started, join now`
-  console.log(subscriptions)
   for (const subscription of subscriptions) {
-    await webpush.sendNotification(subscription.sub as any, JSON.stringify({
+    if (!subscription.sub) continue
+    webpush.sendNotification(subscription.sub, JSON.stringify({
       title: tittle,
       body: message,
       icon: '/logo2.png',
       data: {
         type: "team",
         teamId: teamId,
-        link: `/meet/${teamId}?room=true`,
+        link: `${process.env.NEXT_PUBLIC_BASE_URL}/meet/${teamId}?room=true`,
       },
     }))
   }

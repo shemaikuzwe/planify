@@ -3,6 +3,7 @@ import RecordingCard from './recording.card'
 import { useGetCalls } from '@/hooks/use-get-calls'
 import { CallRecording } from '@stream-io/video-react-sdk'
 import { Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 export default function Recordings() {
     const [recordings, setRecordings] = useState<CallRecording[]>([])
@@ -24,7 +25,7 @@ export default function Recordings() {
             }
             catch (err) {
                 console.log(err);
-                // TODO: add toat 
+                toast.error("Error fetching recordings")
             }
         }
         fetchRecordings()

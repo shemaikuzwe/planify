@@ -3,10 +3,10 @@ self.addEventListener('push', function (event) {
       const data = event.data.json()
       const options = {
         body: data.body,
-        icon: data.icon || '/logo2`.png',
+        icon: data.icon || '/logo2.png',
         badge: '/logo.png',
         vibrate: [100, 50, 100],
-        data: {
+        data: data.data || {
           dateOfArrival: Date.now(),
           primaryKey: '2',
         },
@@ -15,8 +15,34 @@ self.addEventListener('push', function (event) {
     }
   })
    
+  self.addEventListener('install', function(event) {
+    // Activate this service worker immediately after installation
+    self.skipWaiting()
+  })
+  
+  self.addEventListener('activate', function(event) {
+    // Claim any clients immediately so that the service worker starts controlling them without requiring a reload
+    event.waitUntil(self.clients.claim())
+  })
+  
   self.addEventListener('notificationclick', function (event) {
     console.log('Notification click received.')
     event.notification.close()
-    event.waitUntil(clients.openWindow(`${process.env.NEXT_PUBLIC_APP_URL}/meet`))
+    
+    const relativeLink = event.notification.data?.link || '/meet'
+    // Convert relative link to absolute URL based on the current service worker scope
+    const urlToOpen = new URL(relativeLink, self.location.origin).href
+    
+    event.waitUntil(
+      clients.matchAll({type: 'window', includeUncontrolled: true}).then(function(clientList) {
+        // If a window tab matching the targeted URL already exists, focus that;
+        for (const client of clientList) {
+          if (client.url === urlToOpen && 'focus' in client) {
+            return client.focus()
+          }
+        }
+        // If no matching tab exists, open a new one to the correct URL
+        return clients.openWindow(urlToOpen)
+      })
+    )
   })
