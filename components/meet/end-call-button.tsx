@@ -15,7 +15,7 @@ export default function EndCallButton() {
     const handleClick=async()=>{
       try {
         await call.endCall();
-        await endMeeting(call.id);
+        endMeeting(call.id);
         router.push("/meet")
       } catch (error) {
         console.error(error);

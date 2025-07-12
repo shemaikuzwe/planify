@@ -11,46 +11,63 @@ import {
   useStreamVideoClient,
 } from "@stream-io/video-react-sdk";
 import { notFound, useParams, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { sendTeamNotification } from "@/lib/actions/push";
 export default function Meeting() {
   const searchParams = useSearchParams()
   const [isSetup, setIsSetUp] = useState(false);
   const client = useStreamVideoClient()
   const id = useParams().id as string | undefined;
+  const [isLoading, setIsLoading] = useState(true)
+  const [roomCall, setRoomCall] = useState<Call | undefined>()
+  
   if (!id) {
     return notFound()
   }
-  let roomCall: Call | undefined
+  
   const { loading, call } = useCall(id);
-  roomCall = call
+  // synchronize the call returned from useCall with local state
+  useEffect(() => {
+    if (call) setRoomCall(call)
+  }, [call])
+
+  // start a call if the `room` query param is present
   const room = searchParams.get("room")
-  if (room && !roomCall) {
-    startRoom(id)
-  }
+  useEffect(() => {
+    if (room && !roomCall) {
+      startRoom(id)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room, roomCall, id])
+
   async function startRoom(id: string) {
+    setIsLoading(true)
     const newCall = client?.call("default", id)
     await newCall?.getOrCreate({
       data: {
         starts_at: new Date().toISOString(),
       }
     })
-    roomCall = newCall
+    setRoomCall(newCall)
     sendTeamNotification(id).then(() => {
       console.log("Notifications sent")
     })
+    setIsLoading(false)
   }
 
-  if (loading) return <MeetingSetupSkeleton />;
   return (
-    <StreamCall call={roomCall}>
-      <StreamTheme>
-        {isSetup ? (
-          <MeetingRoom />
-        ) : (
-          <MeetingSetup setIsSetUp={setIsSetUp} call={call} />
-        )}
-      </StreamTheme>
-    </StreamCall>
+    (loading || isLoading) ? (
+      <MeetingSetupSkeleton />
+    ) : (
+      <StreamCall call={roomCall}>
+        <StreamTheme>
+          {isSetup ? (
+            <MeetingRoom />
+          ) : (
+            <MeetingSetup setIsSetUp={setIsSetUp} call={roomCall} />
+          )}
+        </StreamTheme>
+      </StreamCall>
+    )
   );
-} ``
+}

@@ -4,7 +4,12 @@ import {
   CallParticipantsList,
   CallStatsButton,
   PaginatedGridLayout,
+  ReactionsButton,
+  RecordCallButton,
+  ScreenShareButton,
   SpeakerLayout,
+  ToggleAudioPublishingButton,
+  ToggleVideoPreviewButton,
   useCallStateHooks,
 } from "@stream-io/video-react-sdk";
 import React, { useState } from "react";
@@ -35,7 +40,7 @@ export default function MeetingRoom() {
       </div>
     </div>;
   }
-  const CallLayout = () => {  
+  const CallLayout = () => {
     switch (layout) {
       case "Grid":
         return <PaginatedGridLayout />;
@@ -60,8 +65,7 @@ export default function MeetingRoom() {
       </div>
 
       <div className="fixed bottom-0 left-28 max-md:bottom-28 max-md:flex-wrap max-md:left-0 flex w-full items-center justify-center gap-4">
-        <CallControls onLeave={() => router.push(`/home`)} />
-
+        <CallControls onLeave={() => router.push(`/meet`)} />
         <DropdownMenu>
           <div className="flex items-center">
             <DropdownMenuTrigger className="cursor-pointer rounded-2xl bg-[#19232d] px-4 py-2 hover:bg-[#4c535b]  ">
@@ -81,7 +85,6 @@ export default function MeetingRoom() {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-        <CallStatsButton />
         <button onClick={() => setShowParticipants((prev) => !prev)}>
           <div className=" cursor-pointer rounded-2xl bg-[#19232d] px-4 py-2 hover:bg-[#4c535b]  ">
             <Users size={20} className="text-foreground" />

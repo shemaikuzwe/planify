@@ -62,7 +62,8 @@ async function endMeeting(meetingId: string) {
         where: eq(meeting.meetingId, meetingId),
     })
     if (!meet) {
-        throw new Error("Meeting not found")
+        // for room meetings
+        return ;
     }
     await db.update(meeting).set({
         status: "ENDED"
