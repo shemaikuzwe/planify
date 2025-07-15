@@ -11,7 +11,7 @@ export function useCall(id: string | string[] | undefined) {
     const loadCall = async () => {
       try {
         const { calls } = await client.queryCalls({
-          filter_conditions: { id, ongoing: true },
+          filter_conditions: { id },
         });
         if (calls.length > 0) {
           setCall(calls[0]);

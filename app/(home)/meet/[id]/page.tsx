@@ -20,26 +20,17 @@ export default function Meeting() {
   const id = useParams().id as string | undefined;
   const [isLoading, setIsLoading] = useState(true)
   const [roomCall, setRoomCall] = useState<Call | undefined>()
-  
+
   if (!id) {
     return notFound()
   }
-  
+
   const { loading, call } = useCall(id);
   // synchronize the call returned from useCall with local state
   useEffect(() => {
-    if (call) setRoomCall(call)
+    if (call) return setRoomCall(call)
+    startRoom(id)
   }, [call])
-
-  // start a call if the `room` query param is present
-  const room = searchParams.get("room")
-  useEffect(() => {
-    if (room && !roomCall) {
-      startRoom(id)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [room, roomCall, id])
-
   async function startRoom(id: string) {
     setIsLoading(true)
     const newCall = client?.call("default", id)
@@ -49,9 +40,6 @@ export default function Meeting() {
       }
     })
     setRoomCall(newCall)
-    sendTeamNotification(id).then(() => {
-      console.log("Notifications sent")
-    })
     setIsLoading(false)
   }
 

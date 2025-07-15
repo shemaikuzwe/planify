@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { format, formatDistance, isToday, isTomorrow, isYesterday, parseISO } from "date-fns"
+import { format, formatDistance, isToday, isTomorrow, isYesterday, parseISO, subDays } from "date-fns"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -36,7 +36,7 @@ export function urlBase64ToUint8Array(base64String: string) {
 
 export function formatShortDate(date: Date | string): string {
   const parsedDate = typeof date === 'string' ? parseISO(date) : date
- return formatDistance(parsedDate, new Date(), { addSuffix: true })
+  return formatDistance(subDays(parsedDate, 5), new Date(), { addSuffix: true })
 }
 
 export function capitalize(str: string) {
@@ -53,9 +53,9 @@ export function sleep(ms: number) {
 
 export const getInitials = (name: string) => {
   return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2)
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2)
 }

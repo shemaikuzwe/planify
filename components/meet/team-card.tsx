@@ -5,11 +5,14 @@ import { Card, CardContent } from "@/components/ui/card"
 import { UserTeam } from "@/lib/data/meet"
 import { Button } from "../ui/button"
 import { EditIcon, Play, TrashIcon } from "lucide-react"
-import Link from "next/link"
 import CopyLink from "./copy-link"
 import { useSession } from "next-auth/react"
 import { getInitials } from "@/lib/utils/utils"
-import { useCall } from "@/hooks/use-call"
+import { useStreamVideoClient } from "@stream-io/video-react-sdk"
+import { useRouter } from "next/navigation"
+import { sendTeamNotification } from "@/lib/actions/push"
+import { useCallById } from "@/hooks/use-callById"
+import { ButtonSkeleton } from "../ui/skelton/button"
 
 interface TeamCardProps {
     team: UserTeam,
@@ -26,7 +29,25 @@ export function TeamCard({
     const totalAdditional = Math.max(0, (team.teamMembers?.length || 0) - 4)
     const user = useSession()
     const isCreator = user.data?.user.id === team.createdBy
-    // const call=useCall(team.teamId)
+    const { call, loading } = useCallById(team.teamId ?? "")
+    const client = useStreamVideoClient()
+    const router = useRouter()
+    const handleStart = async () => {
+        if (start) {
+            const newCall = client?.call("default", team.teamId ?? "")
+            await newCall?.getOrCreate({
+                data: {
+                    starts_at: new Date().toISOString(),
+                }
+            })
+        }
+        sendTeamNotification(team.teamId ?? "").then(() => {
+            console.log("Notifications sent")
+        })
+        router.push(`/meet/${team.teamId}`)
+    }
+    const start = !call?.state
+
     return (
         <Card
             className={`cursor-pointer hover:shadow-lg ${className}`}
@@ -52,12 +73,10 @@ export function TeamCard({
                     <p className="text-sm text-muted-foreground">{team.slogan}</p>
                     <p className="text-sm text-muted-foreground">{team.creator.name}</p>
                     <div className="flex items-center gap-2">
-                        <Button size={"sm"} asChild>
-                            <Link href={`/meet/${team.teamId}?room=true`}>
-                                <Play className="h-4 w-4" />
-                                Start
-                            </Link>
-                        </Button>
+                        {loading ? <ButtonSkeleton className="w-20" /> : <Button size={"sm"} onClick={handleStart}>
+                            <Play className="h-4 w-4" />
+                            {start ? "Start" : "Join"}
+                        </Button>}
                         <CopyLink link={`/meet/${team.teamId}?room=true`} />
                     </div>
                 </div>
