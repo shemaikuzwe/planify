@@ -14,7 +14,6 @@ import type {
   NonDeletedExcalidrawElement,
   OrderedExcalidrawElement,
 } from "@excalidraw/excalidraw/element/types";
-import { loadFromBlob } from "@excalidraw/excalidraw/data/blob";
 
 import type {
   AppState,
@@ -69,6 +68,7 @@ const initialData = {
 export interface AppProps {
   apiElements?: OrderedExcalidrawElement[],
   drawingId?: string,
+  drawingName?: string,
   children: React.ReactNode;
   excalidrawLib: typeof TExcalidraw;
 }
@@ -78,6 +78,7 @@ export default function App({
   children,
   drawingId,
   excalidrawLib,
+  drawingName,
 }: AppProps) {
   const {
     exportToClipboard,
@@ -197,7 +198,6 @@ export default function App({
     const newElement = cloneElement(
       Excalidraw,
       {
-
         excalidrawAPI: (api: ExcalidrawImperativeAPI) => setExcalidrawAPI(api),
         initialData: elements ? { ...initialData, elements } : initialStatePromiseRef.current.promise,
         onChange: (
@@ -226,7 +226,7 @@ export default function App({
         zenModeEnabled,
         gridModeEnabled,
         theme,
-        name: "Custom name of drawing",
+        name: "excalidraw",
         UIOptions: {
           canvasActions: {
             toggleTheme: true,
@@ -235,7 +235,6 @@ export default function App({
 
           tools: { image: !disableImageTool },
         },
-
         renderTopRightUI,
         onLinkOpen,
         onPointerDown,
@@ -259,6 +258,9 @@ export default function App({
   const renderTopRightUI = (isMobile: boolean) => {
     return (
       <>
+        <div className="absolute top-1 left-12 z-[10000]">
+          <h1 className="text-xl">{drawingName?.slice(0, 30) ?? "Untitled"}</h1>
+        </div>
         {!isMobile && (
           <LiveCollaborationTrigger
             isCollaborating={isCollaborating}
@@ -271,7 +273,6 @@ export default function App({
       </>
     );
   };
-
 
   const onLinkOpen = useCallback(
     (

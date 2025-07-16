@@ -21,6 +21,7 @@ const ExcalidrawWrapper = ({ drawing }: { drawing?: Drawing }) => {
         excalidrawLib={excalidrawLib}
         apiElements={apiElements}
         drawingId={drawing?.id}
+        drawingName={drawing?.name}
       >
         <Excalidraw
         />

@@ -1,10 +1,15 @@
+"use client"
 import React from 'react'
 import { ThemeProvider } from './theme-provider'
 import { SessionProvider } from 'next-auth/react'
 import { SidebarProvider } from '../ui/sidebar'
 import { TooltipProvider } from '../ui/tooltip'
-
+import {
+    QueryClient,
+    QueryClientProvider,
+} from '@tanstack/react-query'
 export default function Providers({ children }: { children: React.ReactNode }) {
+    const queryClient = new QueryClient()
     return (
         <ThemeProvider
             attribute="class"
@@ -13,12 +18,15 @@ export default function Providers({ children }: { children: React.ReactNode }) {
             disableTransitionOnChange
         >
             <SidebarProvider>
-                <SessionProvider>
-                    <TooltipProvider delayDuration={0}>
-                        {children}
-                    </TooltipProvider>
+                <QueryClientProvider client={queryClient}>
+                    <SessionProvider>
+                        <TooltipProvider delayDuration={0}>
+                            {children}
+                        </TooltipProvider>
 
-                </SessionProvider>
+                    </SessionProvider>
+                </QueryClientProvider>
+
             </SidebarProvider>
 
         </ThemeProvider>

@@ -1,34 +1,27 @@
 import { Call, useStreamVideoClient } from "@stream-io/video-react-sdk";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 export function useCallById(id: string | string[] | undefined) {
-    const [call, setCall] = useState<Call>();
-    const [loading, setLoading] = useState(true);
     const client = useStreamVideoClient();
-    useEffect(() => {
-        if (!client) return;
 
-        const loadCall = async () => {
-            try {
-                const { calls } = await client.queryCalls({
-                    filter_conditions: { id, ongoing: true },
-                });
-                if (calls.length > 0) {
-                    setCall(calls[0]);
-                    setLoading(false);
-                } else {
-                    console.log("no call found for this id");
-                }
-            } catch (err) {
-                console.log(err);
-                setLoading(false)
+    const { data: call, isLoading: loading } = useQuery({
+        queryKey: ['call-by-id', id],
+        queryFn: async () => {
+            if (!client || !id) return null;
+            
+            const { calls } = await client.queryCalls({
+                filter_conditions: { id, ongoing: true },
+            });
+            
+            if (calls.length > 0) {
+                return calls[0];
             }
-            finally {
-                setLoading(false)
-            }
-        };
-        loadCall();
-    }, [client, id]);
+            
+            console.log("no call found for this id");
+            return null;
+        },
+        enabled: !!client && !!id,
+    });
 
     return { call, loading };
 }
