@@ -33,12 +33,12 @@ export async function unsubscribeUser(sub: PushSubscription) {
   return { success: true }
 }
 
-export async function sendNotification(message: string, title: string) {
+export async function sendNotification(message: string, title: string, sub: PushSubscription) {
   const session = await auth()
   const userId = session?.user?.id
   if (!userId) throw new Error("User not found")
   const subscription = await db.query.subscription.findFirst({
-    where: eq(subscriptionTable.userId, userId),
+    where: eq(subscriptionTable.endpoint, sub.endpoint),
   })
   if (!subscription) throw new Error("No subscription available")
   try {

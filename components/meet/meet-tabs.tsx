@@ -20,26 +20,28 @@ export default function MeetTabs({ recentMeetingsPromise, teamsPromise }: Props)
         router.push(`/meet?tab=${value}`)
     }
     return (
-        <Tabs defaultValue={tab} className='w-full space-y-2 space-x-2 p-4' onValueChange={handleTabChange}>
-            <TabsList className='grid grid-cols-4 w-full'>
-                <TabsTrigger value="teams">Teams</TabsTrigger>
-                <TabsTrigger value="meet">Meet</TabsTrigger>
+        <div className="w-full">
+            <Tabs defaultValue={tab} className="w-full" onValueChange={handleTabChange}>
+                <TabsList className="w-full flex overflow-x-auto md:grid md:grid-cols-4 lg:grid-flow-col">
+                    <TabsTrigger className="flex-shrink-0" value="teams">Teams</TabsTrigger>
+                    <TabsTrigger className="flex-shrink-0" value="meet">Meet</TabsTrigger>
+                    <TabsTrigger className="flex-shrink-0" value="recordings">Recordings</TabsTrigger>
+                    <TabsTrigger className="flex-shrink-0" value="recent-meetings">Recent Meetings</TabsTrigger>
+                </TabsList>
 
-                <TabsTrigger value="recordings">Recordings</TabsTrigger>
-                <TabsTrigger value="recent-meetings">Recent Meetings</TabsTrigger>
-            </TabsList>
-            <TabsContent value="meet">
-                <MeetPage recentMeetings={recentMeetings} />
-            </TabsContent>
-            <TabsContent value="teams">
-                <TeamsPage teamsPromise={teamsPromise} />
-            </TabsContent>
-            <TabsContent value="recordings">
-                <Recordings />
-            </TabsContent>
-            <TabsContent value="recent-meetings">
-                {/* <RecentMeetings /> */}
-            </TabsContent>
-        </Tabs>
+                <TabsContent value="meet" className="w-full">
+                    <MeetPage recentMeetings={recentMeetings} />
+                </TabsContent>
+                <TabsContent value="teams" className="w-full">
+                    <TeamsPage teamsPromise={teamsPromise} />
+                </TabsContent>
+                <TabsContent value="recordings" className="w-full">
+                    <Recordings />
+                </TabsContent>
+                <TabsContent value="recent-meetings" className="w-full">
+                    {/* <RecentMeetings /> */}
+                </TabsContent>
+            </Tabs>
+        </div>
     )
 }

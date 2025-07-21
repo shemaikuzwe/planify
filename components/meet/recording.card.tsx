@@ -51,7 +51,7 @@ export default function RecordingCard({
 
         {/* Meeting Title */}
         <div className="flex flex-col gap-1 flex-grow">
-          <h3 className="text-xl font-bold leading-tight">{recording.filename.split(".")[0]}</h3>
+          <h3 className="text-xl font-bold leading-tight">{recording.filename.split(".")[0].slice(0,30)}</h3>
           <p className="text-sm">{formatDate(recording.start_time)}</p>
         </div>
 

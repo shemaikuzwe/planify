@@ -17,7 +17,7 @@ export default function MeetPage({ recentMeetings }: { recentMeetings: Meeting[]
   return (
     <div className="min-h-screen flex">
       <div className="flex-1 flex flex-col">
-        <div className="flex-1 p-8">
+        <div className="flex-1 p-2 md:p-4">
         
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-8">

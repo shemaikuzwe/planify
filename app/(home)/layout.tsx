@@ -6,7 +6,7 @@ export default function layout({ children }: { children: React.ReactNode }) {
     return (
         <div className="flex h-screen gap-2 w-full">
             <Navbar />
-            <main className="flex h-screen w-full">
+            <main className="flex h-screen w-full p-2 md:p-4">
                 <SidebarTrigger className="h-5 w-5" />
                 {children}
             </main>
