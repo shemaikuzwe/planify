@@ -1,7 +1,7 @@
 import db from "../drizzle";
 import { categories, dailyTodo, drawings, tasks } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
-
+import { auth } from "@/auth";
 export async function GetUserTodos(userId: string) {
   // "use cache";
   // cacheTag("todos", userId);
@@ -18,7 +18,23 @@ export async function GetUserTodos(userId: string) {
   });
   return todos;
 }
-
+export async function getUserSubtasks() {
+  // "use cache";
+  // cacheTag("subtasks", userId);
+  const session = await auth()
+  const userId = session?.user?.id;
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+  const subtasks = await db.query.dailyTodo.findMany({
+    where: eq(dailyTodo.userId, userId),
+    with: {
+      categories: true,
+    },
+    orderBy: (dailyTodo, { desc, asc }) => [desc(dailyTodo.createdAt), asc(dailyTodo.createdAt)]
+  });
+  return subtasks[0].categories;
+}
 export type Todos = Awaited<ReturnType<typeof GetUserTodos>>;
 
 export async function GetUserDrawings(userId: string) {
