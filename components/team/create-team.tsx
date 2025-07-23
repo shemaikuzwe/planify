@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { EmailsInput } from "./emails-input"
+import { EmailsInput } from "../ui/emails-input"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -12,8 +12,8 @@ import { Form, FormControl,  FormField, FormItem, FormLabel, FormMessage } from 
 import { Users, Loader2 } from "lucide-react"
 import { DialogClose, DialogFooter } from "../ui/dialog"
 import { teamSchema } from "@/lib/types/schema"
-import { createTeam } from "@/lib/actions/meet"
 import { toast } from "sonner"
+import {createTeam} from "@/lib/actions/team";
 
 
 
@@ -39,8 +39,8 @@ export default function CreateTeam({ setIsCreatingTeam }: { setIsCreatingTeam: (
       form.reset()
       setIsCreatingTeam(false)
     } catch (error) {
-      console.error("Error creating team:", error)
-      toast.error("Failed to create team. Please try again.")
+      console.error("Error creating team.ts:", error)
+      toast.error("Failed to create team.ts. Please try again.")
     } finally {
       setIsSubmitting(false)
     }

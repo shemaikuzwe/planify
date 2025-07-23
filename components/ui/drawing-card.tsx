@@ -11,7 +11,8 @@ import { formatDate } from "@/lib/utils/utils"
 import DeleteDialog from "./delete-dialog"
 import { useState } from "react"
 import { Input } from "./input"
-import { editDrawingName as saveEditDrawingName } from "@/lib/actions"
+
+import {editDrawingName as saveEditDrawingName} from "@/lib/actions/drawing";
 interface DrawingCardProps {
     id: string
     name: string

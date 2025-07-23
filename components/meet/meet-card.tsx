@@ -6,7 +6,7 @@ import { Calendar, Play } from "lucide-react"
 import { Meeting } from "@prisma/client"
 import { formatDate } from "@/lib/utils/utils"
 import { useRouter } from "next/navigation"
-import CopyLink from "./copy-link"
+import CopyLink from "../ui/copy-link"
 
 interface MeetingCardProps {
   meeting: Meeting,

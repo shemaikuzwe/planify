@@ -1,5 +1,5 @@
 import EditTaskForm from '@/components/task/edit-task-form';
-import { getTaskById } from '@/lib/data';
+import { getTaskById } from '@/lib/data/task';
 import { notFound } from 'next/navigation';
 import React from 'react'
 

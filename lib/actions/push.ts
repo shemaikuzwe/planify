@@ -66,11 +66,11 @@ export async function sendTeamNotification(teamId: string) {
   const team = await db.team.findFirst({
     where: { teamId },
   })
-  if (!team) throw new Error("No team found")
+  if (!team) throw new Error("No team.ts found")
   const teamMembers = await db.user.findMany({
     where: { teamId: team.id },
   })
-  if (!teamMembers) throw new Error("No team members found")
+  if (!teamMembers) throw new Error("No team.ts members found")
   const filteredMembers = teamMembers.filter(member => member.id != userId)
   const subscriptions = await db.subscription.findMany({
     where: {

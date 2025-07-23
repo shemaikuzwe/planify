@@ -1,6 +1,6 @@
 import { Navbar } from "@/components/ui/navbar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { getUserSubtasks } from "@/lib/data";
+import { getUserSubtasks } from "@/lib/data/task";
 
 
 export default function layout({ children }: { children: React.ReactNode }) {

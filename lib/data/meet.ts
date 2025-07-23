@@ -1,5 +1,6 @@
-import { auth } from "@/auth";
-import { db } from "../prisma";
+import "server-only"
+import {auth} from "@/auth";
+import {db} from "../prisma";
 
 export async function getRecentMeetings() {
     const session = await auth();
@@ -17,24 +18,3 @@ export async function getRecentMeetings() {
     return meetings;
 }
 
-export async function getUserTeams() {
-    const session = await auth();
-    const userId = session?.user.id;
-    if (!userId) {
-        throw new Error("Unauthorized");
-    }
-    const teams = await db.team.findMany({
-        where: {
-            OR: [
-                { createdById: userId },
-                { members: { some: { id: userId } } },
-            ],
-        },
-        include: {
-            members: true,
-            createdBy: true,
-        }
-    });
-
-    return teams;
-}

@@ -10,7 +10,7 @@ import Link from "next/link"
 import MarkdownEditor from "../ui/mark-down-editor"
 import { TaskStatusIndicator } from "../ui/task-status"
 import { TaskStatus } from "@/lib/types"
-import { editName, saveTaskDescription, ToggleTaskStatus } from "@/lib/actions"
+import { editName, saveTaskDescription, toggleStatus } from "@/lib/actions/task"
 import DeleteDialog from "../ui/delete-dialog"
 import { Input } from "../ui/input"
 
@@ -25,7 +25,7 @@ export function TaskView({ taskPromise }: Props) {
   const [isEditing, setIsEditing] = useState(false)
   const [edit, setEdit] = useState<string | null>(task.description ?? null)
   const toggleTaskCompletion = async (taskId: string, status: TaskStatus) => {
-    await ToggleTaskStatus(taskId, status)
+    await toggleStatus(taskId, status)
   }
   const handleSaveDescription = async () => {
     if (!edit) return

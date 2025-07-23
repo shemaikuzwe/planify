@@ -1,7 +1,7 @@
 "use client"
 import { Home, Settings, ListTodo, CalendarCheck, Presentation, StickyNote, ChevronDown } from "lucide-react"
 import Link from "next/link"
-import User from "@/components/task/user"
+import User from "@/components/profile/user"
 import {
   Sidebar,
   SidebarContent,
