@@ -10,13 +10,13 @@ export default async function layout({ children }: { children: React.ReactNode }
     const session = await auth();
     const userId = session?.user?.id;
     if (!userId) throw new Error("User not found");
-    const todosPromise = getUserTasks(userId);
+    const taskPromise = getUserTasks(userId);
     return (
         <div className='flex flex-col w-full h-full'>
             <Header title="Daily To-do" icon={<CalendarCheck className="h-5 w-5 " />} />
             <div className='flex w-full h-full max-md:flex-col justify-between gap-2 mt-2 px-3'>
                 <Suspense fallback={<DailyTaskSkeleton />}>
-                    <Task todosPromise={todosPromise} />
+                    <Task taskPromise={taskPromise} />
                 </Suspense>
                 {children}
             </div>

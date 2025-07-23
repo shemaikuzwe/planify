@@ -85,7 +85,7 @@ export async function sendTeamNotification(teamId: string) {
   const message = `New meeting started, join now`
   for (const subscription of subscriptions) {
     if (!subscription.sub) continue
-    webpush.sendNotification(subscription.sub, JSON.stringify({
+    webpush.sendNotification(subscription.sub as any, JSON.stringify({
       title: tittle,
       body: message,
       icon: '/logo2.png',
