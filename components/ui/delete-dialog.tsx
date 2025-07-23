@@ -3,8 +3,9 @@ import React, { useState, useTransition } from 'react'
 import { AlertDialogCancel, AlertDialogContent, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog'
 import { Button } from '../ui/button'
 import { Trash2 } from 'lucide-react'
-import { deleteDrawing, deleteGroup, deleteTask } from '@/lib/actions'
+import { deleteGroup, deleteTask } from '@/lib/actions/task'
 import { useRouter } from 'next/navigation'
+import {deleteDrawing} from "@/lib/actions/drawing";
 interface Props {
     id: string;
     type: "group" | "task" | "drawing",

@@ -12,7 +12,7 @@ export function PushNotificationManager() {
   const [message, setMessage] = useState('')
   async function sendTestNotification() {
     if (subscription) {
-      await sendNotification(message, "Test Notification")
+      await sendNotification(message, "Test Notification", subscription)
       setMessage('')
     }
   }

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react'
-import { Button } from '../ui/button'
+import { Button } from './button'
 import { Copy } from 'lucide-react'
 
 interface Props {

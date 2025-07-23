@@ -1,10 +1,10 @@
 "use client"
 
 import { use, useState } from "react"
-import { Calendar1, Check, Clock, Loader, Pen, Plus} from "lucide-react"
-import type { Todos } from "@/lib/data"
+import { Calendar1, Check, Clock, Loader, Pen, Plus } from "lucide-react"
+import type { TaskCategory, Task } from "@prisma/client"
 import type { TaskStatus } from "@/lib/types"
-import { editGroupName, ToggleTaskStatus } from "@/lib/actions"
+import { editGroupName, toggleStatus } from "@/lib/actions/task"
 import { TaskStatusIndicator } from "../ui/task-status"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -15,18 +15,19 @@ import { formatShortDate } from "@/lib/utils/utils"
 import AddGroup from "./add-group"
 import { Input } from "../ui/input"
 
+type TaskCategoryWithTasks = TaskCategory & { tasks: Task[] }
 interface Props {
-  todosPromise:Promise<Todos>
+  taskPromise: Promise<TaskCategoryWithTasks[]>
 }
 
-export default function DailyTask({ todosPromise}: Props) {
- const todos=use(todosPromise)
+export default function Task({ taskPromise }: Props) {
+  const task = use(taskPromise)
   const router = useRouter()
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
   const [editCategoryName, setEditCategoryName] = useState("")
 
   const toggleTaskCompletion = async (taskId: string, status: TaskStatus) => {
-    await ToggleTaskStatus(taskId, status)
+    await toggleStatus(taskId, status)
   }
 
   const handleCategoryDoubleClick = (categoryId: string, name: string) => {
@@ -45,14 +46,14 @@ export default function DailyTask({ todosPromise}: Props) {
       <div className="overflow-x-auto">
         <div className="min-w-170 rounded-md border bg-background">
           <div className="grid grid-cols-12 border-b text-sm">
-            <div className="col-span-2 p-3 font-medium flex gap-1 items-center"><Loader className="h-4 w-4"/>Status</div>
-            <div className="col-span-4 p-3 font-medium flex gap-1 items-center"><Check className="h-4 w-4"/> Task</div>
-            <div className="col-span-2 p-3 font-medium flex gap-1 items-center"><Clock className="h-4 w-4"/>Time</div>
+            <div className="col-span-2 p-3 font-medium flex gap-1 items-center"><Loader className="h-4 w-4" />Status</div>
+            <div className="col-span-4 p-3 font-medium flex gap-1 items-center"><Check className="h-4 w-4" /> Task</div>
+            <div className="col-span-2 p-3 font-medium flex gap-1 items-center"><Clock className="h-4 w-4" />Time</div>
             <div className="col-span-2 p-3 font-medium flex gap-1 items-center"><Calendar1 className="h-4 w-4" />Due Date</div>
-            <div className="col-span-2 p-3 font-medium text-center flex gap-1 items-center"><Pen className="h-4 w-4"/>Actions</div>
+            <div className="col-span-2 p-3 font-medium text-center flex gap-1 items-center"><Pen className="h-4 w-4" />Actions</div>
           </div>
 
-          {todos?.[0]?.categories.map((category) => (
+          {task?.map((category) => (
             <div key={category.id} className="border-b last:border-0">
               <div className="grid grid-cols-12 items-center bg-muted/30 px-3 py-2">
                 <div className="col-span-6 flex items-center">
@@ -127,7 +128,7 @@ export default function DailyTask({ todosPromise}: Props) {
           ))}
 
           <div className="p-3 border-t">
-            <AddGroup dailyTodoId={todos[0]?.id}/>
+            <AddGroup />
           </div>
         </div>
       </div>

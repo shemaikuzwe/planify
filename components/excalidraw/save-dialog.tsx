@@ -3,9 +3,9 @@ import { AlertDialog, AlertDialogHeader, AlertDialogTrigger, AlertDialogContent,
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { OrderedExcalidrawElement } from '@excalidraw/excalidraw/element/types'
-import { saveDrawing, UpdateDrawing } from '@/lib/actions'
 import { useFormStatus } from 'react-dom'
 import { Label } from '../ui/label'
+import {saveDrawing, updateDrawing} from "@/lib/actions/drawing";
 
 interface Props {
     elements: OrderedExcalidrawElement[] | null,
@@ -14,7 +14,7 @@ interface Props {
 export default function SaveDialog({ elements,drawingId }: Props) {
 
     return drawingId  ? (
-      <form action={UpdateDrawing}>
+      <form action={updateDrawing}>
         <input type='hidden' name='elements' value={JSON.stringify(elements)} />
         <input type='hidden' name='drawingId' value={drawingId} />
         <SubmitButton/>

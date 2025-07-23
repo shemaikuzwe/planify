@@ -9,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from "../ui/radio-group"
 import { FormControl, FormField, Form, FormItem, FormLabel } from "../ui/form"
 import { Input } from "../ui/input"
 import { TimePicker } from "../ui/time-picker"
-import { addTodo } from "@/lib/actions"
+import { addTask } from "@/lib/actions/task"
 import { useTransition } from "react"
 import { useRouter } from "next/navigation"
 
@@ -34,7 +34,7 @@ export default function AddTaskForm({ categoryId }: Props) {
 
   const onSubmit = async (data: AddTaskValue) => {
     startTransition(async () => {
-      const id = await addTodo(data)
+      const id = await addTask(data)
       form.reset()
       router.push(`/task/${id}`)
     })

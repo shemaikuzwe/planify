@@ -1,13 +1,11 @@
 "use server"
 
-import { auth } from "@/auth";
-import db from "../drizzle";
-import { meeting, team, users, teamMembers } from "../drizzle/schema";
-import { MeetData, TeamData } from "../types/schema";
-import { StreamClient } from "@stream-io/node-sdk";
-import { cleanMeetingLink } from "../utils/meet";
-import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import {auth} from "@/auth";
+import {db} from "../prisma";
+import {MeetData} from "../types/schema";
+import {StreamClient} from "@stream-io/node-sdk";
+import {cleanMeetingLink} from "../utils/meet";
+import {revalidatePath} from "next/cache";
 
 async function createMeeting(data: MeetData, id: string) {
     const session = await auth();
@@ -18,14 +16,14 @@ async function createMeeting(data: MeetData, id: string) {
     if (!userId) {
         throw new Error("Unauthorized");
     }
-    const [meet] = await db.insert(meeting).values({
-        name: data.name,
-        description: data.description,
-        startTime: data.date ? new Date(data.date) : new Date(),
-        userId,
-        meetingId: id,
-    }).returning({
-        id: meeting.id,
+    const meet = await db.meeting.create({
+        data: {
+            name: data.name,
+            description: data.description,
+            startTime: data.date ? new Date(data.date) : new Date(),
+            userId,
+            meetingId: id,
+        }
     })
     if (!meet?.id) {
         throw new Error("Failed to create meeting");
@@ -41,8 +39,8 @@ async function joinMeeting(meetingLink: string) {
     if (!meetingId) {
         throw new Error("Invalid meeting link")
     }
-    const meet = await db.query.meeting.findFirst({
-        where: eq(meeting.meetingId, meetingId),
+    const meet = await db.meeting.findFirst({
+        where: { meetingId },
     })
     if (!meet) {
         throw new Error("Meeting not found")
@@ -58,16 +56,17 @@ async function endMeeting(meetingId: string) {
         throw new Error("Unauthorized");
     }
     const userId = session.user.id;
-    const meet = await db.query.meeting.findFirst({
-        where: eq(meeting.meetingId, meetingId),
+    const meet = await db.meeting.findFirst({
+        where: { meetingId },
     })
     if (!meet) {
         // for room meetings
-        return ;
+        return;
     }
-    await db.update(meeting).set({
-        status: "ENDED"
-    }).where(eq(meeting.id, meet.id))
+    await db.meeting.update({
+        where: { id: meet.id },
+        data: { status: "ENDED" },
+    })
 }
 async function generateToken() {
     const session = await auth();
@@ -95,57 +94,9 @@ async function generateToken() {
     return token;
 }
 
-async function createTeam(data: TeamData) {
-    const session = await auth();
-    if (!session) {
-        throw new Error("Unauthorized");
-    }
-    const userId = session.user.id;
-    if (!userId) {
-        throw new Error("Unauthorized");
-    }
-    const memberIds: string[] = [];
-    for (const email of data.members) {
-        const user = await db.query.users.findFirst({
-            where: eq(users.email, email),
-            columns: { id: true },
-        });
-        // TODO: send invitation emails to the user
-        if (user) {
-            memberIds.push(user.id);
-        }
-    }
-
-    if (!memberIds.includes(userId)) {
-        memberIds.push(userId);
-    }
-    const [newTeam] = await db
-        .insert(team)
-        .values({
-            name: data.name,
-            slogan: data.slogan,
-            createdBy: userId,
-        })
-        .returning({ id: team.id });
-
-    if (!newTeam?.id) {
-        throw new Error("Failed to create team");
-    }
-    if (memberIds.length > 0) {
-        await db.insert(teamMembers).values(
-            memberIds.map((memberId) => ({
-                teamId: newTeam.id,
-                userId: memberId,
-            }))
-        );
-    }
-    revalidatePath("/meet")
-}
-
 export {
     createMeeting,
     joinMeeting,
     endMeeting,
-    generateToken,
-    createTeam
+    generateToken
 }

@@ -1,7 +1,7 @@
 "use client"
-import { Home, Settings, LayoutDashboard, List, ListTodo, CalendarCheck, Presentation } from "lucide-react"
+import { Home, Settings, ListTodo, CalendarCheck, Presentation, StickyNote, ChevronDown } from "lucide-react"
 import Link from "next/link"
-import User from "@/components/task/user"
+import User from "@/components/profile/user"
 import {
   Sidebar,
   SidebarContent,
@@ -14,20 +14,28 @@ import {
   SidebarMenuItem,
   SidebarFooter,
   SidebarRail,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+  SidebarMenuSkeleton,
 } from "@/components/ui/sidebar"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import Logo from "./logo"
-
-export function Navbar() {
-  const pathName=usePathname()
-
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "./collapsible"
+import { Category } from "@/lib/drizzle"
+import { Suspense, use } from "react"
+interface Props {
+  taskPromise: Promise<Category[]>
+}
+export function Navbar({ taskPromise }: Props) {
+  const pathName = usePathname()
   return (
     <Sidebar className="border-r" collapsible="icon">
       <SidebarHeader className="border-b">
         <SidebarMenu>
           <div className="flex items-center gap-2 py-2">
-             <Logo className="bg-black dark:bg-white" textClassName="text-black dark:text-white"/>
+            <Logo className="bg-black dark:bg-white" textClassName="text-black dark:text-white" />
           </div>
         </SidebarMenu>
       </SidebarHeader>
@@ -52,13 +60,21 @@ export function Navbar() {
           <SidebarGroupLabel className="text-xs font-medium text-neutral-500">Private</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={"Daily Todo"} isActive={pathName==="/"}>
-                  <Link href="/" className="flex gap-2 items-center w-full">
-                    <CalendarCheck className="h-4 w-4" />
+              <SidebarMenuItem className="ml-2">
+                <Collapsible defaultOpen className="group/collapsible">
+                  <CollapsibleTrigger className="flex items-center justify-center gap-2">
+                    <ListTodo className="h-4 w-4" />
                     <span>Tasks</span>
-                  </Link>
-                </SidebarMenuButton>
+                    <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <Suspense fallback={<NavBarSkelton />}>
+                        <NavTask taskPromise={taskPromise} />
+                      </Suspense>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip={"Excalidraw"} isActive={pathName.includes("/excalidraw")}>
@@ -68,14 +84,6 @@ export function Navbar() {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              {/* <SidebarMenuItem>
-                <SidebarMenuButton asChild  tooltip="Weekly To-do List" isActive={pathName.includes("/weeklytodo")}>
-                  <Link href="/weeklytodo" className="flex items-center gap-2 ">
-                    <List className="h-4 w-4" />
-                    <span>Weekly Todo</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem> */}
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Project Planner" isActive={pathName.includes("/project-planner")}>
                   <Link href="/project-planner" className="flex items-center gap-2 ">
@@ -132,4 +140,28 @@ export function Navbar() {
       <SidebarRail />
     </Sidebar>
   )
+}
+function NavBarSkelton() {
+  return (
+    <SidebarMenu>
+      {Array.from({ length: 4 }).map((_, index) => (
+        <SidebarMenuItem key={index}>
+          <SidebarMenuSkeleton showIcon />
+        </SidebarMenuItem>
+      ))}
+    </SidebarMenu>
+  )
+}
+function NavTask({ taskPromise }: { taskPromise: Promise<Category[]> }) {
+  const tasks = use(taskPromise)
+  return tasks.map((task) => (
+    <SidebarMenuSubItem key={task.id}>
+      <SidebarMenuSubButton asChild>
+        <Link href={`/`} className="flex items-center gap-2 ">
+          <StickyNote className="h-4 w-4" />
+          <span>{task.name}</span>
+        </Link>
+      </SidebarMenuSubButton>
+    </SidebarMenuSubItem>
+  ))
 }

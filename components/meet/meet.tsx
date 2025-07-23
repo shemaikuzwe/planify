@@ -1,7 +1,8 @@
 import { Presentation } from "lucide-react";
 import MeetTabs from "./meet-tabs";
 import Header from "../ui/header";
-import { getRecentMeetings, getUserTeams } from "@/lib/data/meet";
+import { getRecentMeetings } from "@/lib/data/meet";
+import {getUserTeams} from "@/lib/data/team";
 
 export default async function Meet() {
    const recentMeetings = getRecentMeetings();
