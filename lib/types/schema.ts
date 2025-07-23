@@ -14,7 +14,7 @@ export const AddCategorySchema = z.object({
     .string({ required_error: "Category name is required" })
     .min(1)
     .max(50),
-  dailyTodoId: z.string().uuid(),
+  userId: z.string().uuid(),
 });
 
 export const addDailyTodoSchema = z.object({
@@ -43,7 +43,7 @@ export const updateDrawingSchema = z.object({
 
 export const addGroupSchema = z.object({
   name: z.string().min(2),
-  dailyTodoId: z.string().uuid(),
+  userId: z.string().uuid(),
 });
 
 export const meetSchema = z.object({
@@ -61,3 +61,4 @@ export const teamSchema = z.object({
 });
 
 export type TeamData = z.infer<typeof teamSchema>;
+

@@ -2,7 +2,6 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
-import { UserTeam } from "@/lib/data/meet"
 import { Button } from "../ui/button"
 import { EditIcon, Play, TrashIcon } from "lucide-react"
 import CopyLink from "./copy-link"
@@ -13,6 +12,7 @@ import { useRouter } from "next/navigation"
 import { sendTeamNotification } from "@/lib/actions/push"
 import { useCallById } from "@/hooks/use-callById"
 import { ButtonSkeleton } from "../ui/skelton/button"
+import { UserTeam } from "@/lib/types"
 
 interface TeamCardProps {
     team: UserTeam,
@@ -25,10 +25,10 @@ export function TeamCard({
     className = "",
 }: TeamCardProps) {
 
-    const displayMembers = team.teamMembers?.slice(0, 4)
-    const totalAdditional = Math.max(0, (team.teamMembers?.length || 0) - 4)
+    const displayMembers = team.members?.slice(0, 4)
+    const totalAdditional = Math.max(0, (team.members?.length || 0) - 4)
     const user = useSession()
-    const isCreator = user.data?.user.id === team.createdBy
+    const isCreator = user.data?.user.id === team.createdBy.id
     const { call, loading } = useCallById(team.teamId ?? "")
     const client = useStreamVideoClient()
     const router = useRouter()
@@ -71,7 +71,7 @@ export function TeamCard({
                 </div>
                 <div className="flex justify-center gap-2 flex-col">
                     <p className="text-sm text-muted-foreground">{team.slogan}</p>
-                    <p className="text-sm text-muted-foreground">{team.creator.name}</p>
+                    <p className="text-sm text-muted-foreground">{team.createdBy.name}</p>
                     <div className="flex items-center gap-2">
                         {loading ? <ButtonSkeleton className="w-20" /> : <Button size={"sm"} onClick={handleStart}>
                             <Play className="h-4 w-4" />
@@ -91,9 +91,9 @@ export function TeamCard({
                                     className="w-8 h-8 border-2 ring-1"
                                     style={{ zIndex: displayMembers.length - index }}
                                 >
-                                    <AvatarImage src={member.user.image || "/placeholder.svg"} alt={member.user.name || ""} />
+                                    <AvatarImage src={member.image || "/placeholder.svg"} alt={member.name || ""} />
                                     <AvatarFallback className="text-xs font-medium">
-                                        {getInitials(member.user.name || "")}
+                                        {getInitials(member.name || "")}
                                     </AvatarFallback>
                                 </Avatar>
                             ))}
@@ -106,7 +106,7 @@ export function TeamCard({
                         )}
                     </div>
                     <div className="text-xs ">
-                        {team.teamMembers.length} member{team.teamMembers.length !== 1 ? "s" : ""}
+                        {team.members.length} member{team.members.length !== 1 ? "s" : ""}
                     </div>
                 </div>
             </CardContent>

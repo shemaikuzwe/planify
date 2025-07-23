@@ -2,10 +2,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from '../ui/button'
 import CreateTeam from './create-team'
 import { PlusIcon } from 'lucide-react'
-import { UserTeam } from '@/lib/data/meet'
 import { TeamCard } from './team-card'
 import { use } from 'react'
 import { useState } from 'react'
+import { UserTeam } from '@/lib/types'
 
 interface Props {
     teamsPromise: Promise<UserTeam[]>

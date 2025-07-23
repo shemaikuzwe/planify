@@ -1,7 +1,5 @@
 import { auth } from "@/auth";
-import db from "../drizzle";
-import { meeting, team, teamMembers} from "../drizzle/schema";
-import { desc, eq, or, exists, and } from "drizzle-orm";
+import { db } from "../prisma";
 
 export async function getRecentMeetings() {
     const session = await auth();
@@ -12,10 +10,9 @@ export async function getRecentMeetings() {
     if (!userId) {
         throw new Error("Unauthorized");
     }
-    const meetings = await db.query.meeting.findMany({
-        where: eq(meeting.userId, userId),
-        orderBy: desc(meeting.startTime),
-        limit: 10,
+    const meetings = await db.meeting.findMany({
+        where: { userId },
+        orderBy: { startTime: "desc" },
     });
     return meetings;
 }
@@ -26,36 +23,18 @@ export async function getUserTeams() {
     if (!userId) {
         throw new Error("Unauthorized");
     }
-    const teams = await db.query.team.findMany({
-        where: or(
-            eq(team.createdBy, userId),
-            exists(db.select().from(teamMembers).where(and(eq(teamMembers.userId, userId), eq(teamMembers.teamId, team.id))))
-        ),
-        with: {
-            teamMembers: {
-                with: {
-                    user: {
-                        columns: {
-                            id: true,
-                            name: true,
-                            email: true,
-                            image: true,
-                        }
-                    }
-                }
-            },
-            creator: {
-                columns: {
-                    id: true,
-                    name: true,
-                    email: true,
-                    image: true,
-                }
-            }
+    const teams = await db.team.findMany({
+        where: {
+            OR: [
+                { createdById: userId },
+                { members: { some: { id: userId } } },
+            ],
+        },
+        include: {
+            members: true,
+            createdBy: true,
         }
     });
 
     return teams;
 }
-
-export type UserTeam = Awaited<ReturnType<typeof getUserTeams>>[number];

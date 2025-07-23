@@ -2,11 +2,11 @@
 import React, { use } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 import MeetPage from './meet-page'
-import { Meeting } from '@/lib/drizzle'
 import Recordings from './recordings'
 import TeamsPage from './teams-page'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { UserTeam } from '@/lib/data/meet'
+import { UserTeam } from '@/lib/types'
+import { Meeting } from '@prisma/client'
 interface Props {
     teamsPromise: Promise<UserTeam[]>
     recentMeetingsPromise: Promise<Meeting[]>
@@ -39,7 +39,7 @@ export default function MeetTabs({ recentMeetingsPromise, teamsPromise }: Props)
                     <Recordings />
                 </TabsContent>
                 <TabsContent value="recent-meetings" className="w-full">
-                    {/* <RecentMeetings /> */}
+                    {/* <RecentMeetings recentMeetings={recentMeetings} /> */}
                 </TabsContent>
             </Tabs>
         </div>
