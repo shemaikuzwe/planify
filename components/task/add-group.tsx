@@ -1,5 +1,5 @@
 import { AlertDialog } from '@radix-ui/react-alert-dialog'
-import React, { useState, useTransition } from 'react'
+import React, { useEffect, useState, useTransition } from 'react'
 import { AlertDialogCancel, AlertDialogContent, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog'
 import { Button } from '../ui/button'
 import { Plus } from 'lucide-react'
@@ -10,18 +10,18 @@ import { Form, FormField, FormControl, FormItem, FormLabel } from '../ui/form'
 import { Input } from '../ui/input'
 import { addGroup } from '@/lib/actions'
 import EmojiPicker from '../ui/emoji-picker'
+import { useSession } from 'next-auth/react'
 
-export default function AddGroup({ dailyTodoId }: { dailyTodoId: string }) {
+export default function AddGroup() {
     const [isOpen, setIsOpen] = useState(false)
     const [isPending, startTransition] = useTransition()
+    const { data: session } = useSession()
+    const userId = session?.user.id;
     const form = useForm({
         resolver: zodResolver(addGroupSchema),
-        defaultValues: {
-            dailyTodoId: dailyTodoId
-        }
-
+        defaultValues: { userId: userId }
     })
-    const onSubmit = async (data: { name: string, dailyTodoId: string }) => {
+    const onSubmit = async (data: { name: string, userId: string }) => {
         startTransition(async () => {
             await addGroup(data)
             form.reset()
@@ -32,7 +32,6 @@ export default function AddGroup({ dailyTodoId }: { dailyTodoId: string }) {
         const currentText = form.getValues("name") || ""
         form.setValue("name", currentText + newEmoji)
     }
-
     return (
         <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
             <AlertDialogTrigger asChild>

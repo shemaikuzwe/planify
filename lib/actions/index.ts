@@ -24,7 +24,6 @@ export async function addTodo(data: AddTaskValue) {
   if (!categoryId) return;
   const task = await db.task.create({ data: { time, priority, categoryId, dueDate: dueDate, text } });
 
-  // revalidateTag("todos");
   revalidatePath("/")
   return task.id
 }
@@ -66,7 +65,6 @@ export async function editName(
     where: { id: validate.data.taskId },
     data: { text: validate.data.text },
   });
-  //revalidateTag("todos");
   revalidatePath("/")
 }
 
@@ -87,7 +85,6 @@ export async function editTodo(data: AddTaskValue) {
       categoryId,
     }
   })
-  //revalidateTag("todos");
   revalidatePath("/")
 }
 
@@ -100,18 +97,16 @@ export async function ToggleTaskStatus(taskId: string, status: TaskStatus) {
     where: { id: taskId },
     data: { status },
   });
-  //revalidateTag("todos");
   revalidatePath("/")
 }
 
 export async function DeleteTodo(taskId: string) {
   await db.task.delete({ where: { id: taskId } });
-  //revalidateTag("todos");
   revalidatePath("/")
 }
 export async function deleteTask(taskId: string) {
   await db.task.delete({ where: { id: taskId } });
-  //revalidateTag("todos");
+
   revalidatePath("/")
 }
 
@@ -134,7 +129,6 @@ export async function saveDrawing(formData: FormData): Promise<void> {
       elements,
     }
   })
-  //revalidateTag("drawings");
   revalidatePath("/")
   redirect(`/excalidraw/${drawing.id}`)
 }
@@ -157,7 +151,6 @@ export async function UpdateDrawing(formData: FormData): Promise<void> {
       userId,
     }
   })
-  //revalidateTag("drawings");
   revalidatePath("/")
 }
 
@@ -167,7 +160,6 @@ export async function saveTaskDescription(taskId: string, description: string) {
     where: { id: taskId },
     data: { description },
   })
-  //revalidateTag("todos");
   revalidatePath("/")
 }
 
@@ -179,7 +171,6 @@ export async function addGroup(data: { name: string, userId: string }) {
     return validate.error.flatten().fieldErrors;
   }
   await db.taskCategory.create({ data: validate.data });
-  //revalidateTag("todos");
   revalidatePath("/")
 }
 
