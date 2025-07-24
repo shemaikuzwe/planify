@@ -5,13 +5,14 @@ import { toast } from "sonner"
 
 export function useSubscriptions() {
   const [isSupported, setIsSupported] = useState(false)
+  const [loading,setIsLoading] = useState(true)
   const [subscription, setSubscription] = useState<PushSubscription | null>(
     null
   )
   useEffect(() => {
     if ('serviceWorker' in navigator && 'PushManager' in window) {
       setIsSupported(true)
-      registerServiceWorker()
+      registerServiceWorker().then(() => setIsLoading(false))
     }
   }, [])
 
@@ -51,6 +52,7 @@ export function useSubscriptions() {
   }, [subscription])
   return {
     isSupported,
+    loading,
     subscription,
     subscribeToPush,
     unsubscribeFromPush,

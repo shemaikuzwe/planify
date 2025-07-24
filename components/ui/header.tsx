@@ -10,10 +10,10 @@ interface Props {
     description?: string;
 }
 export default function Header({ title, icon, description }: Props) {
-    const { subscription, isSupported } = useSubscriptions()
+    const { subscription, isSupported,loading } = useSubscriptions()
     return (
         <div className='flex flex-col gap-2 mt-4 mx-2 '>
-            {isSupported && !subscription && <NotificationBanner />}
+            {isSupported && !subscription && !loading && <NotificationBanner />}
             <header className="flex items-center justify-between p-2 border-b">
                 <div className="flex gap-2 justify-between items-center">
                     {icon}
