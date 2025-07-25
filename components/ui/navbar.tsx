@@ -23,10 +23,10 @@ import Image from "next/image"
 import { usePathname } from "next/navigation"
 import Logo from "./logo"
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "./collapsible"
-import { Category } from "@/lib/drizzle"
 import { Suspense, use } from "react"
+import { TaskCategory } from "@prisma/client"
 interface Props {
-  taskPromise: Promise<Category[]>
+  taskPromise: Promise<TaskCategory[]>
 }
 export function Navbar({ taskPromise }: Props) {
   const pathName = usePathname()
@@ -78,9 +78,9 @@ export function Navbar({ taskPromise }: Props) {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip={"Excalidraw"} isActive={pathName.includes("/excalidraw")}>
-                  <Link href={"/excalidraw"} className="flex gap-2 items-center w-full">
+                  <Link href={"/whiteboard"} className="flex gap-2 items-center w-full">
                     <Image src="/excalidraw.png" alt="Excalidraw" width={16} height={16} />
-                    <span>Excalidraw</span>
+                    <span>White Board</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
