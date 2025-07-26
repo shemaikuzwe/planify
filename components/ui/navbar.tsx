@@ -1,5 +1,5 @@
 "use client"
-import { Home, Settings, ListTodo, CalendarCheck, Presentation, StickyNote, ChevronDown } from "lucide-react"
+import { Home, Settings, ListTodo,Presentation, StickyNote, ChevronDown } from "lucide-react"
 import Link from "next/link"
 import User from "@/components/profile/user"
 import {
@@ -152,12 +152,12 @@ function NavBarSkelton() {
     </SidebarMenu>
   )
 }
-function NavTask({ taskPromise }: { taskPromise: Promise<Category[]> }) {
+function NavTask({ taskPromise }: { taskPromise: Promise<TaskCategory[]> }) {
   const tasks = use(taskPromise)
   return tasks.map((task) => (
     <SidebarMenuSubItem key={task.id}>
       <SidebarMenuSubButton asChild>
-        <Link href={`/`} className="flex items-center gap-2 ">
+        <Link href={`/${task.id}`} className="flex items-center gap-2 ">
           <StickyNote className="h-4 w-4" />
           <span>{task.name}</span>
         </Link>
