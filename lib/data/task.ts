@@ -39,8 +39,12 @@ export async function getCategoryTasks(categoryId: string) {
       categoryId
     },
     include: {
-      tasks: true,
-    }
+      tasks: {
+        orderBy: {
+          taskIndex: "asc"
+        }
+      }
+    },
   })
   return tasks
 }

@@ -1,148 +1,151 @@
 "use client"
 
 import { use, useState } from "react"
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
-import { Calendar, Plus } from "lucide-react"
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd"
+import { Calendar } from "lucide-react"
 import { TaskDetailsSheet } from "./task-details-sheet"
 import { TaskAddForm } from "./task-add-form"
 import { GroupOptionsMenu } from "./group-options-menu"
 import { cn, formatDate } from "@/lib/utils/utils"
-import { Prisma } from "@prisma/client"
+import { Prisma, Task } from "@prisma/client"
 import { TaskStatusTask } from "@/lib/types"
 import AddGroup from "./add-group"
+import { getColorVariants } from "@/lib/utils"
+import { changeTaskStatus, updateTaskIndex } from "@/lib/actions/task"
+import { toast } from "sonner"
 
-// Types
-type TaskStatus = "TODO" | "IN_PROGRESS" | "DONE" | string
-
-interface Task {
-  id: string
-  text: string
-  status: TaskStatus
-  date?: string
-  tags?: string[]
-}
-
-interface Group {
-  id: string
-  title: string
-  tasks: Task[]
-  color?: string
-}
 interface Props {
   statusPromise: Promise<TaskStatusTask[]>
 }
 
 export default function KanbanBoard({ statusPromise }: Props) {
-  const status = use(statusPromise)
-  const [newGroupTitle, setNewGroupTitle] = useState("")
-  const [isAddingGroup, setIsAddingGroup] = useState(false)
-  // Removed: addingNewTaskGroupId and newTaskText states
-
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [isSheetOpen, setIsSheetOpen] = useState(false)
+  const [status, setStatus] = useState<TaskStatusTask[]>(() => {
+    return use(statusPromise)
+  })
+
+  const reorderTasks = (tasks: Task[], startIndex: number, endIndex: number): Task[] => {
+    const result = Array.from(tasks)
+    const [removed] = result.splice(startIndex, 1)
+    result.splice(endIndex, 0, removed)
+
+    // Update positions for all affected tasks
+    return result.map((task, index) => ({
+      ...task,
+      taskIndex: index
+    }))
+  }
+
+  const moveBetweenLists = (
+    sourceTasks: Task[],
+    destTasks: Task[],
+    sourceIndex: number,
+    destIndex: number,
+    destListId: string
+  ): { sourceTasks: Task[], destTasks: Task[] } => {
+    const sourceClone = Array.from(sourceTasks)
+    const destClone = Array.from(destTasks)
+    const [removed] = sourceClone.splice(sourceIndex, 1)
+
+    // Update the moved task's listId
+    removed.statusId = destListId
+    destClone.splice(destIndex, 0, removed)
+
+    return {
+      sourceTasks: sourceClone.map((task, index) => ({
+        ...task,
+        taskIndex: index
+      })),
+      destTasks: destClone.map((task, index) => ({
+        ...task,
+        taskIndex: index
+      }))
+    }
+  }
+
 
   // Handle drag end
-  const onDragEnd = (result: any) => {
+  const onDragEnd = async (result: DropResult) => {
     const { destination, source, draggableId } = result
 
-    // If there's no destination or the item was dropped back in its original position
-    // if (!destination || (destination.droppableId === source.droppableId && destination.index === source.index)) {
-    //   return
-    // }
+    // Do nothing if dropped outside or in same position
+    if (!destination ||
+      (destination.droppableId === source.droppableId &&
+        destination.index === source.index)) {
+      return
+    }
 
-    // // Find the source and destination groups
-    // // const sourceGroup = groups.find((group) => group.id === source.droppableId)
-    // // const destGroup = groups.find((group) => group.id === destination.droppableId)
+    const sourceListId = source.droppableId
+    const destListId = destination.droppableId
+    const sourceIndex = source.index
+    const destIndex = destination.index
 
-    // if (!sourceGroup || !destGroup) return
+    // Find source and destination lists
+    const sourceList = status.find(list => list.id === sourceListId)
+    const destList = status.find(list => list.id === destListId)
 
-    // // Create a new array of groups
-    // const newGroups:string[] = []
+    if (!sourceList || !destList) return
 
-    // // Find the task being moved
-    // const task = sourceGroup.tasks[source.index]
+    // Create new status array with updated positions
+    const newStatus = [...status]
+    const sourceListIndex = newStatus.findIndex(list => list.id === sourceListId)
+    const destListIndex = newStatus.findIndex(list => list.id === destListId)
 
-    // // Update the task status to match the destination group
-    // const updatedTask = {
-    //   ...task,
-    //   status: destGroup.title.toUpperCase().replace(" ", "_"),
-    // }
+    try {
+      if (sourceListId === destListId) {
+        // Moving within the same list
+        const reorderedTasks = reorderTasks(sourceList.tasks, sourceIndex, destIndex)
+        newStatus[sourceListIndex] = {
+          ...sourceList,
+          tasks: reorderedTasks
+        }
 
-    // // Remove the task from the source group
-    // const sourceGroupIndex = newGroups.findIndex((g) => g.id === sourceGroup.id)
-    // newGroups[sourceGroupIndex] = {
-    //   ...sourceGroup,
-    //   tasks: sourceGroup.tasks.filter((_, index) => index !== source.index),
-    // }
+        setStatus(newStatus)
 
-    // // Add the task to the destination group
-    // const destGroupIndex = newGroups.findIndex((g) => g.id === destGroup.id)
-    // const newTasks = [...destGroup.tasks]
-    // newTasks.splice(destination.index, 0, updatedTask)
-    // newGroups[destGroupIndex] = {
-    //   ...destGroup,
-    //   tasks: newTasks,
-    // }
+        updateTaskIndex(reorderedTasks.map(task => ({
+          id: task.id,
+          taskIndex: task.taskIndex
+        })))
 
+      } else {
+        // Moving between different lists
+        const { sourceTasks, destTasks } = moveBetweenLists(
+          sourceList.tasks,
+          destList.tasks,
+          sourceIndex,
+          destIndex,
+          destListId
+        )
 
-  }
+        newStatus[sourceListIndex] = {
+          ...sourceList,
+          tasks: sourceTasks
+        }
 
-  // Add a new task with details to a group
-  const addTaskWithDetails = (groupId: string, taskData: { text: string; date?: string; tags?: string[] }) => {
-
-  }
-
-  // Removed: handleSaveNewTask function
-
-  // Add a new group
-  const addGroup = () => {
-
-  }
-
-
-  // Delete group
-  const deleteGroup = (groupId: string) => {
-
-  }
-  const editGroup = (groupId: string) => {
-
-  }
-
-  // Update task details
-  const updateTaskDetails = (updatedTask: Task) => {
-    // const newGroups = [...groups]
-
-    // for (let i = 0; i < newGroups.length; i++) {
-    //   const taskIndex = newGroups[i].tasks.findIndex((t) => t.id === updatedTask.id)
-
-    //   if (taskIndex !== -1) {
-    //     // If the status has changed, move the task to the appropriate group
-    //     if (newGroups[i].tasks[taskIndex].status !== updatedTask.status) {
-    //       // Remove from current group
-    //       const taskToMove = { ...updatedTask }
-    //       newGroups[i].tasks.splice(taskIndex, 1)
-
-    //       // Add to new group
-    //       const targetGroupIndex = newGroups.findIndex(
-    //         (g) => g.title.toUpperCase().replace(" ", "_") === updatedTask.status,
-    //       )
-
-    //       if (targetGroupIndex !== -1) {
-    //         newGroups[targetGroupIndex].tasks.push(taskToMove)
-    //       } else {
-    //         // If no matching group, put it back in the original group
-    //         newGroups[i].tasks.splice(taskIndex, 0, taskToMove)
-    //       }
-    //     } else {
-    //       // Just update the task in place
-    //       newGroups[i].tasks[taskIndex] = updatedTask
-    //     }
-    //     break
-    //   }
-    // }
-
-    // setGroups(newGroups)
-    // setSelectedTask(updatedTask)
+        newStatus[destListIndex] = {
+          ...destList,
+          tasks: destTasks
+        }
+        setStatus(newStatus)
+        Promise.all([
+        changeTaskStatus(draggableId, destListId),
+          updateTaskIndex([
+            ...sourceTasks.map(task => ({
+              id: task.id,
+              taskIndex: task.taskIndex
+            })),
+            ...destTasks.map(task => ({
+              id: task.id,
+              taskIndex: task.taskIndex
+            }))
+          ])
+        ])
+      }
+    } catch (error) {
+      console.error('Failed to update task position:', error)
+      toast.error("Failed to update task position")
+    }
   }
 
   return (
@@ -150,21 +153,22 @@ export default function KanbanBoard({ statusPromise }: Props) {
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="flex gap-4 overflow-x-auto pb-4">
           {status.map((status) => {
-            // const colorClasses = getGroupColorClasses(status.primaryColor)
+            const colorVariants = getColorVariants(status.primaryColor)
+
             return (
               <Droppable droppableId={status.id} key={status.id}>
                 {(provided) => (
                   <div
-                    // className={`w-80 flex-shrink-0 ${colorClasses.bgClass} rounded-lg overflow-hidden flex flex-col`}
+                    className={cn("p-2 flex-shrink-0", colorVariants.lightBg, "rounded-lg overflow-hidden flex flex-col")}
                     ref={provided.innerRef}
                     {...provided.droppableProps}
                   >
                     <div
-                      className={cn("font-medium flex items-center justify-between rounded-md min-w-64", status.primaryColor, "group")}
+                      className={cn("font-medium flex items-center justify-between rounded-md min-w-64", colorVariants.lightBg, "group")}
                     >
                       <div className="flex items-center gap-2">
-                        <span className={cn("px-2 py-1 rounded-md", status.primaryColor)}>{status.name}</span>
-                        <span className="text-neutral-400 text-sm">{status.tasks.length}</span>
+                        <span className={cn("px-2 py-1 rounded-md", colorVariants.bgColor, "text-white")}>{status.name}</span>
+                        <span className="text-sm">{status.tasks.length}</span>
                       </div>
                       <GroupOptionsMenu
                         groupId={status.id}
@@ -180,26 +184,26 @@ export default function KanbanBoard({ statusPromise }: Props) {
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              className={cn(status.primaryColor, "rounded-md p-3 shadow-sm cursor-pointer")}
-                              onClick={() => {
-                                const mappedTask: Task = {
-                                  id: task.id,
-                                  text: task.text,
-                                  status: status.name.toUpperCase().replace(" ", "_"),
-                                  date: task.dueDate?.toISOString(),
-                                  tags: task.tags as string[]
-                                }
-                                setSelectedTask(mappedTask)
-                                setIsSheetOpen(true)
-                              }}
+                              className={cn(colorVariants.lightBg, "rounded-md p-3 shadow-sm cursor-pointer")}
+                              // onClick={() => {
+                              //   const mappedTask: Task = {
+                              //     id: task.id,
+                              //     text: task.text,
+                              //     statusId: status.id,
+                              //     dueDate: task.dueDate,
+                              //     tags: task.tags as string[]
+                              //   }
+                              //   setSelectedTask(mappedTask)
+                              //   setIsSheetOpen(true)
+                              // }}
                             >
                               <div className="space-y-2">
-                                <h3 className={cn("text-sm font-medium", status.primaryColor)}>
+                                <h3 className={cn("text-sm font-medium", colorVariants.textColor)}>
                                   {task.text}
                                 </h3>
 
                                 {task.dueDate && (
-                                  <div className="flex items-center gap-1 text-xs text-neutral-400">
+                                  <div className="flex items-center gap-1 text-xs">
                                     <Calendar className="h-3 w-3" />
                                     <span>{formatDate(task.dueDate)}</span>
                                   </div>
@@ -210,7 +214,7 @@ export default function KanbanBoard({ statusPromise }: Props) {
                                     {(task.tags as Prisma.JsonArray)?.map((tag, index) => (
                                       <span
                                         key={index}
-                                        className={cn("px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded text-xs", status.primaryColor)}
+                                        className={cn("px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded text-xs", colorVariants.textColor)}
                                       >
                                         {tag as string}
                                       </span>
@@ -225,8 +229,7 @@ export default function KanbanBoard({ statusPromise }: Props) {
                       {provided.placeholder}
                       <TaskAddForm
                         statusId={status.id}
-                        bgClass={status.primaryColor}
-                      />
+                        bgClass={colorVariants.bgColor} />
                     </div>
                   </div>
                 )}
@@ -237,12 +240,12 @@ export default function KanbanBoard({ statusPromise }: Props) {
           <AddGroup />
         </div>
         {/* Task Details Sheet */}
-        <TaskDetailsSheet
+        {/* <TaskDetailsSheet
           task={selectedTask}
           open={isSheetOpen}
           onOpenChange={setIsSheetOpen}
           onTaskUpdate={updateTaskDetails}
-        />
+        /> */}
       </DragDropContext>
     </div>
   )

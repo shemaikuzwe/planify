@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils/utils"
 import { addTask } from "@/lib/actions/task"
 import { AddTaskSchema } from "@/lib/types/schema"
 import React from "react"
+import { getColorVariants } from "@/lib/utils"
 
 interface TaskAddFormProps {
   bgClass?: string;
@@ -26,14 +27,14 @@ interface TaskAddFormProps {
 }
 
 export function TaskAddForm({
-  bgClass = "bg-neutral-700",
+  bgClass = "bg-neutral-200",
   statusId,
 }: TaskAddFormProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [tags, setTags] = useState<string[]>([])
   const [newTag, setNewTag] = useState("")
   type TaskFormValues = z.infer<typeof AddTaskSchema>
-
+  const colorVariants = getColorVariants(bgClass)
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(AddTaskSchema),
     defaultValues: {
@@ -77,10 +78,10 @@ export function TaskAddForm({
   if (!isExpanded) {
     return (
       <Button
-        variant="ghost"
+        variant="outline"
         className={cn(
-          "w-64 justify-start text-neutral-400 hover:text-white",
-          bgClass,
+          "w-64 justify-start border-2 bg-transparent",
+          colorVariants.borderColor,
         )}
         onClick={() => setIsExpanded(true)}
       >
@@ -91,7 +92,7 @@ export function TaskAddForm({
   }
 
   return (
-    <div className={cn("rounded-md p-3 space-y-3", bgClass)}>
+    <div className={cn("rounded-md w-64 p-3 space-y-3", colorVariants.lightBg)}>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
           {/* Task Name Input */}
@@ -102,12 +103,12 @@ export function TaskAddForm({
               <FormItem>
                 <FormControl>
                   <div className="relative">
-                    <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400" />
+                    <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 " />
                     <Input
                       placeholder="Type a name..."
                       className={cn(
-                        "pl-10 border-neutral-600 placeholder:text-neutral-400",
-                        bgClass,
+                        "pl-10",
+                        colorVariants.lightBg,
                       )}
                       autoFocus
                       {...field}
@@ -126,13 +127,13 @@ export function TaskAddForm({
               <FormItem>
                 <FormControl>
                   <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400" />
+                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4" />
                     <Input
                       placeholder="Add Due Date"
                       type="date"
                       className={cn(
-                        "pl-10 border-neutral-600 placeholder:text-neutral-400",
-                        bgClass,
+                        "pl-10",
+                        colorVariants.lightBg,
                       )}
                       {...field}
                     />
@@ -145,7 +146,7 @@ export function TaskAddForm({
 
           <div className="space-y-2">
             <div className="relative">
-              <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400" />
+              <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4" />
               <div className="flex">
                 <Input
                   type="text"
@@ -159,14 +160,14 @@ export function TaskAddForm({
                     }
                   }}
                   className={cn(
-                    "pl-10 border-neutral-600 placeholder:text-neutral-400 rounded-r-none",
-                    bgClass,
+                    "pl-10 rounded-r-none",
+                    colorVariants.lightBg,
                   )}
                 />
                 <Button
                   type="button"
                   onClick={addTag}
-                  className={cn("rounded-l-none border-neutral-600", bgClass)}
+                  className={cn("rounded-l-none", bgClass)}
                   size="icon"
                 >
                   <Tag />
@@ -177,7 +178,7 @@ export function TaskAddForm({
             {tags.length > 0 && (
               <div className="flex flex-wrap gap-1">
                 {tags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="flex items-center gap-1 bg-blue-500/20 text-blue-300">
+                  <Badge key={tag} variant="secondary" className="flex items-center gap-1">
                     {tag}
                     <X className="h-3 w-3 cursor-pointer" onClick={() => removeTag(tag)} />
                   </Badge>
@@ -192,7 +193,6 @@ export function TaskAddForm({
               variant="outline"
               size="sm"
               onClick={handleCancel}
-              className="bg-transparent border-neutral-600 text-neutral-300 hover:bg-neutral-700"
             >
               Cancel
             </Button>

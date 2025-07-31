@@ -40,7 +40,7 @@ export function GroupOptionsMenu({
         <Button
           variant="ghost"
           size="sm"
-          className="h-6 w-6 p-0 text-neutral-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+          className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
         >
           <MoreVertical className="h-4 w-4" />
           <span className="sr-only">Group options</span>
@@ -67,7 +67,7 @@ export function GroupOptionsMenu({
             className="flex items-center justify-between"
           >
             <div className="flex items-center">
-              <div className={`w-4 h-4 rounded mr-2 ${color}`} />
+              <div className={`w-4 h-4 rounded mr-2 ${color.value}`} />
               {color.name}
             </div>
             {groupColor === color.value && <Check className="h-4 w-4" />}

@@ -96,6 +96,24 @@ async function changeStatusColor(statusId: string, color: string) {
   await db.taskStatus.update({ where: { id: statusId }, data: { primaryColor: color } });
   revalidatePath("/")
 }
+async function changeTaskStatus(taskId: string, statusId: string) {
+  await db.task.update({ where: { id: taskId }, data: { statusId } });
+  revalidatePath("/")
+}
+
+async function updateTaskIndex(tasks: { id: string; taskIndex: number }[]) {
+  // Use a transaction to update multiple tasks atomically
+  await db.$transaction(
+    tasks.map(task => 
+      db.task.update({
+        where: { id: task.id },
+        data: { taskIndex: task.taskIndex }
+      })
+    )
+  );
+  revalidatePath("/")
+}
+
 
 async function addStatus(data: { name: string, id: string|undefined }) {
   const validate = addGroupSchema.safeParse(data);
@@ -113,9 +131,11 @@ export {
   editGroupName,
   addTask,
   editTask,
+  updateTaskIndex,
   toggleStatus,
   deleteTask,
   addStatus,
   deleteStatus,
   changeStatusColor,
+  changeTaskStatus,
 }
