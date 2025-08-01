@@ -21,17 +21,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Badge } from "@/components/ui/badge"
+import { Task } from "@prisma/client"
 
-interface Task {
-  id: string
-  text: string
-  status: string
-  date?: string
-  time?: string
-  tags?: string[]
-  priority?: string
-  description?: string
-}
 
 interface TaskDetailsSheetProps {
   task: Task | null
@@ -120,17 +111,17 @@ export function TaskDetailsSheet({ task, open, onOpenChange, onTaskUpdate }: Tas
               <PopoverTrigger asChild>
                 <Button variant="outline" className="w-full justify-start text-left font-normal bg-transparent">
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {editedTask.date ? editedTask.date : <span>Pick a date</span>}
+                  {editedTask.dueDate ? editedTask.dueDate : <span>Pick a date</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
                 <Calendar
                   mode="single"
-                  selected={editedTask.date ? new Date(editedTask.date) : undefined}
+                  selected={editedTask.dueDate ? new Date(editedTask.dueDate) : undefined}
                   onSelect={(date) =>
                     setEditedTask({
                       ...editedTask,
-                      date: date ? format(date, "MMMM dd, yyyy") : undefined,
+                      dueDate: date ? format(date, "MMMM dd, yyyy") : undefined,
                     })
                   }
                   initialFocus

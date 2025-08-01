@@ -1,7 +1,7 @@
 "use client"
 
 import { use, useState } from "react"
-import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd"
+import { DragDropContext, Droppable, Draggable, DropResult, DragStart, DragUpdate } from "@hello-pangea/dnd"
 import { Calendar } from "lucide-react"
 import { TaskDetailsSheet } from "./task-details-sheet"
 import { TaskAddForm } from "./task-add-form"
@@ -13,17 +13,19 @@ import AddGroup from "./add-group"
 import { getColorVariants } from "@/lib/utils"
 import { changeTaskStatus, updateTaskIndex } from "@/lib/actions/task"
 import { toast } from "sonner"
+import { TaskView } from "./task/task-view"
 
 interface Props {
   statusPromise: Promise<TaskStatusTask[]>
 }
 
 export default function KanbanBoard({ statusPromise }: Props) {
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
-  const [isSheetOpen, setIsSheetOpen] = useState(false)
-  const [status, setStatus] = useState<TaskStatusTask[]>(() => {
-    return use(statusPromise)
-  })
+ const stat=use(statusPromise)
+  const [status, setStatus] = useState<TaskStatusTask[]>(stat)
+  const [dragState, setDragState] = useState<{
+    isDragging: boolean
+    draggedOver: { droppableId: string; index: number } | null
+  }>({ isDragging: false, draggedOver: null })
 
   const reorderTasks = (tasks: Task[], startIndex: number, endIndex: number): Task[] => {
     const result = Array.from(tasks)
@@ -66,7 +68,26 @@ export default function KanbanBoard({ statusPromise }: Props) {
 
 
   // Handle drag end
+  const onDragStart = (start: DragStart) => {
+    setDragState({ isDragging: true, draggedOver: null })
+  }
+
+  const onDragUpdate = (update: DragUpdate) => {
+    if (update.destination) {
+      setDragState({
+        isDragging: true,
+        draggedOver: {
+          droppableId: update.destination.droppableId,
+          index: update.destination.index
+        }
+      })
+    } else {
+      setDragState({ isDragging: true, draggedOver: null })
+    }
+  }
+
   const onDragEnd = async (result: DropResult) => {
+    setDragState({ isDragging: false, draggedOver: null })
     const { destination, source, draggableId } = result
 
     // Do nothing if dropped outside or in same position
@@ -150,16 +171,16 @@ export default function KanbanBoard({ statusPromise }: Props) {
 
   return (
     <div>
-      <DragDropContext onDragEnd={onDragEnd}>
+      <DragDropContext onDragStart={onDragStart} onDragUpdate={onDragUpdate} onDragEnd={onDragEnd}>
         <div className="flex gap-4 overflow-x-auto pb-4">
-          {status.map((status) => {
-            const colorVariants = getColorVariants(status.primaryColor)
+          {status.map((stat) => {
+            const colorVariants = getColorVariants(stat.primaryColor)
 
             return (
-              <Droppable droppableId={status.id} key={status.id}>
+              <Droppable droppableId={stat.id} key={stat.id}>
                 {(provided) => (
                   <div
-                    className={cn("p-2 flex-shrink-0", colorVariants.lightBg, "rounded-lg overflow-hidden flex flex-col")}
+                    className={cn("p-2 flex-shrink-0", colorVariants.lightBg, "rounded-lg overflow-hidden flex flex-col h-fit")}
                     ref={provided.innerRef}
                     {...provided.droppableProps}
                   >
@@ -167,68 +188,78 @@ export default function KanbanBoard({ statusPromise }: Props) {
                       className={cn("font-medium flex items-center justify-between rounded-md min-w-64", colorVariants.lightBg, "group")}
                     >
                       <div className="flex items-center gap-2">
-                        <span className={cn("px-2 py-1 rounded-md", colorVariants.bgColor, "text-white")}>{status.name}</span>
-                        <span className="text-sm">{status.tasks.length}</span>
+                        <span className={cn("px-1.5 py-1 rounded-md", colorVariants.bgColor, "text-white")}>{stat.name}</span>
+                        <span className="text-sm">{stat.tasks.length}</span>
                       </div>
                       <GroupOptionsMenu
-                        groupId={status.id}
-                        groupColor={status.primaryColor}
+                        groupId={stat.id}
+                        groupColor={stat.primaryColor}
                       />
                     </div>
 
                     <div className="flex-1 p-2 space-y-2">
-                      {status.tasks.map((task, index) => (
-                        <Draggable key={task.id} draggableId={task.id} index={index}>
-                          {(provided) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              className={cn(colorVariants.lightBg, "rounded-md p-3 shadow-sm cursor-pointer")}
-                              // onClick={() => {
-                              //   const mappedTask: Task = {
-                              //     id: task.id,
-                              //     text: task.text,
-                              //     statusId: status.id,
-                              //     dueDate: task.dueDate,
-                              //     tags: task.tags as string[]
-                              //   }
-                              //   setSelectedTask(mappedTask)
-                              //   setIsSheetOpen(true)
-                              // }}
-                            >
-                              <div className="space-y-2">
-                                <h3 className={cn("text-sm font-medium", colorVariants.textColor)}>
-                                  {task.text}
-                                </h3>
-
-                                {task.dueDate && (
-                                  <div className="flex items-center gap-1 text-xs">
-                                    <Calendar className="h-3 w-3" />
-                                    <span>{formatDate(task.dueDate)}</span>
-                                  </div>
-                                )}
-
-                                {task.tags && (task.tags as Prisma.JsonArray)?.length > 0 && (
-                                  <div className="flex flex-wrap gap-1">
-                                    {(task.tags as Prisma.JsonArray)?.map((tag, index) => (
-                                      <span
-                                        key={index}
-                                        className={cn("px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded text-xs", colorVariants.textColor)}
-                                      >
-                                        {tag as string}
-                                      </span>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
+                      {stat.tasks.map((task, index) => (
+                        <div key={task.id}>
+                          {/* Drop indicator above task */}
+                          {dragState.isDragging && 
+                           dragState.draggedOver?.droppableId === stat.id && 
+                           dragState.draggedOver?.index === index && (
+                            <div className={cn("h-0.5 rounded-full mb-2 opacity-80", colorVariants.bgColor)} />
                           )}
-                        </Draggable>
+                          
+                          <Draggable draggableId={task.id} index={index}>
+                            {(provided, snapshot) => (
+                            <TaskView task={task} currStatus={stat} status={status}>
+                                <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                className={cn(
+                                  colorVariants.lightBg, 
+                                  "rounded-md p-3 shadow-sm cursor-pointer transition-all duration-200 text-start",
+                                  snapshot.isDragging && "shadow-lg scale-105"
+                                )}
+                              >
+                                <div className="space-y-2">
+                                  <h3 className={cn("text-sm font-medium", colorVariants.textColor)}>
+                                    {task.text}
+                                  </h3>
+
+                                  {task.dueDate && (
+                                    <div className="flex items-center gap-1 text-xs">
+                                      <Calendar className="h-3 w-3" />
+                                      <span>{formatDate(task.dueDate)}</span>
+                                    </div>
+                                  )}
+
+                                  {task.tags && (task.tags as Prisma.JsonArray)?.length > 0 && (
+                                    <div className="flex flex-wrap gap-1">
+                                      {(task.tags as Prisma.JsonArray)?.map((tag, index) => (
+                                        <span
+                                          key={index}
+                                          className={cn("px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded text-xs", colorVariants.textColor)}
+                                        >
+                                          {tag as string}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </TaskView>
+                            )}
+                          </Draggable>
+                        </div>
                       ))}
+                      
+                      {dragState.isDragging && 
+                       dragState.draggedOver?.droppableId === stat.id && 
+                       dragState.draggedOver?.index === stat.tasks.length && (
+                        <div className={cn("h-0.5 rounded-full mb-2 opacity-80", colorVariants.bgColor)} />
+                      )}
                       {provided.placeholder}
                       <TaskAddForm
-                        statusId={status.id}
+                        statusId={stat.id}
                         bgClass={colorVariants.bgColor} />
                     </div>
                   </div>

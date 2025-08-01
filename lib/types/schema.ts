@@ -44,7 +44,7 @@ export const updateDrawingSchema = z.object({
 
 export const addGroupSchema = z.object({
   name: z.string().min(2),
-  id: z.string().uuid().optional(),
+  id: z.string().uuid().optional()
 });
 
 export const meetSchema = z.object({

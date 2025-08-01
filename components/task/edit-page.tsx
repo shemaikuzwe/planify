@@ -1,5 +1,4 @@
-
-import React, { useState, useTransition } from 'react'
+import React, { useEffect, useState, useTransition } from 'react'
 import {
     AlertDialog,
     AlertDialogCancel,
@@ -8,31 +7,37 @@ import {
     AlertDialogTrigger
 } from '../ui/alert-dialog'
 import { Button } from '../ui/button'
-import { Plus } from 'lucide-react'
+import { Pen} from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { addGroupSchema } from '@/lib/types/schema'
 import { Form, FormField, FormControl, FormItem, FormLabel } from '../ui/form'
 import { Input } from '../ui/input'
-import { addGroup } from '@/lib/actions/task'
+import { editGroupName } from '@/lib/actions/task'
 import EmojiPicker from '../ui/emoji-picker'
-import { useSession } from 'next-auth/react'
+import { toast } from 'sonner'
+import { TaskCategory } from '@prisma/client'
 
-export default function AddGroup() {
+export default function EditPage({ page }: { page: TaskCategory }) {
     const [isOpen, setIsOpen] = useState(false)
     const [isPending, startTransition] = useTransition()
-    const { data: session } = useSession()
-    const userId = session?.user.id;
     const form = useForm({
         resolver: zodResolver(addGroupSchema),
-        defaultValues: { id: userId }
+        defaultValues: {
+            name: page.name
+        }
     })
-    const onSubmit = async (data: { name: string, id: string }) => {
-        startTransition(async () => {
-            await addGroup(data)
-            form.reset()
-            setIsOpen(false)
-        })
+    const onSubmit = async (data: { name: string }) => {
+        try {
+            startTransition(async () => {
+                await editGroupName(page.id, data.name)
+                form.reset()
+                setIsOpen(false)
+            })
+        } catch (error) {
+            console.log(error)
+            toast.error("Failed to edit page")
+        }
     }
     const handleEmojiSelect = (newEmoji: string) => {
         const currentText = form.getValues("name") || ""
@@ -40,14 +45,14 @@ export default function AddGroup() {
     }
     return (
         <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
-            <AlertDialogTrigger asChild>
+            <AlertDialogTrigger asChild >
                 <Button size={"sm"} variant={"ghost"} >
-                    <Plus className="w-4 h-4 mr-1" />
-                    New Group
+                    <Pen className="w-4 h-4 mr-1" />
+                    Edit Page
                 </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
-                <AlertDialogTitle>New Group</AlertDialogTitle>
+                <AlertDialogTitle>Edit Page</AlertDialogTitle>
                 <Form {...form}>
                     <form className="space-y-3 w-full" onSubmit={form.handleSubmit(onSubmit)}>
                         <div className='space-y-3 flex  gap-4 w-full'>
@@ -56,9 +61,9 @@ export default function AddGroup() {
                                 name="name"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Group Name <span className="text-red-500">*</span> </FormLabel>
+                                        <FormLabel>Name <span className="text-red-500">*</span> </FormLabel>
                                         <FormControl>
-                                            <Input {...field} placeholder="Enter group name" className="w-full" />
+                                            <Input {...field} placeholder="Enter name" className="w-full" />
                                         </FormControl>
                                     </FormItem>
                                 )}
@@ -75,7 +80,7 @@ export default function AddGroup() {
                             <AlertDialogCancel>
                                 Cancel
                             </AlertDialogCancel>
-                            <Button type="submit" disabled={isPending}>{isPending ? "Adding..." : "Add"}</Button>
+                            <Button type="submit" disabled={isPending}>{isPending ? "Editing..." : "Edit"}</Button>
                         </div>
                     </form>
                 </Form>

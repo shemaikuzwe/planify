@@ -89,13 +89,15 @@ model Task {
 
 model TaskStatus {
     id           String       @id @default(uuid()) @db.Uuid
-    name         String       @unique
+    name         String
     primaryColor String       @default("bg-neutral-600")
     tasks        Task[]
     createdAt    DateTime?    @default(now())
     updatedAt    DateTime?    @updatedAt
     categoryId   String       @db.Uuid
     categories   TaskCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    
+    @@unique([name, categoryId])
 }
 
 model Team {

@@ -45,6 +45,9 @@ export async function getCategoryTasks(categoryId: string) {
         }
       }
     },
+    orderBy:{
+      createdAt:"asc"
+    }
   })
   return tasks
 }

@@ -92,7 +92,7 @@ export function TaskAddForm({
   }
 
   return (
-    <div className={cn("rounded-md w-64 p-3 space-y-3", colorVariants.lightBg)}>
+    <div className={cn("rounded-md  p-3 space-y-3 h-fit w-64", colorVariants.lightBg)}>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
           {/* Task Name Input */}

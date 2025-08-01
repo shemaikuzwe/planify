@@ -11,7 +11,7 @@ async function addTask(data: AddTaskValue) {
     return validate.error.flatten().fieldErrors;
   }
   const { text, time, priority, dueDate, statusId, tags } = validate.data;
-  const task = await db.task.create({ data: { time, priority,dueDate: dueDate ? new Date(dueDate) : null, text, statusId, tags } });
+  const task = await db.task.create({ data: { time, priority, dueDate: dueDate ? new Date(dueDate) : null, text, statusId, tags } });
 
   revalidatePath("/")
   return task.id
@@ -73,10 +73,12 @@ async function addGroup(data: { name: string }) {
   if (!validate.success) {
     return validate.error.flatten().fieldErrors;
   }
-  await db.taskCategory.create({ data: { name: validate.data.name, userId } });
+  const category = await db.taskCategory.create({ data: { name: validate.data.name, userId } })
+  await db.taskStatus.create({ data: { name: "TODO", categoryId: category.id } })
+  await db.taskStatus.create({ data: { name: "IN PROGRESS", categoryId: category.id,primaryColor:"bg-blue-600" } })
+  await db.taskStatus.create({ data: { name: "DONE", categoryId: category.id,primaryColor:"bg-green-600" } })
   revalidatePath("/")
 }
-
 async function deleteGroup(categoryId: string) {
   await db.taskCategory.delete({ where: { id: categoryId } });
   //revalidateTag("todos");
@@ -102,9 +104,8 @@ async function changeTaskStatus(taskId: string, statusId: string) {
 }
 
 async function updateTaskIndex(tasks: { id: string; taskIndex: number }[]) {
-  // Use a transaction to update multiple tasks atomically
   await db.$transaction(
-    tasks.map(task => 
+    tasks.map(task =>
       db.task.update({
         where: { id: task.id },
         data: { taskIndex: task.taskIndex }
@@ -115,7 +116,7 @@ async function updateTaskIndex(tasks: { id: string; taskIndex: number }[]) {
 }
 
 
-async function addStatus(data: { name: string, id: string|undefined }) {
+async function addStatus(data: { name: string, id: string | undefined }) {
   const validate = addGroupSchema.safeParse(data);
   if (!validate.success) {
     throw validate.error.flatten().fieldErrors;

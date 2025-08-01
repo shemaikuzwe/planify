@@ -12,7 +12,7 @@ interface Props {
 export default function Header({ title, icon, description }: Props) {
     const { subscription, isSupported,loading } = useSubscriptions()
     return (
-        <div className='flex flex-col gap-2 mt-4 mx-2 '>
+        <div className='flex flex-col gap-2 mt-4 mx-2 max-w-250 '>
             {isSupported && !subscription && !loading && <NotificationBanner />}
             <header className="flex items-center justify-between p-2 border-b">
                 <div className="flex gap-2 justify-between items-center">
