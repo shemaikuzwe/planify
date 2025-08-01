@@ -3,7 +3,6 @@
 import { use, useState } from "react"
 import { DragDropContext, Droppable, Draggable, DropResult, DragStart, DragUpdate } from "@hello-pangea/dnd"
 import { Calendar } from "lucide-react"
-import { TaskDetailsSheet } from "./task-details-sheet"
 import { TaskAddForm } from "./task-add-form"
 import { GroupOptionsMenu } from "./group-options-menu"
 import { cn, formatDate } from "@/lib/utils/utils"
@@ -221,7 +220,7 @@ export default function KanbanBoard({ statusPromise }: Props) {
                                 )}
                               >
                                 <div className="space-y-2">
-                                  <h3 className={cn("text-sm font-medium", colorVariants.textColor)}>
+                                  <h3 className={cn("text-sm font-medium text-background")}>
                                     {task.text}
                                   </h3>
 
@@ -270,13 +269,6 @@ export default function KanbanBoard({ statusPromise }: Props) {
 
           <AddGroup />
         </div>
-        {/* Task Details Sheet */}
-        {/* <TaskDetailsSheet
-          task={selectedTask}
-          open={isSheetOpen}
-          onOpenChange={setIsSheetOpen}
-          onTaskUpdate={updateTaskDetails}
-        /> */}
       </DragDropContext>
     </div>
   )

@@ -28,7 +28,7 @@ export const addDailyTodoSchema = z.object({
 
 export const ToggleTaskStatusSchema = z.object({
   taskId: z.string().uuid(),
-  status: z.enum(["COMPLETED", "IN_PROGRESS", "NOT_STARTED", "FAILED"]),
+  status: z.string(),
 });
 
 export const saveDrawingSchema = z.object({

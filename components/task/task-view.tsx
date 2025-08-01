@@ -57,7 +57,7 @@ export function TaskView({ task, children, currStatus, status }: Props) {
           onMouseEnter={() => setIsHovering(true)}
           onMouseLeave={() => setIsHovering(false)}
         >
-          <div className={cn("flex items-center justify-between p-2 rounded-md w-full",colorVariants.lightBg)}>
+          <div className={cn("flex items-center justify-between p-2 rounded-md w-full h-16", colorVariants.lightBg)}>
             <div className="flex items-center gap-2 ">
               <TaskStatusIndicator status={status} onChange={(status) => toggleTaskCompletion(task.id, status)} currStatusId={currStatus.id} />
               <div
@@ -66,7 +66,20 @@ export function TaskView({ task, children, currStatus, status }: Props) {
                   colorVariants.textColor
                 )}
               >
-                {capitalizeWords(currStatus.name)}
+                {inlineEditText ? (
+                  <Input
+                    type="text"
+                    value={inlineEditText}
+                    onChange={(e) => setInlineEditText(e.target.value)}
+                    // onKeyDown={(e)=>{
+                    //   if(e.key ==="Enter") saveInlineEdit()
+                    //   if(e.key ==="Escape") setInlineEditText(null)
+                    // }}
+                    // onBlur={saveInlineEdit}
+                    className="text-sm w-55 font-medium"
+                    autoFocus
+                  />
+                ) : (<h3 className="text-sm font-medium" onDoubleClick={() => setInlineEditText(task.text)}>{task.text}</h3>)}
               </div>
             </div>
 
@@ -90,23 +103,6 @@ export function TaskView({ task, children, currStatus, status }: Props) {
 
           <div className="p-3 space-y-4 ">
             <div className="flex justify-between w-full">
-              <div className="flex items-start gap-2">
-                {task.priority && <div className="mt-0.5">{getPriorityIcon(task.priority)}</div>}
-                {inlineEditText ? (
-                  <Input
-                    type="text"
-                    value={inlineEditText}
-                    onChange={(e) => setInlineEditText(e.target.value)}
-                    // onKeyDown={(e)=>{
-                    //   if(e.key ==="Enter") saveInlineEdit()
-                    //   if(e.key ==="Escape") setInlineEditText(null)
-                    // }}
-                    // onBlur={saveInlineEdit}
-                    className="text-sm w-55 font-medium"
-                    autoFocus
-                  />
-                ) : (<h3 className="text-sm font-medium" onDoubleClick={() => setInlineEditText(task.text)}>{task.text}</h3>)}
-              </div>
               <div className="flex flex-col justify-end">
                 {task.time && (
                   <div className="flex items-center gap-1 text-xs text-neutral-400">

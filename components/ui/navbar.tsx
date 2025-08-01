@@ -65,9 +65,11 @@ export function Navbar({ taskPromise }: Props) {
             <SidebarMenu>
               <SidebarMenuItem className="ml-2">
                 <Collapsible defaultOpen className="group/collapsible">
-                  <CollapsibleTrigger className="flex items-center justify-center gap-2">
-                    <ListTodo className="h-4 w-4" />
-                    <span>Tasks</span>
+                  <CollapsibleTrigger className="flex items-center justify-center gap-5">
+                    <div className="flex items-center gap-2">
+                      <ListTodo className="h-4 w-4" />
+                      <span>Tasks</span>
+                    </div>
                     <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
                   </CollapsibleTrigger>
                   <CollapsibleContent>

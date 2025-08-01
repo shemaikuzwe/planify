@@ -8,7 +8,7 @@ import type { TaskStatus } from "@prisma/client"
 
 interface TaskStatusIndicatorProps {
     status: TaskStatus[],
-    currStatusId:string,
+    currStatusId: string,
     onChange: (status: string) => void
     className?: string
 }
@@ -18,7 +18,7 @@ export function TaskStatusIndicator({ status, onChange, currStatusId, className 
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-            <button
+                <button
                     className={cn("w-5 h-5 rounded-full flex items-center justify-center", currStatus?.primaryColor, className)}
                     aria-label={`Task status: ${currStatus?.name}`}
                 />

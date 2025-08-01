@@ -81,12 +81,10 @@ async function addGroup(data: { name: string }) {
 }
 async function deleteGroup(categoryId: string) {
   await db.taskCategory.delete({ where: { id: categoryId } });
-  //revalidateTag("todos");
   revalidatePath("/")
 }
 async function editGroupName(categoryId: string, name: string) {
   await db.taskCategory.update({ where: { id: categoryId }, data: { name } });
-  //revalidateTag("todos");
   revalidatePath("/")
 }
 async function deleteStatus(statusId: string) {

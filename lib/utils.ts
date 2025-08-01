@@ -42,7 +42,7 @@ export const getColorVariants = (baseColor: string): ColorVariants => {
     'bg-red-600': {
       bgColor: 'bg-red-600',
       lightBg: 'bg-red-200',
-      textColor: 'text-foreground',
+      textColor: 'text-background',
       borderColor: 'border-red-300',
       hoverBg: 'hover:bg-red-700'
     },
