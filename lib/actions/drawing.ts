@@ -25,7 +25,7 @@ async function saveDrawing(formData: FormData): Promise<void> {
         }
     })
     revalidatePath("/")
-    redirect(`/excalidraw/${drawing.id}`)
+    redirect(`/whiteboard/${drawing.id}`)
 }
 
 async function updateDrawing(formData: FormData): Promise<void> {

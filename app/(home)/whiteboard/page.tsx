@@ -18,7 +18,7 @@ export default async function Page() {
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-end items-center mb-8">
           <Button asChild>
-            <Link href="/excalidraw/new">
+            <Link href="/whiteboard/new">
               <MessageSquare size={16} />
               New Drawing
             </Link>
