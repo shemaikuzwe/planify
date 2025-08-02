@@ -42,7 +42,7 @@ export function DrawingCard({ id, name, description, createdAt }: DrawingCardPro
     return (
         <Card
             className="px-3 shadow-none border rounded-lg"
-            onDoubleClick={() => router.push(`/excalidraw/${id}`)}
+            onDoubleClick={() => router.push(`/whiteboard/${id}`)}
         >
             <CardContent className="p-0">
                 <div className="flex items-center justify-between">
@@ -88,7 +88,7 @@ export function DrawingCard({ id, name, description, createdAt }: DrawingCardPro
                     </div>
                     <div className="flex items-center justify-between text-xs w-full">
                         <span>{createdAt ? formatDate(createdAt) : ""}</span>
-                        <ChevronRight size={20}  className="cursor-pointer" onClick={()=> router.push(`/excalidraw/${id}`)}/>
+                        <ChevronRight size={20}  className="cursor-pointer" onClick={()=> router.push(`/whiteboard/${id}`)}/>
                     </div>
                 </div>
 
