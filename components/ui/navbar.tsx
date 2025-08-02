@@ -1,5 +1,5 @@
 "use client"
-import { Home, Settings, ListTodo, CalendarCheck, Presentation, StickyNote, ChevronDown } from "lucide-react"
+import { Home, Settings, ListTodo, Presentation, StickyNote, ChevronDown } from "lucide-react"
 import Link from "next/link"
 import User from "@/components/profile/user"
 import {
@@ -23,10 +23,13 @@ import Image from "next/image"
 import { usePathname } from "next/navigation"
 import Logo from "./logo"
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "./collapsible"
-import { Category } from "@/lib/drizzle"
-import { Suspense, use } from "react"
+import { Suspense, use, useState } from "react"
+import { TaskCategory } from "@prisma/client"
+import { Plus } from "lucide-react"
+import AddPage from "../task/add-page"
+import PageOptions from "../task/page-options"
 interface Props {
-  taskPromise: Promise<Category[]>
+  taskPromise: Promise<TaskCategory[]>
 }
 export function Navbar({ taskPromise }: Props) {
   const pathName = usePathname()
@@ -62,9 +65,11 @@ export function Navbar({ taskPromise }: Props) {
             <SidebarMenu>
               <SidebarMenuItem className="ml-2">
                 <Collapsible defaultOpen className="group/collapsible">
-                  <CollapsibleTrigger className="flex items-center justify-center gap-2">
-                    <ListTodo className="h-4 w-4" />
-                    <span>Tasks</span>
+                  <CollapsibleTrigger className="flex items-center justify-center gap-5">
+                    <div className="flex items-center gap-2">
+                      <ListTodo className="h-4 w-4" />
+                      <span>Tasks</span>
+                    </div>
                     <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
                   </CollapsibleTrigger>
                   <CollapsibleContent>
@@ -72,15 +77,20 @@ export function Navbar({ taskPromise }: Props) {
                       <Suspense fallback={<NavBarSkelton />}>
                         <NavTask taskPromise={taskPromise} />
                       </Suspense>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild>
+                          <AddPage />
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </Collapsible>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip={"Excalidraw"} isActive={pathName.includes("/excalidraw")}>
-                  <Link href={"/excalidraw"} className="flex gap-2 items-center w-full">
+                  <Link href={"/whiteboard"} className="flex gap-2 items-center w-full">
                     <Image src="/excalidraw.png" alt="Excalidraw" width={16} height={16} />
-                    <span>Excalidraw</span>
+                    <span>White Board</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -152,15 +162,49 @@ function NavBarSkelton() {
     </SidebarMenu>
   )
 }
-function NavTask({ taskPromise }: { taskPromise: Promise<Category[]> }) {
+function NavTask({ taskPromise }: { taskPromise: Promise<TaskCategory[]> }) {
   const tasks = use(taskPromise)
+  const [hoveredTaskId, setHoveredTaskId] = useState<string | null>(null)
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null)
+
+  const handleMouseEnter = (taskId: string) => {
+    setHoveredTaskId(taskId)
+  }
+
+  const handleMouseLeave = (taskId: string) => {
+    if (openDropdownId !== taskId) {
+      setHoveredTaskId(null)
+    }
+  }
+
+  const handleDropdownOpenChange = (taskId: string, isOpen: boolean) => {
+    setOpenDropdownId(isOpen ? taskId : null)
+    if (!isOpen) {
+      setHoveredTaskId(null)
+    }
+  }
+
   return tasks.map((task) => (
     <SidebarMenuSubItem key={task.id}>
       <SidebarMenuSubButton asChild>
-        <Link href={`/`} className="flex items-center gap-2 ">
-          <StickyNote className="h-4 w-4" />
-          <span>{task.name}</span>
-        </Link>
+        <div
+          className="flex items-center justify-between gap-2 w-full"
+          onMouseEnter={() => handleMouseEnter(task.id)}
+          onMouseLeave={() => handleMouseLeave(task.id)}
+        >
+          <Link href={`/${task.id}`} className="flex items-center gap-2 flex-1">
+            <StickyNote className="h-4 w-4" />
+            <span>{task.name}</span>
+          </Link>
+          {(hoveredTaskId === task.id || openDropdownId === task.id) && (
+            <div onClick={(e) => e.preventDefault()}>
+              <PageOptions
+                page={task}
+                onOpenChange={(isOpen) => handleDropdownOpenChange(task.id, isOpen)}
+              />
+            </div>
+          )}
+        </div>
       </SidebarMenuSubButton>
     </SidebarMenuSubItem>
   ))

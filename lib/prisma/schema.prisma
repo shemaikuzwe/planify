@@ -29,13 +29,13 @@ model Account {
 }
 
 model TaskCategory {
-    id        String    @id @default(uuid()) @db.Uuid
-    name      String
-    createdAt DateTime? @default(now())
-    updatedAt DateTime? @updatedAt
-    tasks     Task[]
-    userId    String    @db.Uuid
-    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    id         String       @id @default(uuid()) @db.Uuid
+    name       String
+    createdAt  DateTime?    @default(now())
+    updatedAt  DateTime?    @updatedAt
+    taskStatus TaskStatus[]
+    userId     String       @db.Uuid
+    user       User         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Drawing {
@@ -73,17 +73,31 @@ model Subscription {
 }
 
 model Task {
-    id          String       @id @default(uuid()) @db.Uuid
-    categoryId  String       @db.Uuid
+    id          String     @id @default(uuid()) @db.Uuid
+    taskIndex   Int        @default(autoincrement())
     text        String
     description String?
     time        String?
-    status      TASK_STATUS  @default(NOT_STARTED)
-    priority    PRIORITY?    @default(MEDIUM)
+    tags        Json?
+    statusId    String     @db.Uuid
+    status      TaskStatus @relation(fields: [statusId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    priority    PRIORITY?  @default(MEDIUM)
     dueDate     DateTime?
-    createdAt   DateTime?    @default(now())
-    updatedAt   DateTime?    @updatedAt
-    categories  TaskCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    createdAt   DateTime?  @default(now())
+    updatedAt   DateTime?  @updatedAt
+}
+
+model TaskStatus {
+    id           String       @id @default(uuid()) @db.Uuid
+    name         String
+    primaryColor String       @default("bg-neutral-600")
+    tasks        Task[]
+    createdAt    DateTime?    @default(now())
+    updatedAt    DateTime?    @updatedAt
+    categoryId   String       @db.Uuid
+    categories   TaskCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    
+    @@unique([name, categoryId])
 }
 
 model Team {
@@ -128,11 +142,4 @@ enum STATUS {
     ACTIVE
     ENDED
     CANCELLED
-}
-
-enum TASK_STATUS {
-    COMPLETED
-    IN_PROGRESS
-    NOT_STARTED
-    FAILED
 }

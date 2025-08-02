@@ -8,13 +8,16 @@ import { useSubscriptions } from "@/hooks/use-sub"
 
 
 export function PushNotificationManager() {
-  const { isSupported, subscription, subscribeToPush, unsubscribeFromPush } = useSubscriptions()
+  const { isSupported, subscription, subscribeToPush, unsubscribeFromPush,loading } = useSubscriptions()
   const [message, setMessage] = useState('')
   async function sendTestNotification() {
     if (subscription) {
       await sendNotification(message, "Test Notification", subscription)
       setMessage('')
     }
+  }
+  if (loading) {
+   return null
   }
 
   if (!isSupported) {

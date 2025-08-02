@@ -5,13 +5,14 @@ import { Button } from '../ui/button'
 import { Trash2 } from 'lucide-react'
 import { deleteGroup, deleteTask } from '@/lib/actions/task'
 import { useRouter } from 'next/navigation'
-import {deleteDrawing} from "@/lib/actions/drawing";
+import { deleteDrawing } from "@/lib/actions/drawing";
 interface Props {
     id: string;
     type: "group" | "task" | "drawing",
-    text: string
+    text: string,
+    children?: React.ReactNode
 }
-export default function DeleteDialog({ id, type, text }: Props) {
+export default function DeleteDialog({ id, type, text, children}: Props) {
     const router = useRouter()
     const [isOpen, setIsOpen] = useState(false)
     const [isPending, startTransition] = useTransition()
@@ -31,9 +32,11 @@ export default function DeleteDialog({ id, type, text }: Props) {
     return (
         <AlertDialog open={isOpen} onOpenChange={setIsOpen} >
             <AlertDialogTrigger asChild >
-                <Button size={"sm"} variant={`${type === "group" ? "ghost" : "destructive"}`} className='w-7 h-7' >
-                    <Trash2 className="w-3.5 h-3.5" />
-                </Button>
+                {children ? children : (
+                    <Button size={"sm"} variant={`${type === "group" ? "ghost" : "destructive"}`} className='w-7 h-7' >
+                        <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                )}
             </AlertDialogTrigger>
             <AlertDialogContent className='w-100'>
                 <AlertDialogTitle className='font-light'>Are you sure you want to delete  <span className='font-bold'>{text}</span>?</AlertDialogTitle>

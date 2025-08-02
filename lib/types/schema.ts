@@ -5,7 +5,8 @@ export const AddTaskSchema = z.object({
   priority: z.enum(["HIGH", "MEDIUM", "LOW"]).optional(),
   dueDate: z.string().optional(),
   taskId: z.string().uuid().optional(),
-  categoryId: z.string().uuid().optional(),
+  tags:z.array(z.string()).optional(),
+  statusId: z.string().uuid(),
 });
 export type AddTaskValue = z.infer<typeof AddTaskSchema>;
 
@@ -27,7 +28,7 @@ export const addDailyTodoSchema = z.object({
 
 export const ToggleTaskStatusSchema = z.object({
   taskId: z.string().uuid(),
-  status: z.enum(["COMPLETED", "IN_PROGRESS", "NOT_STARTED", "FAILED"]),
+  status: z.string(),
 });
 
 export const saveDrawingSchema = z.object({
@@ -43,7 +44,7 @@ export const updateDrawingSchema = z.object({
 
 export const addGroupSchema = z.object({
   name: z.string().min(2),
-  userId: z.string(),
+  id: z.string().uuid().optional()
 });
 
 export const meetSchema = z.object({

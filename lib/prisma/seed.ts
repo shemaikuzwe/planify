@@ -10,19 +10,27 @@ async function seedNewUser(userId: string) {
         }
         ]
     })
-    await db.task.createMany({
-        data: [
-            {
-                categoryId: categories[0].id,
-                text: "Meet ",
-                priority: "MEDIUM",
-            },
-            {
-                categoryId: categories[1].id,
-                text: "Learn"
-            }
-        ]
-    })
+    for (const category of categories) {
+        await db.taskStatus.createMany({
+            data: [
+                {
+                    name: "TODO",
+                    categoryId: category.id,
+                    primaryColor: "bg-blue-600"
+                },
+                {
+                    name: "IN PROGRESS",
+                    categoryId: category.id,
+                    primaryColor: "bg-blue-600"
+                },
+                {
+                    name: "DONE",
+                    categoryId: category.id,
+                    primaryColor: "bg-blue-600"
+                }
+            ]
+        })
+    }
 }
 
 export { seedNewUser }

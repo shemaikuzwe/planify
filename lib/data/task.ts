@@ -5,9 +5,9 @@ import { auth } from "@/auth";
 export async function getUserTasks(userId: string) {
   const todos = await db.taskCategory.findMany({
     where: { userId },
-    include: {
-      tasks: true,
-    },
+    // include: {
+    //   tasks: true,
+    // },
     orderBy: {
       createdAt: "desc",
     }
@@ -32,4 +32,22 @@ export async function getTaskById(taskId: string) {
   });
   if (!task) throw new Error("Task not found")
   return task;
+}
+export async function getCategoryTasks(categoryId: string) {
+  const tasks = await db.taskStatus.findMany({
+    where: {
+      categoryId
+    },
+    include: {
+      tasks: {
+        orderBy: {
+          taskIndex: "asc"
+        }
+      }
+    },
+    orderBy:{
+      createdAt:"asc"
+    }
+  })
+  return tasks
 }
