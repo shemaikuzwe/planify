@@ -20,6 +20,7 @@ import { addTask } from "@/lib/actions/task"
 import { AddTaskSchema } from "@/lib/types/schema"
 import React from "react"
 import { getColorVariants } from "@/lib/utils"
+import { useRouter } from "next/navigation"
 
 interface TaskAddFormProps {
   bgClass?: string;
@@ -33,6 +34,7 @@ export function TaskAddForm({
   const [isExpanded, setIsExpanded] = useState(false)
   const [tags, setTags] = useState<string[]>([])
   const [newTag, setNewTag] = useState("")
+  const router = useRouter()
   type TaskFormValues = z.infer<typeof AddTaskSchema>
   const colorVariants = getColorVariants(bgClass)
   const form = useForm<TaskFormValues>({
@@ -55,6 +57,7 @@ export function TaskAddForm({
     setTags([])
     setNewTag("")
     setIsExpanded(false)
+    router.refresh()
   }
 
   const handleCancel = () => {

@@ -14,14 +14,23 @@ async function saveDrawing(formData: FormData): Promise<void> {
     }
     const session = await auth();
     const userId = session?.user.id;
-    if (!userId) throw new Error("something went wrong");
+    if (!userId) throw new Error("No user ID in session");
     const {elements, title, description} = validate.data;
+    
+    // Parse elements string back to JSON
+    let parsedElements;
+    try {
+        parsedElements = JSON.parse(elements);
+    } catch (error) {
+        throw new Error("Invalid elements data");
+    }
+    
     const drawing = await db.drawing.create({
         data: {
             name: title,
             description,
             userId,
-            elements,
+            elements: parsedElements,
         }
     })
     revalidatePath("/")
@@ -39,10 +48,19 @@ async function updateDrawing(formData: FormData): Promise<void> {
     const userId = session?.user.id;
     if (!userId) throw new Error("something went wrong");
     const {elements, drawingId} = validate.data;
+    
+    // Parse elements string back to JSON
+    let parsedElements;
+    try {
+        parsedElements = JSON.parse(elements);
+    } catch (error) {
+        throw new Error("Invalid elements data");
+    }
+    
     await db.drawing.update({
         where: {id: drawingId},
         data: {
-            elements,
+            elements: parsedElements,
             userId,
         }
     })

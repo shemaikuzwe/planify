@@ -259,7 +259,7 @@ export default function App({
     return (
       <>
         <div className="absolute top-1 left-12 z-[10000]">
-          <h1 className="text-xl">{drawingName?.slice(0, 30) ?? "Untitled"}</h1>
+          <h1 className="text-lg">{drawingName?.slice(0, 30) ?? "Untitled"}</h1>
         </div>
         {!isMobile && (
           <LiveCollaborationTrigger
