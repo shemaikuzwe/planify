@@ -80,7 +80,7 @@ export function TaskAddForm({
       <Button
         variant="outline"
         className={cn(
-          "w-64 justify-start border-2 bg-transparent text-background",
+          "w-64 justify-start border-2 bg-transparent text-black hover:text-black",
           colorVariants.borderColor,
         )}
         onClick={() => setIsExpanded(true)}
@@ -92,7 +92,7 @@ export function TaskAddForm({
   }
 
   return (
-    <div className={cn("rounded-md  p-3 space-y-3 h-fit w-64 text-background", colorVariants.lightBg)}>
+    <div className={cn("rounded-md  p-3 space-y-3 h-fit w-64 text-black", colorVariants.lightBg)}>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
           {/* Task Name Input */}
@@ -199,6 +199,7 @@ export function TaskAddForm({
             <Button
               type="submit"
               size="sm"
+              className={cn(colorVariants.bgColor)}
               disabled={!form.watch("text")?.trim()}
             >
               Add Task

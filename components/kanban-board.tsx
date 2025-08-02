@@ -169,7 +169,7 @@ export default function KanbanBoard({ statusPromise }: Props) {
   }
 
   return (
-    <div>
+    <div className="">
       <DragDropContext onDragStart={onDragStart} onDragUpdate={onDragUpdate} onDragEnd={onDragEnd}>
         <div className="flex gap-4 overflow-x-auto pb-4">
           {status.map((stat) => {
@@ -187,8 +187,8 @@ export default function KanbanBoard({ statusPromise }: Props) {
                       className={cn("font-medium flex items-center justify-between rounded-md min-w-64", colorVariants.lightBg, "group")}
                     >
                       <div className="flex items-center gap-2">
-                        <span className={cn("px-1.5 py-1 rounded-md", colorVariants.bgColor, "text-white")}>{stat.name}</span>
-                        <span className="text-sm">{stat.tasks.length}</span>
+                        <span className={cn("p-1 rounded-md text-sm", colorVariants.bgColor, "text-white")}>{stat.name}</span>
+                        <span className="text-sm text-black">{stat.tasks.length}</span>
                       </div>
                       <GroupOptionsMenu
                         groupId={stat.id}
@@ -220,7 +220,7 @@ export default function KanbanBoard({ statusPromise }: Props) {
                                 )}
                               >
                                 <div className="space-y-2">
-                                  <h3 className={cn("text-sm font-medium text-background")}>
+                                  <h3 className={cn("text-sm font-medium text-black")}>
                                     {task.text}
                                   </h3>
 
@@ -236,7 +236,7 @@ export default function KanbanBoard({ statusPromise }: Props) {
                                       {(task.tags as Prisma.JsonArray)?.map((tag, index) => (
                                         <span
                                           key={index}
-                                          className={cn("px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded text-xs", colorVariants.textColor)}
+                                          className={cn("px-2 py-0.5 bg-blue-500/20 text-blue-500 rounded text-xs")}
                                         >
                                           {tag as string}
                                         </span>
