@@ -62,8 +62,7 @@ export function TaskView({ task, children, currStatus, status }: Props) {
               <TaskStatusIndicator status={status} onChange={(status) => toggleTaskCompletion(task.id, status)} currStatusId={currStatus.id} />
               <div
                 className={cn(
-                  "flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium text-white",
-                  colorVariants.textColor
+                  "flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium text-black",
                 )}
               >
                 {inlineEditText ? (

@@ -12,9 +12,7 @@ async function addTask(data: AddTaskValue) {
   }
   const { text, time, priority, dueDate, statusId, tags } = validate.data;
   const task = await db.task.create({ data: { time, priority, dueDate: dueDate ? new Date(dueDate) : null, text, statusId, tags } });
-
-  revalidatePath("/")
-  return task.id
+  return task
 }
 async function editTask(data: AddTaskValue) {
   const validate = AddTaskSchema.safeParse(data);

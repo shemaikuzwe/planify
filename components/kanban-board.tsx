@@ -19,7 +19,7 @@ interface Props {
 }
 
 export default function KanbanBoard({ statusPromise }: Props) {
- const stat=use(statusPromise)
+  const stat = use(statusPromise)
   const [status, setStatus] = useState<TaskStatusTask[]>(stat)
   const [dragState, setDragState] = useState<{
     isDragging: boolean
@@ -149,7 +149,7 @@ export default function KanbanBoard({ statusPromise }: Props) {
         }
         setStatus(newStatus)
         Promise.all([
-        changeTaskStatus(draggableId, destListId),
+          changeTaskStatus(draggableId, destListId),
           updateTaskIndex([
             ...sourceTasks.map(task => ({
               id: task.id,
@@ -169,7 +169,7 @@ export default function KanbanBoard({ statusPromise }: Props) {
   }
 
   return (
-    <div className="">
+    <div>
       <DragDropContext onDragStart={onDragStart} onDragUpdate={onDragUpdate} onDragEnd={onDragEnd}>
         <div className="flex gap-4 overflow-x-auto pb-4">
           {status.map((stat) => {
@@ -200,66 +200,76 @@ export default function KanbanBoard({ statusPromise }: Props) {
                       {stat.tasks.map((task, index) => (
                         <div key={task.id}>
                           {/* Drop indicator above task */}
-                          {dragState.isDragging && 
-                           dragState.draggedOver?.droppableId === stat.id && 
-                           dragState.draggedOver?.index === index && (
-                            <div className={cn("h-0.5 rounded-full mb-2 opacity-80", colorVariants.bgColor)} />
-                          )}
-                          
+                          {dragState.isDragging &&
+                            dragState.draggedOver?.droppableId === stat.id &&
+                            dragState.draggedOver?.index === index && (
+                              <div className={cn("h-0.5 rounded-full mb-2 opacity-80", colorVariants.bgColor)} />
+                            )}
+
                           <Draggable draggableId={task.id} index={index}>
                             {(provided, snapshot) => (
-                            <TaskView task={task} currStatus={stat} status={status}>
+                              <TaskView task={task} currStatus={stat} status={status}>
                                 <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className={cn(
-                                  colorVariants.lightBg, 
-                                  "rounded-md p-3 shadow-sm cursor-pointer transition-all duration-200 text-start",
-                                  snapshot.isDragging && "shadow-lg scale-105"
-                                )}
-                              >
-                                <div className="space-y-2">
-                                  <h3 className={cn("text-sm font-medium text-black")}>
-                                    {task.text}
-                                  </h3>
-
-                                  {task.dueDate && (
-                                    <div className="flex items-center gap-1 text-xs">
-                                      <Calendar className="h-3 w-3" />
-                                      <span>{formatDate(task.dueDate)}</span>
-                                    </div>
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  className={cn(
+                                    colorVariants.lightBg,
+                                    "rounded-md p-3 shadow-sm cursor-pointer transition-all duration-200 text-start",
+                                    snapshot.isDragging && "shadow-lg scale-105"
                                   )}
+                                >
+                                  <div className="space-y-2">
+                                    <h3 className={cn("text-sm font-medium text-black")}>
+                                      {task.text}
+                                    </h3>
 
-                                  {task.tags && (task.tags as Prisma.JsonArray)?.length > 0 && (
-                                    <div className="flex flex-wrap gap-1">
-                                      {(task.tags as Prisma.JsonArray)?.map((tag, index) => (
-                                        <span
-                                          key={index}
-                                          className={cn("px-2 py-0.5 bg-blue-500/20 text-blue-500 rounded text-xs")}
-                                        >
-                                          {tag as string}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  )}
+                                    {task.dueDate && (
+                                      <div className="flex items-center gap-1 text-xs">
+                                        <Calendar className="h-3 w-3" />
+                                        <span>{formatDate(task.dueDate)}</span>
+                                      </div>
+                                    )}
+
+                                    {task.tags && (task.tags as Prisma.JsonArray)?.length > 0 && (
+                                      <div className="flex flex-wrap gap-1">
+                                        {(task.tags as Prisma.JsonArray)?.map((tag, index) => (
+                                          <span
+                                            key={index}
+                                            className={cn("px-2 py-0.5 bg-blue-500/20 text-blue-500 rounded text-xs")}
+                                          >
+                                            {tag as string}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            </TaskView>
+                              </TaskView>
                             )}
                           </Draggable>
                         </div>
                       ))}
-                      
-                      {dragState.isDragging && 
-                       dragState.draggedOver?.droppableId === stat.id && 
-                       dragState.draggedOver?.index === stat.tasks.length && (
-                        <div className={cn("h-0.5 rounded-full mb-2 opacity-80", colorVariants.bgColor)} />
-                      )}
+
+                      {dragState.isDragging &&
+                        dragState.draggedOver?.droppableId === stat.id &&
+                        dragState.draggedOver?.index === stat.tasks.length && (
+                          <div className={cn("h-0.5 rounded-full mb-2 opacity-80", colorVariants.bgColor)} />
+                        )}
                       {provided.placeholder}
                       <TaskAddForm
                         statusId={stat.id}
-                        bgClass={colorVariants.bgColor} />
+                        bgClass={colorVariants.bgColor}
+                        onAddTask={(task) => {
+                          setStatus(prevStatus => 
+                            prevStatus.map(statusItem => 
+                              statusItem.id === stat.id 
+                                ? { ...statusItem, tasks: [...statusItem.tasks, task] }
+                                : statusItem
+                            )
+                          )
+                        }}
+                      />
                     </div>
                   </div>
                 )}
