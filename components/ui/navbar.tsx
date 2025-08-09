@@ -155,8 +155,10 @@ function NavBarSkelton() {
   return (
     <SidebarMenu>
       {Array.from({ length: 4 }).map((_, index) => (
-        <SidebarMenuItem key={index}>
-          <SidebarMenuSkeleton showIcon />
+        <SidebarMenuItem key={index}> 
+          <Suspense fallback={null}>
+            <SidebarMenuSkeleton showIcon />
+          </Suspense>
         </SidebarMenuItem>
       ))}
     </SidebarMenu>

@@ -1,3 +1,4 @@
+"use cache"
 import ExcalidrawClient from "@/components/excalidraw/excalidraw";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";

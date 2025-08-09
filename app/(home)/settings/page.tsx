@@ -1,3 +1,4 @@
+"use cache"
 import UserProfile from '@/components/profile/user-profile'
 import React from 'react'
 
