@@ -1,17 +1,22 @@
 import React from 'react'
 import { Input } from './input'
+import { cn } from '@/lib/utils'
 
 interface Props {
     value: string
     onChange: (value: string) => void
+    className?: string
+    options?: {
+        slice?: number,
+    }
 }
-export default function InlineInput({ value, onChange }: Props) {
+export default function InlineInput({ value, onChange, options, className }: Props) {
     const [isEditing, setIsEditing] = React.useState(false)
     const [inputValue, setInputValue] = React.useState(value)
     const handleSave = () => {
+        if (!inputValue || inputValue === value || inputValue.trim() === "") return
         onChange(inputValue)
         setIsEditing(false)
-        setInputValue(value)
     }
     const handleCancel = () => {
         setInputValue(value)
@@ -28,12 +33,12 @@ export default function InlineInput({ value, onChange }: Props) {
                         if (e.key === "Enter") handleSave()
                         if (e.key === "Escape") handleCancel()
                     }}
-                    className="text-sm w-55 font-medium"
+                    className={cn("text-sm font-medium", className)}
                     autoFocus
                 />
             ) : (<h3 className="text-lg font-medium" onDoubleClick={() => {
                 setIsEditing(true)
-            }}>{value}</h3>)}
+            }}>{options?.slice ? value.length > options.slice ? value.slice(0, options.slice) + "..." : value : value}</h3>)}
         </div>
     )
 }

@@ -66,7 +66,9 @@ export function TaskView({ task, children, currStatus, status }: Props) {
               <InlineInput value={task.text} onChange={(value) => {
                 editName({ taskId: task.id, text: value })
                 task.text=value
-              }} />
+              }}
+              className="w-55"
+               />
               </div>
             </div>
 

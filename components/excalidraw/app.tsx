@@ -39,6 +39,8 @@ import { useTheme } from "next-themes";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { createDrawingElementsStorage } from "@/lib/store/excali-store";
 import SaveDialog from "./save-dialog";
+import InlineInput from "../ui/inline-input";
+import { editDrawingName, saveDrawing, updateDrawing } from "@/lib/actions/drawing";
 
 type Comment = {
   x: number;
@@ -255,11 +257,25 @@ export default function App({
     );
     return newElement;
   };
+  const handleNameChange = (name: string) => {
+    if (drawingId) {
+      editDrawingName(drawingId, name);
+      return;
+    }
+    const formData = new FormData();
+    formData.append("title", name);
+    formData.append("elements", JSON.stringify(elements));
+    saveDrawing(formData);
+  }
+
   const renderTopRightUI = (isMobile: boolean) => {
     return (
       <>
         <div className="absolute top-1 left-12 z-[10000]">
-          <h1 className="text-lg">{drawingName?.slice(0, 30) ?? "Untitled"}</h1>
+          <InlineInput value={drawingName ?? "Untitled"} onChange={handleNameChange}
+            options={{ slice: 20 }}
+            className="w-36"
+          />
         </div>
         {!isMobile && (
           <LiveCollaborationTrigger
