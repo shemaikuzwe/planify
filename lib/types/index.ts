@@ -1,4 +1,4 @@
-import { Team, User, TaskStatus, Task } from "@prisma/client"
+
 
 export type Priority = 'HIGH' | 'MEDIUM' | 'LOW'
 export type Drawing = {
