@@ -1,7 +1,7 @@
 import ExcalidrawClient from "@/components/excalidraw/excalidraw";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { getDrawingById } from "@/lib/data/drawing";
+import { getDrawingById, getUserDrawings } from "@/lib/data/drawing";
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -10,10 +10,11 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     if (!drawing) {
         redirect("/excalidraw")
     }
+    const drawingsPromise = getUserDrawings(drawing.userId)
     return (
         <div className="h-full w-fit">
             <Suspense>
-                <ExcalidrawClient drawing={drawing} />
+                <ExcalidrawClient drawingsPromise={drawingsPromise} drawing={drawing} />
             </Suspense>
         </div>
     );

@@ -25,7 +25,6 @@ import Logo from "./logo"
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "./collapsible"
 import { Suspense, use, useState } from "react"
 import { TaskCategory } from "@prisma/client"
-import { Plus } from "lucide-react"
 import AddPage from "../task/add-page"
 import PageOptions from "../task/page-options"
 interface Props {
@@ -63,14 +62,16 @@ export function Navbar({ taskPromise }: Props) {
           <SidebarGroupLabel className="text-xs font-medium text-neutral-500">Private</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem className="ml-2">
+              <SidebarMenuItem>
                 <Collapsible defaultOpen className="group/collapsible">
                   <CollapsibleTrigger className="flex items-center justify-center gap-5">
-                    <div className="flex items-center gap-2">
-                      <ListTodo className="h-4 w-4" />
-                      <span>Tasks</span>
-                    </div>
-                    <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    <SidebarMenuButton asChild tooltip="Tasks" isActive={pathName.includes("/tasks")}>
+                      <div className="flex items-center gap-2">
+                        <ListTodo className="h-5 w-5" />
+                        <span>Tasks</span>
+                        <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                      </div>
+                    </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>

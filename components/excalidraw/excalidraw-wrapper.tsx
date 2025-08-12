@@ -1,14 +1,12 @@
 "use client";
 import * as excalidrawLib from "@excalidraw/excalidraw";
 import { Excalidraw } from "@excalidraw/excalidraw";
-
 import "@excalidraw/excalidraw/index.css";
-
 import App from "./app";
-import { Drawing } from "@/lib/drizzle";
 import { OrderedExcalidrawElement } from "@excalidraw/excalidraw/element/types";
+import { Drawing } from "@prisma/client";
 
-const ExcalidrawWrapper = ({ drawing }: { drawing?: Drawing }) => {
+const ExcalidrawWrapper = ({ drawingsPromise,drawing }: { drawingsPromise: Promise<Drawing[]>,drawing?: Drawing }) => {
 
   const apiElements = drawing?.elements
     ? (Array.isArray(drawing.elements) ? drawing.elements as OrderedExcalidrawElement[] : [])
@@ -20,6 +18,7 @@ const ExcalidrawWrapper = ({ drawing }: { drawing?: Drawing }) => {
       <App
         excalidrawLib={excalidrawLib}
         apiElements={apiElements}
+        drawingsPromise={drawingsPromise}
         drawingId={drawing?.id}
         drawingName={drawing?.name}
       >
