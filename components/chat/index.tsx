@@ -9,6 +9,11 @@ import { UIMessage } from '@/lib/types/ai';
 import { DefaultChatTransport } from 'ai';
 import { useState } from 'react';
 import Messages from './messages';
+import { ScrollArea } from '../ui/scroll-area';
+import { AutoScroller } from './auto-scroller';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useScroll } from '@/hooks/scroll';
+import { cn } from '@/lib/utils';
 
 
 export default function Chat() {
@@ -28,54 +33,112 @@ export default function Chat() {
     sendMessage({ text: input });
     setInput("");
   };
+  const {
+    isAtBottom,
+    scrollToBottom,
+    messagesRef,
+    visibilityRef,
+    handleScroll,
+  } = useScroll<HTMLDivElement>();
+  const isMobile = useIsMobile();
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 w-full">
-      <div className="w-full max-w-2xl">
-        {isEmpty ? (
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-medium">Hello, {user?.name?.split(" ")[0]}</h1>
-          </div>
-        ) : (
-          <Messages messages={messages} error={error} loading={status == "streaming"} reload={sendMessage} />
-        )}
+    <div className="flex flex-col h-screen w-full overflow-hidden relative">
+      {isEmpty ? (
+        <>
+          {/* Centered greeting and input form */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center w-full max-w-2xl px-4">
+              <h1 className="text-2xl font-medium mb-8">Hello, {user?.name?.split(" ")[0]}</h1>
+              
+              <div className="mx-auto p-2">
+                <div className="flex items-center gap-2 p-4 focus-within:ring-2 focus-within:rounded-md focus-within:ring-ring/50">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="p-2 h-auto flex-shrink-0"
+                  >
+                    <Paperclip className="w-4 h-4" />
+                  </Button>
 
-        <form onSubmit={handleSubmit} className="relative">
-          <div className="relative rounded-lg border">
-            <div className="flex items-center gap-2 p-4 focus-within:ring-2 focus-within:rounded-md focus-within:ring-ring/50">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="p-2 h-auto flex-shrink-0"
-              >
-                <Paperclip className="w-4 h-4" />
-              </Button>
+                  <textarea
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    // onKeyDown={handleKeyDown}
+                    onKeyUp={(e) => {
+                      if (e.key === "Enter") {
+                        handleSubmit(e);
+                      }
+                    }}
+                    placeholder="Send a message..."
+                    className="border-none px-2 outline-none focus:outline-none focus:ring-0 w-full resize-none"
+                    rows={2}
+                  />
 
-              <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                // onKeyDown={handleKeyDown}
-                onKeyUp={(e) => {
-                  if (e.key === "Enter") {
-                    handleSubmit(e);
-                  }
-                }}
-                placeholder="Send a message..."
-                className="border-none px-2 outline-none focus:outline-none focus:ring-0 w-full resize-none"
-                rows={2}
-              />
-
-              <Button
-                type="submit"
-                disabled={!input.trim()}
-                size={"icon"}
-              >
-                <ArrowUp className="w-4 h-4" />
-              </Button>
+                  <Button
+                    type="submit"
+                    disabled={!input.trim()}
+                    size={"icon"}
+                  >
+                    <ArrowUp className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
-        </form>
-      </div>
+        </>
+      ) : (
+        <>
+          <ScrollArea
+            onScrollCapture={handleScroll}
+            className="flex-grow w-full overflow-y-auto mt-3"
+          >
+            <AutoScroller
+              ref={visibilityRef}
+              className="min-h-full w-full flex flex-col lg:max-w-2xl mx-auto p-1"
+            >
+              <Messages messages={messages} error={error} loading={status == "streaming"} reload={sendMessage} />
+            </AutoScroller>
+          </ScrollArea>
+          
+          <div className="w-full z-10 mb-14">
+            <div className="mx-auto p-2 max-w-xl">
+              <div className="flex items-center gap-2 p-4 focus-within:ring-2 focus-within:rounded-md focus-within:ring-ring/50">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="p-2 h-auto flex-shrink-0"
+                >
+                  <Paperclip className="w-4 h-4" />
+                </Button>
+
+                <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  // onKeyDown={handleKeyDown}
+                  onKeyUp={(e) => {
+                    if (e.key === "Enter") {
+                      handleSubmit(e);
+                    }
+                  }}
+                  placeholder="Send a message..."
+                  className="border-none px-2 outline-none focus:outline-none focus:ring-0 w-full resize-none"
+                  rows={2}
+                />
+
+                <Button
+                  type="submit"
+                  disabled={!input.trim()}
+                  size={"icon"}
+                >
+                  <ArrowUp className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }
