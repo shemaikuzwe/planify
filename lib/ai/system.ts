@@ -45,7 +45,7 @@ The create task tool creates a new task for a specific page.
 
 Expects a JSON string that adheres to this schema:
 {
-   pageName:string,
+   statusId:string,
    task:{
      text:string,
      description:string|undefined, #The description is optional and is in markdown format
