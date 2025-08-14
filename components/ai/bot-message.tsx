@@ -34,7 +34,7 @@ export function BotMessage({
       </div>
       <div
         className={cn(
-          "ml-1 flex-1 flex-col text-sm md:text-sm lg:text-base ",
+          "ml-2 flex-1 flex-col text-sm md:text-sm lg:text-base ",
           className
         )}
       >

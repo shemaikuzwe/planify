@@ -51,7 +51,7 @@ export default function Chat() {
               <h1 className="text-2xl font-medium mb-8">Hello, {user?.name?.split(" ")[0]}</h1>
               
               <div className="mx-auto p-2">
-                <div className="flex items-center gap-2 p-4 focus-within:ring-2 focus-within:rounded-md focus-within:ring-ring/50">
+                <div className="flex items-center gap-2 p-4 border border-border rounded-md focus-within:ring-2 focus-within:ring-ring/50">
                   <Button
                     type="button"
                     variant="ghost"
@@ -103,7 +103,7 @@ export default function Chat() {
           
           <div className="w-full z-10 mb-14">
             <div className="mx-auto p-2 max-w-xl">
-              <div className="flex items-center gap-2 p-4 focus-within:ring-2 focus-within:rounded-md focus-within:ring-ring/50">
+              <div className="flex items-center gap-2 p-4 border border-border rounded-md focus-within:ring-2 focus-within:ring-ring/50">
                 <Button
                   type="button"
                   variant="ghost"

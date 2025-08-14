@@ -14,6 +14,27 @@ export async function getUserTasks(userId: string) {
   });
   return todos;
 }
+export async function getUserPages(pageName?: string) {
+  const session = await auth()
+  const userId = session?.user?.id;
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+  const todos = await db.taskCategory.findMany({
+    where: { userId, name: pageName },
+    include: {
+      taskStatus: {
+        include: {
+          tasks: true
+        }
+      }
+    },
+    orderBy: {
+      createdAt: "desc",
+    }
+  });
+  return todos.flatMap(todo => todo.taskStatus).map(status => status.tasks);
+}
 export async function getUserSubtasks() {
   const session = await auth()
   const userId = session?.user?.id;
@@ -45,8 +66,8 @@ export async function getCategoryTasks(categoryId: string) {
         }
       }
     },
-    orderBy:{
-      createdAt:"asc"
+    orderBy: {
+      createdAt: "asc"
     }
   })
   return tasks
