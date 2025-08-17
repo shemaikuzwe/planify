@@ -16,7 +16,7 @@ export function BotMessage({
   isLoading?: boolean;
   reload: (
     chatRequestOptions?: ChatRequestOptions
-  ) => Promise<string | null | undefined>;
+  ) => Promise<void>;
 }) {
   const [text, isAnimating] = useAnimatedText(children, {
     duration: 3,

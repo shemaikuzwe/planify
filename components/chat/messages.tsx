@@ -11,7 +11,7 @@ interface MessageProps {
     loading: boolean;
     reload: (
         chatRequestOptions?: ChatRequestOptions
-    ) => Promise<string | null | undefined>;
+    ) => Promise<void>;
 }
 
 const Messages = forwardRef<HTMLDivElement, MessageProps>(function Messages(

@@ -13,12 +13,12 @@ import { ScrollArea } from '../ui/scroll-area';
 import { AutoScroller } from './auto-scroller';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useScroll } from '@/hooks/scroll';
-import { cn } from '@/lib/utils';
+import ScrollAnchor from './scroll-anchor';
 
 
 export default function Chat() {
   const [input, setInput] = useState<string>("")
-  const { messages, sendMessage, error, status } = useChat<UIMessage>({
+  const { messages, sendMessage, error, status,regenerate } = useChat<UIMessage>({
     transport: new DefaultChatTransport({
       api: '/api/chat',
     }),
@@ -32,6 +32,10 @@ export default function Chat() {
     if (!input.trim()) return;
     sendMessage({ text: input });
     setInput("");
+
+    if (!isAtBottom) {
+      scrollToBottom();
+    }
   };
   const {
     isAtBottom,
@@ -42,7 +46,7 @@ export default function Chat() {
   } = useScroll<HTMLDivElement>();
   const isMobile = useIsMobile();
   return (
-    <div className="flex flex-col h-screen w-full overflow-hidden relative">
+    <div className="flex flex-col flex-1 h-[calc(100vh-86px)] w-full overflow-hidden relative">
       {isEmpty ? (
         <>
           {/* Centered greeting and input form */}
@@ -64,8 +68,7 @@ export default function Chat() {
                   <textarea
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    // onKeyDown={handleKeyDown}
-                    onKeyUp={(e) => {
+                    onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         handleSubmit(e);
                       }
@@ -97,9 +100,17 @@ export default function Chat() {
               ref={visibilityRef}
               className="min-h-full w-full flex flex-col lg:max-w-2xl mx-auto p-1"
             >
-              <Messages messages={messages} error={error} loading={status == "streaming"} reload={sendMessage} />
+              <Messages ref={messagesRef} messages={messages} error={error} loading={status == "streaming"} reload={regenerate} />
+              {/* Bottom sentinel for precise scroll-to-bottom targeting */}
+              <div ref={messagesRef} />
             </AutoScroller>
           </ScrollArea>
+          <div className="mx-auto flex justify-center items-center pb-2 pt-0 z-10">
+            <ScrollAnchor
+              isAtBottom={isAtBottom}
+              scrollToBottom={scrollToBottom}
+            />
+          </div>
           
           <div className="w-full z-10 mb-14">
             <div className="mx-auto p-2 max-w-xl">
@@ -116,7 +127,6 @@ export default function Chat() {
                 <textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  // onKeyDown={handleKeyDown}
                   onKeyUp={(e) => {
                     if (e.key === "Enter") {
                       handleSubmit(e);

@@ -20,7 +20,7 @@ import {
     content: string;
     reload: (
       chatRequestOptions?: ChatRequestOptions
-    ) => Promise<string | null | undefined>;
+    ) => Promise<void>;
   }
   export default function ButtonRow({ content, reload }: Props) {
     const [isCopied, copyText] = useClipBoard();
