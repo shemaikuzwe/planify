@@ -40,7 +40,7 @@ model TaskCategory {
 
 model Drawing {
     id          String    @id @default(uuid()) @db.Uuid
-    userId      String    @unique @db.Uuid
+    userId      String    @db.Uuid
     description String?
     name        String
     elements    Json?     @db.Json
@@ -96,7 +96,7 @@ model TaskStatus {
     updatedAt    DateTime?    @updatedAt
     categoryId   String       @db.Uuid
     categories   TaskCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    
+
     @@unique([name, categoryId])
 }
 
@@ -130,6 +130,17 @@ model User {
     creator       Team[]         @relation("Creator")
     Team          Team?          @relation("TeamMembers", fields: [teamId], references: [id])
     teamId        String?        @db.Uuid
+    chats         Chat[]
+}
+
+model Chat {
+    id        String    @id
+    title     String
+    messages  Json?     @db.Json
+    createdAt DateTime? @default(now())
+    updatedAt DateTime? @default(now()) @updatedAt
+    userId    String    @db.Uuid
+    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 enum PRIORITY {

@@ -3,11 +3,11 @@ import { convertToModelMessages, stepCountIs, streamText, tool } from 'ai';
 import { UIMessage } from '@/lib/types/ai';
 import { systemPrompt } from '@/lib/ai/system';
 import { z } from 'zod';
-import { getUserPages, getUserTasks } from '@/lib/ai/data';
+import { getUserPages, getUserTasks, saveChatData } from '@/lib/ai/data';
 import { addTask } from '@/lib/ai/action';
 export async function POST(req: Request) {
-    const { messages }: { messages: UIMessage[] } = await req.json();
-
+    const { messages, id }: { messages: UIMessage[], id: string } = await req.json();
+    const coreMessage = convertToModelMessages(messages)
     const result = streamText({
         model: groq('qwen/qwen3-32b'),
         system: systemPrompt,
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
                 parallelToolCalls: true,
             },
         },
-        prompt: convertToModelMessages(messages),
+        prompt: coreMessage,
         stopWhen: stepCountIs(10),
         tools: {
             getTasks: tool({
@@ -64,6 +64,9 @@ export async function POST(req: Request) {
         },
     });
     return result.toUIMessageStreamResponse({
+        onFinish: async ({ messages }) => {
+            await saveChatData(id, messages)
+        },
         originalMessages: messages,
         messageMetadata: ({ part }) => {
             if (part.type === 'finish') {

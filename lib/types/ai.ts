@@ -1,4 +1,4 @@
-import { UIMessage as Message } from 'ai';
+import { UIMessage as Message} from 'ai';
 import { z } from 'zod';
 
 export const messageMetadataSchema = z.object({

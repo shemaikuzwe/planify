@@ -16,12 +16,18 @@ import { useScroll } from '@/hooks/scroll';
 import ScrollAnchor from './scroll-anchor';
 
 
-export default function Chat() {
+interface ChatProps {
+  id: string
+  initialMessages?: UIMessage[]
+}
+export default function Chat({ id, initialMessages }: ChatProps) {
   const [input, setInput] = useState<string>("")
-  const { messages, sendMessage, error, status,regenerate } = useChat<UIMessage>({
+  const { messages, sendMessage, error, status, regenerate } = useChat<UIMessage>({
     transport: new DefaultChatTransport({
       api: '/api/chat',
+      body: { id }
     }),
+    messages: initialMessages
   });
   const session = useSession()
   const user = session.data?.user
@@ -53,7 +59,7 @@ export default function Chat() {
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center w-full max-w-2xl px-4">
               <h1 className="text-2xl font-medium mb-8">Hello, {user?.name?.split(" ")[0]}</h1>
-              
+
               <div className="mx-auto p-2">
                 <div className="flex items-center gap-2 p-4 border border-border rounded-md focus-within:ring-2 focus-within:ring-ring/50">
                   <Button
@@ -111,7 +117,7 @@ export default function Chat() {
               scrollToBottom={scrollToBottom}
             />
           </div>
-          
+
           <div className="w-full z-10 mb-14">
             <div className="mx-auto p-2 max-w-xl">
               <div className="flex items-center gap-2 p-4 border border-border rounded-md focus-within:ring-2 focus-within:ring-ring/50">
