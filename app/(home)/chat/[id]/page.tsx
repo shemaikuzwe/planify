@@ -14,7 +14,7 @@ export default async function page({ params }: { params: Promise<{ id: string }>
     return (
         <div className='px-4 w-full h-full'>
             <Header title={chat.title} icon={<MessageSquare className="h-5 w-5 " />} />
-            <Chat id={id} initialMessages={chat.messages as unknown as UIMessage[]} />
+            <Chat id={chat.id} initialMessages={chat.messages as unknown as UIMessage[]} />
         </div>
     )
 }

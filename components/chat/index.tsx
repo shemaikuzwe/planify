@@ -11,7 +11,6 @@ import { useState } from 'react';
 import Messages from './messages';
 import { ScrollArea } from '../ui/scroll-area';
 import { AutoScroller } from './auto-scroller';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { useScroll } from '@/hooks/scroll';
 import ScrollAnchor from './scroll-anchor';
 
@@ -23,9 +22,9 @@ interface ChatProps {
 export default function Chat({ id, initialMessages }: ChatProps) {
   const [input, setInput] = useState<string>("")
   const { messages, sendMessage, error, status, regenerate } = useChat<UIMessage>({
+    id: id,
     transport: new DefaultChatTransport({
       api: '/api/chat',
-      body: { id }
     }),
     messages: initialMessages
   });
@@ -50,7 +49,6 @@ export default function Chat({ id, initialMessages }: ChatProps) {
     visibilityRef,
     handleScroll,
   } = useScroll<HTMLDivElement>();
-  const isMobile = useIsMobile();
   return (
     <div className="flex flex-col flex-1 h-[calc(100vh-86px)] w-full overflow-hidden relative">
       {isEmpty ? (
