@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "../prisma";
 import { addGroupSchema, AddTaskSchema, AddTaskValue, ToggleTaskStatusSchema, } from "../types/schema";
 import { auth } from "@/auth";
+import { z } from "zod";
 
 async function addTask(data: AddTaskValue) {
   const validate = AddTaskSchema.safeParse(data);
@@ -12,9 +13,7 @@ async function addTask(data: AddTaskValue) {
   }
   const { text, time, priority, dueDate, statusId, tags } = validate.data;
   const task = await db.task.create({ data: { time, priority, dueDate: dueDate ? new Date(dueDate) : null, text, statusId, tags } });
-
-  revalidatePath("/")
-  return task.id
+  return task
 }
 async function editTask(data: AddTaskValue) {
   const validate = AddTaskSchema.safeParse(data);
@@ -36,6 +35,22 @@ async function editTask(data: AddTaskValue) {
   revalidatePath("/")
 }
 
+async function editName(data: { taskId: string, text: string }) {
+  const validate = z.object({
+    taskId: z.string().uuid(),
+    text: z.string().min(1).max(50),
+  }).safeParse(data)
+  if (!validate.success) {
+    return validate.error.flatten().fieldErrors;
+  }
+  if (!validate.data.taskId) return;
+  const { text, taskId } = validate.data
+  await db.task.update({
+    where: { id: taskId },
+    data: { text },
+  })
+  revalidatePath("/")
+}
 async function toggleStatus(taskId: string, status: string) {
   const validate = ToggleTaskStatusSchema.safeParse({ taskId, status });
   if (!validate.success) {
@@ -75,8 +90,8 @@ async function addGroup(data: { name: string }) {
   }
   const category = await db.taskCategory.create({ data: { name: validate.data.name, userId } })
   await db.taskStatus.create({ data: { name: "TODO", categoryId: category.id } })
-  await db.taskStatus.create({ data: { name: "IN PROGRESS", categoryId: category.id,primaryColor:"bg-blue-600" } })
-  await db.taskStatus.create({ data: { name: "DONE", categoryId: category.id,primaryColor:"bg-green-600" } })
+  await db.taskStatus.create({ data: { name: "IN PROGRESS", categoryId: category.id, primaryColor: "bg-blue-600" } })
+  await db.taskStatus.create({ data: { name: "DONE", categoryId: category.id, primaryColor: "bg-green-600" } })
   revalidatePath("/")
 }
 async function deleteGroup(categoryId: string) {
@@ -137,4 +152,5 @@ export {
   deleteStatus,
   changeStatusColor,
   changeTaskStatus,
+  editName
 }

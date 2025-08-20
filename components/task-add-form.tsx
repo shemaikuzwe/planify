@@ -20,15 +20,18 @@ import { addTask } from "@/lib/actions/task"
 import { AddTaskSchema } from "@/lib/types/schema"
 import React from "react"
 import { getColorVariants } from "@/lib/utils"
+import { Task } from "@prisma/client"
 
 interface TaskAddFormProps {
   bgClass?: string;
   statusId: string;
+  onAddTask:(task:Task)=>void
 }
 
 export function TaskAddForm({
   bgClass = "bg-neutral-200",
   statusId,
+  onAddTask
 }: TaskAddFormProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [tags, setTags] = useState<string[]>([])
@@ -44,7 +47,7 @@ export function TaskAddForm({
   })
 
   const onSubmit = async (values: TaskFormValues) => {
-    await addTask({
+    const newTask=await addTask({
       text: values.text,
       dueDate: values.dueDate,
       priority: "MEDIUM",
@@ -55,6 +58,7 @@ export function TaskAddForm({
     setTags([])
     setNewTag("")
     setIsExpanded(false)
+    onAddTask(newTask as any)
   }
 
   const handleCancel = () => {

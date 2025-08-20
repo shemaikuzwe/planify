@@ -16,7 +16,7 @@ async function seedNewUser(userId: string) {
                 {
                     name: "TODO",
                     categoryId: category.id,
-                    primaryColor: "bg-blue-600"
+                    primaryColor: "bg-gray-600"
                 },
                 {
                     name: "IN PROGRESS",
@@ -26,7 +26,7 @@ async function seedNewUser(userId: string) {
                 {
                     name: "DONE",
                     categoryId: category.id,
-                    primaryColor: "bg-blue-600"
+                    primaryColor: "bg-green-600"
                 }
             ]
         })

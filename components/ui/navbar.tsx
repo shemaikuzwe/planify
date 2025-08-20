@@ -25,7 +25,6 @@ import Logo from "./logo"
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "./collapsible"
 import { Suspense, use, useState } from "react"
 import { TaskCategory } from "@prisma/client"
-import { Plus } from "lucide-react"
 import AddPage from "../task/add-page"
 import PageOptions from "../task/page-options"
 import ChatOptions from "../chat/options"
@@ -88,7 +87,7 @@ export function Navbar({ taskPromise, chatPromise }: Props) {
           <SidebarGroupLabel className="text-xs font-medium text-neutral-500">Private</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem className="ml-2">
+              <SidebarMenuItem>
                 <Collapsible defaultOpen className="group/collapsible">
                   <CollapsibleTrigger className="flex items-center justify-center gap-5">
                     <div className="flex items-center gap-2">

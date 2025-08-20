@@ -1,5 +1,5 @@
 "use client"
-import { Drawing } from "@/lib/drizzle";
+import { Drawing } from "@prisma/client";
 import dynamic from "next/dynamic";
 import Script from "next/script";
 
@@ -11,7 +11,7 @@ const ExcalidrawWithClientOnly = dynamic(
     },
 );
 
-export default function ExcalidrawClient({ drawing }: { drawing?: Drawing }) {
+export default function ExcalidrawClient({ drawingsPromise,drawing }: { drawingsPromise: Promise<Drawing[]>,drawing?: Drawing }) {
 
     return (
         <div className="h-full w-fit">
@@ -20,7 +20,7 @@ export default function ExcalidrawClient({ drawing }: { drawing?: Drawing }) {
             </Script>
 
 
-            <ExcalidrawWithClientOnly drawing={drawing} />
+            <ExcalidrawWithClientOnly drawingsPromise={drawingsPromise} drawing={drawing}  />
 
         </div>
     );

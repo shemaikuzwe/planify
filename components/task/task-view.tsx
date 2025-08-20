@@ -1,20 +1,20 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Edit2, CheckCheck, X, Clock, Calendar1 } from "lucide-react"
+import { Edit2, CheckCheck, X, Clock, Calendar1, Pen } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { capitalizeWords, cn, formatShortDate } from "@/lib/utils/utils"
+import { cn, formatShortDate } from "@/lib/utils/utils"
 import { Task, TaskStatus } from "@prisma/client"
-import { getPriorityIcon } from "../ui/variants"
 import Link from "next/link"
 import MarkdownEditor from "../ui/mark-down-editor"
 import { TaskStatusIndicator } from "../ui/task-status"
-import { saveTaskDescription, toggleStatus } from "@/lib/actions/task"
+import { editName, saveTaskDescription, toggleStatus } from "@/lib/actions/task"
 import DeleteDialog from "../ui/delete-dialog"
-import { Input } from "../ui/input"
 import { Dialog, DialogTrigger, DialogContent } from "../ui/dialog"
 import { TaskStatusTask } from "@/lib/types"
 import { getColorVariants } from "@/lib/utils"
+import ReactMd from "../ui/react-markdown"
+import InlineInput from "../ui/inline-input"
 
 interface Props {
   task: Task
@@ -24,7 +24,6 @@ interface Props {
 }
 
 export function TaskView({ task, children, currStatus, status }: Props) {
-  const [inlineEditText, setInlineEditText] = useState<string | null>(null)
   const [isHovering, setIsHovering] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [edit, setEdit] = useState<string | null>(task.description ?? null)
@@ -35,23 +34,22 @@ export function TaskView({ task, children, currStatus, status }: Props) {
     if (!edit) return
     await saveTaskDescription(task.id, edit)
     setIsEditing(false)
+    task.description = edit
   }
-  // const saveInlineEdit=async ()=>{
-  //   if(!inlineEditText || !inlineEditText.trim() || inlineEditText === task.text) return
-  //   await editName({taskId: task.id, text: inlineEditText})
-  //   setInlineEditText(null)
-  // }
   useEffect(() => {
-    if (!edit) return;
-    if (edit !== task.description) setIsEditing(true)
-  }, [edit])
+    if (edit !== null && edit !== task.description) {
+      setIsEditing(true)
+    } else if (edit === task.description) {
+      setIsEditing(false)
+    }
+  }, [edit, task.description])
   const colorVariants = getColorVariants(currStatus.primaryColor)
   return (
     <Dialog>
       <DialogTrigger className="w-full">
         {children}
       </DialogTrigger>
-      <DialogContent className="w-340">
+      <DialogContent className="min-w-150 min-h-90">
         <div
           className="rounded-md w-full"
           onMouseEnter={() => setIsHovering(true)}
@@ -62,24 +60,15 @@ export function TaskView({ task, children, currStatus, status }: Props) {
               <TaskStatusIndicator status={status} onChange={(status) => toggleTaskCompletion(task.id, status)} currStatusId={currStatus.id} />
               <div
                 className={cn(
-                  "flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium text-white",
-                  colorVariants.textColor
+                  "flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium text-black",
                 )}
               >
-                {inlineEditText ? (
-                  <Input
-                    type="text"
-                    value={inlineEditText}
-                    onChange={(e) => setInlineEditText(e.target.value)}
-                    // onKeyDown={(e)=>{
-                    //   if(e.key ==="Enter") saveInlineEdit()
-                    //   if(e.key ==="Escape") setInlineEditText(null)
-                    // }}
-                    // onBlur={saveInlineEdit}
-                    className="text-sm w-55 font-medium"
-                    autoFocus
-                  />
-                ) : (<h3 className="text-sm font-medium" onDoubleClick={() => setInlineEditText(task.text)}>{task.text}</h3>)}
+              <InlineInput value={task.text} onChange={(value) => {
+                editName({ taskId: task.id, text: value })
+                task.text=value
+              }}
+              className="w-55"
+               />
               </div>
             </div>
 
@@ -121,21 +110,29 @@ export function TaskView({ task, children, currStatus, status }: Props) {
               </div>
             </div>
             <div className="flex flex-col">
-              {isEditing && (
-                <div className="flex gap-2 justify-end">
+              <div className="flex gap-2 justify-end">
+                {!isEditing ? (
                   <Button size={"icon"} variant={"outline"} className="w-7 h-7" onClick={() => {
                     setEdit(task.description ?? null)
-                    setIsEditing(false)
+                    setIsEditing(true)
                   }}>
-                    <X className="h-3.5 w-3.5" />
+                    <Pen className="h-2 w-2" />
                   </Button>
-                  <Button size={"icon"} className="w-7 h-7" onClick={handleSaveDescription}>
-                    <CheckCheck className="h-3.5 w-3.5" />
-                  </Button>
-
-                </div>
-              )}
-              <MarkdownEditor markdown={edit} onChange={(val) => setEdit(val)} />
+                ) : (
+                  <>
+                    <Button size={"icon"} variant={"outline"} className="w-7 h-7" onClick={() => {
+                      setEdit(task.description ?? null)
+                      setIsEditing(false)
+                    }}>
+                      <X className="h-2 w-2" />
+                    </Button>
+                    <Button size={"icon"} className="w-7 h-7" onClick={handleSaveDescription}>
+                      <CheckCheck className="h-2 w-2" />
+                    </Button>
+                  </>
+                )}
+              </div>
+              {isEditing ? <MarkdownEditor markdown={edit} onChange={(val) => setEdit(val)} /> : <ReactMd markdown={edit ?? "Write your description here..."} />}
             </div>
           </div>
         </div>

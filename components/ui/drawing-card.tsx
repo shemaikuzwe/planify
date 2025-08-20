@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useRouter } from "next/navigation"
-import { ChevronRight, MessageSquare, Pencil, MoreVertical } from "lucide-react"
+import { ChevronRight, MessageSquare, Pencil, MoreVertical, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -12,7 +12,7 @@ import DeleteDialog from "./delete-dialog"
 import { useState } from "react"
 import { Input } from "./input"
 
-import {editDrawingName as saveEditDrawingName} from "@/lib/actions/drawing";
+import { editDrawingName as saveEditDrawingName } from "@/lib/actions/drawing";
 interface DrawingCardProps {
     id: string
     name: string
@@ -59,11 +59,17 @@ export function DrawingCard({ id, name, description, createdAt }: DrawingCardPro
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            <DropdownMenuItem className="w-10" onClick={handleEdit}>
+                            <DropdownMenuItem className="flex items-center cursor-pointer" onClick={handleEdit}>
                                 <Pencil size={16} className="mr-2" />
+                                Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild >
-                                <DeleteDialog text={name ?? "Drawing"} id={id} type="drawing" />
+                                <DeleteDialog text={name ?? "Drawing"} id={id} type="drawing">
+                                    <div className="flex gap-2 text-destructive items-center cursor-pointer">
+                                        <Trash2 size={16} className="mr-2" />
+                                        Delete
+                                    </div>
+                                </DeleteDialog>
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -88,7 +94,7 @@ export function DrawingCard({ id, name, description, createdAt }: DrawingCardPro
                     </div>
                     <div className="flex items-center justify-between text-xs w-full">
                         <span>{createdAt ? formatDate(createdAt) : ""}</span>
-                        <ChevronRight size={20}  className="cursor-pointer" onClick={()=> router.push(`/whiteboard/${id}`)}/>
+                        <ChevronRight size={20} className="cursor-pointer" onClick={() => router.push(`/whiteboard/${id}`)} />
                     </div>
                 </div>
 

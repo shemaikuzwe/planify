@@ -7,6 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 interface ColorVariants {
   bgColor: string;
   lightBg: string;
+  medBg: string;
   textColor: string;
   borderColor?: string;
   hoverBg?: string;
@@ -42,6 +43,7 @@ export const getColorVariants = (baseColor: string): ColorVariants => {
     'bg-red-600': {
       bgColor: 'bg-red-600',
       lightBg: 'bg-red-50',
+      medBg: 'bg-red-200',
       textColor: 'text-background',
       borderColor: 'border-red-300',
       hoverBg: 'hover:bg-red-700'
@@ -49,6 +51,7 @@ export const getColorVariants = (baseColor: string): ColorVariants => {
     'bg-green-600': {
       bgColor: 'bg-green-600',
       lightBg: 'bg-green-100',
+      medBg: 'bg-green-200',
       textColor: 'text-foreground',
       borderColor: 'border-green-300',
       hoverBg: 'hover:bg-green-700'
@@ -56,6 +59,7 @@ export const getColorVariants = (baseColor: string): ColorVariants => {
     'bg-blue-600': {
       bgColor: 'bg-blue-600',
       lightBg: 'bg-blue-50',
+      medBg: 'bg-blue-200',
       textColor: 'text-foreground',
       borderColor: 'border-blue-300',
       hoverBg: 'hover:bg-blue-700'
@@ -63,6 +67,7 @@ export const getColorVariants = (baseColor: string): ColorVariants => {
     'bg-yellow-600': {
       bgColor: 'bg-yellow-600',
       lightBg: 'bg-yellow-50',
+      medBg: 'bg-yellow-200',
       textColor: 'text-foreground',
       borderColor: 'border-yellow-300',
       hoverBg: 'hover:bg-yellow-700'
@@ -70,6 +75,7 @@ export const getColorVariants = (baseColor: string): ColorVariants => {
     'bg-purple-600': {
       bgColor: 'bg-purple-600',
       lightBg: 'bg-purple-50',
+      medBg: 'bg-purple-200',
       textColor: 'text-foreground',
       borderColor: 'border-purple-300',
       hoverBg: 'hover:bg-purple-700'
@@ -77,6 +83,7 @@ export const getColorVariants = (baseColor: string): ColorVariants => {
     'bg-pink-600': {
       bgColor: 'bg-pink-600',
       lightBg: 'bg-pink-50',
+      medBg: 'bg-pink-200',
       textColor: 'text-foreground',
       borderColor: 'border-pink-300',
       hoverBg: 'hover:bg-pink-700'
@@ -84,6 +91,7 @@ export const getColorVariants = (baseColor: string): ColorVariants => {
     'bg-indigo-600': {
       bgColor: 'bg-indigo-600',
       lightBg: 'bg-indigo-50',
+      medBg: 'bg-indigo-200',
       textColor: 'text-foreground',
       borderColor: 'border-indigo-300',
       hoverBg: 'hover:bg-indigo-700'
@@ -91,6 +99,7 @@ export const getColorVariants = (baseColor: string): ColorVariants => {
     'bg-gray-600': {
       bgColor: 'bg-gray-600',
       lightBg: 'bg-gray-50',
+      medBg: 'bg-gray-200',
       textColor: 'text-foreground',
       borderColor: 'border-gray-300',
       hoverBg: 'hover:bg-gray-700'
