@@ -25,8 +25,8 @@ const Messages = forwardRef<HTMLDivElement, MessageProps>(function Messages(
                 "w-full max-w-full flex flex-col gap-4 p-1 sm:p-5 md:p-4 lg:p-1"
             }
         >
-            {messages.map((message) => (
-                <div key={message.id} className={"flex flex-col w-full"}>
+            {messages.map((message,idx) => (
+                <div key={idx} className={"flex flex-col w-full"}>
                     {message.role === "user" ? (
                         <UserMessage>
                             <div className="ml-1 mt-4 flex-1 flex-col  gap-2 w-full">

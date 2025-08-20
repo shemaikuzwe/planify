@@ -1,5 +1,5 @@
 "use client"
-import { Home, Settings, ListTodo, Presentation, StickyNote, ChevronDown } from "lucide-react"
+import { Settings, ListTodo, Presentation, StickyNote, ChevronDown, MessageCircle } from "lucide-react"
 import Link from "next/link"
 import User from "@/components/profile/user"
 import {
@@ -30,8 +30,9 @@ import AddPage from "../task/add-page"
 import PageOptions from "../task/page-options"
 interface Props {
   taskPromise: Promise<TaskCategory[]>
+  chatPromise: Promise<{ id: string, title: string }[]>
 }
-export function Navbar({ taskPromise }: Props) {
+export function Navbar({ taskPromise, chatPromise }: Props) {
   const pathName = usePathname()
   return (
     <Sidebar className="border-r" collapsible="icon">
@@ -48,12 +49,35 @@ export function Navbar({ taskPromise }: Props) {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Home">
-                  <Link href="/" className="flex items-center gap-2 ">
-                    <Home className="h-4 w-4" />
-                    <span>Home</span>
-                  </Link>
-                </SidebarMenuButton>
+                <SidebarMenuItem className="ml-2">
+                  <Collapsible defaultOpen className="group/collapsible">
+                    <CollapsibleTrigger className="flex items-center justify-center gap-5">
+                      <div className="flex items-center gap-2">
+                        <MessageCircle className="h-4 w-4" />
+                        <span>Chats</span>
+                      </div>
+                      <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton asChild>
+                            <Link href="/" className="flex items-center gap-2 w-full text-left ">
+                              <div className="border-2 border-foreground/80 rounded-md p-0.5">
+                                <Plus className="h-4 w-4" />
+                              </div>
+                              <span>New Chat</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarGroupLabel className="text-xs font-medium text-neutral-500">Recent Chats</SidebarGroupLabel>
+                        <Suspense fallback={<NavBarSkelton number={3} />}>
+                          <NavChat chatPromise={chatPromise} />
+                        </Suspense>
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </Collapsible>
+                </SidebarMenuItem>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
@@ -151,10 +175,10 @@ export function Navbar({ taskPromise }: Props) {
     </Sidebar>
   )
 }
-function NavBarSkelton() {
+function NavBarSkelton({ number = 5 }: { number?: number }) {
   return (
     <SidebarMenu>
-      {Array.from({ length: 4 }).map((_, index) => (
+      {Array.from({ length: number }).map((_, index) => (
         <SidebarMenuItem key={index}>
           <SidebarMenuSkeleton showIcon />
         </SidebarMenuItem>
@@ -205,6 +229,21 @@ function NavTask({ taskPromise }: { taskPromise: Promise<TaskCategory[]> }) {
             </div>
           )}
         </div>
+      </SidebarMenuSubButton>
+    </SidebarMenuSubItem>
+  ))
+}
+
+function NavChat({ chatPromise }: { chatPromise: Promise<{ id: string; title: string }[]> }) {
+  const chats = use(chatPromise)
+
+  return chats.map((chat) => (
+    <SidebarMenuSubItem key={chat.id}>
+      <SidebarMenuSubButton asChild>
+        <Link href={`/chat/${chat.id}`} className="flex items-center gap-2 w-full">
+          <MessageCircle className="h-4 w-4" />
+          <span>{chat.title}</span>
+        </Link>
       </SidebarMenuSubButton>
     </SidebarMenuSubItem>
   ))
