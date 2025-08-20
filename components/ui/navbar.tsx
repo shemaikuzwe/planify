@@ -28,9 +28,10 @@ import { TaskCategory } from "@prisma/client"
 import { Plus } from "lucide-react"
 import AddPage from "../task/add-page"
 import PageOptions from "../task/page-options"
+import ChatOptions from "../chat/options"
 interface Props {
   taskPromise: Promise<TaskCategory[]>
-  chatPromise: Promise<{ id: string, title: string }[]>
+  chatPromise: Promise<{ id: string, title: string, pinned: boolean }[]>
 }
 export function Navbar({ taskPromise, chatPromise }: Props) {
   const pathName = usePathname()
@@ -56,7 +57,7 @@ export function Navbar({ taskPromise, chatPromise }: Props) {
                         <MessageCircle className="h-4 w-4" />
                         <span>Chats</span>
                       </div>
-                      <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                      {/* <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" /> */}
                     </CollapsibleTrigger>
                     <CollapsibleContent>
                       <SidebarMenuSub>
@@ -64,7 +65,7 @@ export function Navbar({ taskPromise, chatPromise }: Props) {
                           <SidebarMenuSubButton asChild>
                             <Link href="/" className="flex items-center gap-2 w-full text-left ">
                               <div className="border-2 border-foreground/80 rounded-md p-0.5">
-                                <Plus className="h-4 w-4" />
+                                <Plus className="h-3 w-3" />
                               </div>
                               <span>New Chat</span>
                             </Link>
@@ -94,7 +95,7 @@ export function Navbar({ taskPromise, chatPromise }: Props) {
                       <ListTodo className="h-4 w-4" />
                       <span>Tasks</span>
                     </div>
-                    <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    {/* <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" /> */}
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
@@ -134,16 +135,6 @@ export function Navbar({ taskPromise, chatPromise }: Props) {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-
-              {/* <SidebarMenuItem>
-                
-                <SidebarMenuButton asChild tooltip="Add new">
-                  <button className="flex items-center gap-2 w-full">
-                    <Plus className="h-4 w-4" />
-                    <span>Add new</span>
-                  </button>
-                </SidebarMenuButton>
-              </SidebarMenuItem> */}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -234,17 +225,45 @@ function NavTask({ taskPromise }: { taskPromise: Promise<TaskCategory[]> }) {
   ))
 }
 
-function NavChat({ chatPromise }: { chatPromise: Promise<{ id: string; title: string }[]> }) {
+function NavChat({ chatPromise }: { chatPromise: Promise<{ id: string; title: string, pinned: boolean }[]> }) {
   const chats = use(chatPromise)
+  const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null)
 
-  return chats.map((chat) => (
-    <SidebarMenuSubItem key={chat.id}>
-      <SidebarMenuSubButton asChild>
-        <Link href={`/chat/${chat.id}`} className="flex items-center gap-2 w-full">
-          <MessageCircle className="h-4 w-4" />
-          <span>{chat.title}</span>
-        </Link>
-      </SidebarMenuSubButton>
-    </SidebarMenuSubItem>
-  ))
+  const handleMouseEnter = (taskId: string) => {
+    setHoveredId(taskId)
+  }
+
+  const handleMouseLeave = (taskId: string) => {
+    if (openDropdownId !== taskId) {
+      setHoveredId(null)
+    }
+  }
+
+  return chats.map((chat) => {
+    const isHovered = hoveredId === chat.id
+    return (
+      <SidebarMenuSubItem key={chat.id}>
+        <SidebarMenuSubButton asChild>
+          <Link href={`/chat/${chat.id}`}
+            className="flex items-center gap-2 w-full relative group"
+            onMouseEnter={() => handleMouseEnter(chat.id)}
+            onMouseLeave={() => handleMouseLeave(chat.id)}>
+            <MessageCircle className="h-4 w-4 flex-shrink-0" />
+            <span className="flex-1 truncate">{chat.title}</span>
+            {(isHovered) && (
+              <div 
+                className="absolute right-0 top-1/2 -translate-y-1/2 backdrop-blur-sm pl-2"
+                onClick={(e) => e.preventDefault()}
+              >
+                <ChatOptions
+                  chat={chat}
+                />
+              </div>
+            )}
+          </Link>
+        </SidebarMenuSubButton>
+      </SidebarMenuSubItem>
+    )
+  })
 }

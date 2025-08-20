@@ -6,9 +6,10 @@ import { Trash2 } from 'lucide-react'
 import { deleteGroup, deleteTask } from '@/lib/actions/task'
 import { useRouter } from 'next/navigation'
 import { deleteDrawing } from "@/lib/actions/drawing";
+import { deleteChat } from '@/lib/actions/chat'
 interface Props {
     id: string;
-    type: "group" | "task" | "drawing",
+    type: "group" | "task" | "drawing"|"chat",
     text: string,
     children?: React.ReactNode
 }
@@ -24,6 +25,8 @@ export default function DeleteDialog({ id, type, text, children}: Props) {
                 await deleteTask(id)
             } else if (type === "drawing") {
                 await deleteDrawing(id)
+            } else if (type === "chat") {
+                await deleteChat(id)
             }
             setIsOpen(false)
             router.push("/")

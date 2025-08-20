@@ -13,7 +13,8 @@ async function getRecentChats() {
         },
         select: {
             id: true,
-            title: true
+            title: true,
+            pinned: true,
         },
         orderBy: {
             updatedAt: "desc",
