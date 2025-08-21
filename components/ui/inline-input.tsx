@@ -33,10 +33,10 @@ export default function InlineInput({ value, onChange, options, className }: Pro
                         if (e.key === "Enter") handleSave()
                         if (e.key === "Escape") handleCancel()
                     }}
-                    className={cn("text-sm font-medium", className)}
+                    className={cn("text-sm", className)}
                     autoFocus
                 />
-            ) : (<h3 className="text-lg font-medium" onDoubleClick={() => {
+            ) : (<h3 className={cn("text-sm", className)} onDoubleClick={() => {
                 setIsEditing(true)
             }}>{options?.slice ? value.length > options.slice ? value.slice(0, options.slice) + "..." : value : value}</h3>)}
         </div>

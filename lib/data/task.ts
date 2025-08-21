@@ -1,5 +1,5 @@
 import "server-only"
-import { db } from "../prisma";
+import { db } from '@/lib/prisma';
 import { auth } from "@/auth";
 
 export async function getUserTasks(userId: string) {
@@ -45,8 +45,8 @@ export async function getCategoryTasks(categoryId: string) {
         }
       }
     },
-    orderBy:{
-      createdAt:"asc"
+    orderBy: {
+      createdAt: "asc"
     }
   })
   return tasks

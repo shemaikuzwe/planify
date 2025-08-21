@@ -24,16 +24,16 @@ export default function AddPage() {
         resolver: zodResolver(addGroupSchema)
     })
     const onSubmit = async (data: { name: string }) => {
-       try {
-        startTransition(async () => {
-            await addGroup(data)
-            form.reset()
-            setIsOpen(false)
-        })
-       }catch (error) {
-        console.log(error)
-        toast.error("Failed to add page")   
-    }
+        try {
+            startTransition(async () => {
+                await addGroup(data)
+                form.reset()
+                setIsOpen(false)
+            })
+        } catch (error) {
+            console.log(error)
+            toast.error("Failed to add page")
+        }
     }
     const handleEmojiSelect = (newEmoji: string) => {
         const currentText = form.getValues("name") || ""
@@ -42,10 +42,12 @@ export default function AddPage() {
     return (
         <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
             <AlertDialogTrigger asChild>
-                <Button size={"sm"} variant={"ghost"} >
-                    <Plus className="w-4 h-4 mr-1" />
-                    New Page
-                </Button>
+                <div className="flex items-center gap-2 ml-2 cursor-pointer">
+                    <div className="border-2 border-foreground/80 rounded-md p-0.5">
+                        <Plus className="h-3 w-3" />
+                    </div>
+                    <span>New Page</span>
+                </div>
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogTitle>New Page</AlertDialogTitle>

@@ -58,7 +58,7 @@ export default function MeetingRoom() {
           <CallLayout />
         </div>
         <div
-          className={`h-[calc(100vh-86px)] hidden ml-2 ${showParticipants && "show-block"}`}
+          className={`calc(100vh-[h-86px)] hidden ml-2 ${showParticipants && "show-block"}`}
         >
           <CallParticipantsList onClose={() => setShowParticipants(false)} />
         </div>
