@@ -9,3 +9,10 @@ export const messageMetadataSchema = z.object({
 export type MessageMetadata = z.infer<typeof messageMetadataSchema>;
 
 export type UIMessage = Message<MessageMetadata>;
+
+export type Chat = {
+  id: string;
+  title: string;
+  pinned: boolean;
+  updatedAt: Date;
+}
