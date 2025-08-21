@@ -7,7 +7,6 @@ import { getUserPages, getUserTasks, saveChatData } from '@/lib/ai/data';
 import { addTask } from '@/lib/ai/action';
 export async function POST(req: Request) {
     const { messages, id }: { messages: UIMessage[], id: string } = await req.json();
-    console.log("id",id)
     const coreMessage = convertToModelMessages(messages)
     const result = streamText({
         model: groq('qwen/qwen3-32b'),

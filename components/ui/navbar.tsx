@@ -1,5 +1,5 @@
 "use client"
-import { Settings, ListTodo, Presentation, StickyNote,MessageCircle, Plus } from "lucide-react"
+import { Settings, ListTodo, Presentation, StickyNote, MessageCircle, Plus } from "lucide-react"
 import Link from "next/link"
 import User from "@/components/profile/user"
 import {
@@ -31,6 +31,7 @@ import ChatOptions from "../chat/options"
 import InlineInput from "./inline-input"
 import { renameChat } from "@/lib/actions/chat"
 import { editGroupName } from "@/lib/actions/task"
+import { ScrollArea } from "./scroll-area"
 interface Props {
   taskPromise: Promise<TaskCategory[]>
   chatPromise: Promise<{ id: string, title: string, pinned: boolean }[]>
@@ -187,7 +188,7 @@ function NavTask({ taskPromise }: { taskPromise: Promise<TaskCategory[]> }) {
     setHoveredTaskId(taskId)
   }
 
-  const handleMouseLeave = (taskId: string) => {
+  const handleMouseLeave = () => {
     setHoveredTaskId(null)
   }
   return tasks.map((task) => (
@@ -196,7 +197,7 @@ function NavTask({ taskPromise }: { taskPromise: Promise<TaskCategory[]> }) {
         <div
           className="flex items-center justify-between gap-2 w-full"
           onMouseEnter={() => handleMouseEnter(task.id)}
-          onMouseLeave={() => handleMouseLeave(task.id)}
+          onMouseLeave={() => handleMouseLeave()}
         >
           <Link href={`/${task.id}`} className="flex items-center gap-2 w-full relative group">
             <StickyNote className="h-4 w-4" />
@@ -226,43 +227,48 @@ function NavChat({ text, chatPromise }: { text: string; chatPromise: Promise<{ i
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const router = useRouter()
 
-  const handleMouseEnter = (taskId: string) => {
-    setHoveredId(taskId)
+  const handleMouseEnter = (id: string) => {
+    setHoveredId(id)
   }
 
-  const handleMouseLeave = (taskId: string) => {
+  const handleMouseLeave = () => {
     setHoveredId(null)
   }
 
   return chats.length == 0 ? null : (
     <>
-      <SidebarGroupLabel className="text-xs font-medium text-neutral-500">{text}</SidebarGroupLabel>
-      {chats.map((chat) => (
-        <SidebarMenuSubItem key={chat.id}>
-          <SidebarMenuSubButton asChild>
-            <Link href={`/chat/${chat.id}`}
-              className="flex items-center gap-2 w-full relative group"
-              onMouseEnter={() => handleMouseEnter(chat.id)}
-              onMouseLeave={() => handleMouseLeave(chat.id)}>
-              <MessageCircle className="h-4 w-4 flex-shrink-0" />
-              <InlineInput value={chat.title} onChange={async (val) => {
-                await renameChat(chat.id, val)
-                router.refresh()
-              }} options={{ slice: 20 }} className="flex-1 truncate" />
-              {(hoveredId === chat.id) && (
-                <div
-                  className="absolute right-0 top-1/2 -translate-y-1/2 backdrop-blur-sm pl-2"
-                  onClick={(e) => e.preventDefault()}
-                >
-                  <ChatOptions
-                    chat={chat}
-                  />
-                </div>
-              )}
-            </Link>
-          </SidebarMenuSubButton>
-        </SidebarMenuSubItem>
-      ))}
+      <SidebarGroupLabel className="text-xs font-medium">{text}</SidebarGroupLabel>
+      {/* <ScrollArea className="max-h-30 pr-2 w-full"> */}
+        {chats.map((chat) => (
+
+          <SidebarMenuSubItem key={chat.id}>
+            <SidebarMenuSubButton asChild>
+              <Link href={`/chat/${chat.id}`}
+                className="flex items-center gap-2 w-full relative group"
+                onMouseEnter={() => handleMouseEnter(chat.id)}
+                onMouseLeave={() => handleMouseLeave()}>
+                <MessageCircle className="h-4 w-4 flex-shrink-0" />
+                <InlineInput value={chat.title} onChange={async (val) => {
+                  await renameChat(chat.id, val)
+                  router.refresh()
+                }} options={{ slice: 20 }} className="flex-1 truncate" />
+                {(hoveredId === chat.id) && (
+                  <div
+                    className="absolute right-0 top-1/2 -translate-y-1/2 backdrop-blur-sm pl-2"
+                    onClick={(e) => e.preventDefault()}
+                  >
+                    <ChatOptions
+                      chat={chat}
+                    />
+                  </div>
+                )}
+              </Link>
+            </SidebarMenuSubButton>
+          </SidebarMenuSubItem>
+
+        ))}
+      {/* </ScrollArea> */}
+
     </>
   )
 }

@@ -13,7 +13,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import { AutoScroller } from './auto-scroller';
 import { useScroll } from '@/hooks/scroll';
 import ScrollAnchor from './scroll-anchor';
-
+import { usePathname, useRouter } from 'next/navigation';
 
 interface ChatProps {
   id: string
@@ -28,14 +28,22 @@ export default function Chat({ id, initialMessages }: ChatProps) {
     }),
     messages: initialMessages
   });
+  const path = usePathname()
   const session = useSession()
   const user = session.data?.user
   const isEmpty = messages.length === 0
+  const router = useRouter()
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!input.trim()) return;
-    sendMessage({ text: input });
+    sendMessage({ text: input }).then(() => {
+      const isNew = !path.includes(id);
+      if (isNew) {
+        router.refresh()
+        router.push(`/chat/${id}`)
+      }
+    });
     setInput("");
 
     if (!isAtBottom) {
