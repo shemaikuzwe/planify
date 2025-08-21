@@ -10,6 +10,30 @@ async function getRecentChats() {
     const chats = await db.chat.findMany({
         where: {
             userId,
+            pinned: false,
+        },
+        select: {
+            id: true,
+            title: true,
+            pinned: true,
+        },
+        orderBy: {
+            updatedAt: "desc",
+        },
+        take: 5,
+    });
+    return chats;
+}
+async function getPinnedChats() {
+    const session = await auth();
+    const userId = session?.user?.id;
+    if (!userId) {
+        throw new Error("Unauthorized");
+    }
+    const chats = await db.chat.findMany({
+        where: {
+            userId,
+            pinned: true,
         },
         select: {
             id: true,
@@ -24,4 +48,4 @@ async function getRecentChats() {
     return chats;
 }
 
-export { getRecentChats };
+export { getRecentChats, getPinnedChats };

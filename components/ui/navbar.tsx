@@ -1,5 +1,5 @@
 "use client"
-import { Settings, ListTodo, Presentation, StickyNote, ChevronDown, MessageCircle } from "lucide-react"
+import { Settings, ListTodo, Presentation, StickyNote,MessageCircle, Plus } from "lucide-react"
 import Link from "next/link"
 import User from "@/components/profile/user"
 import {
@@ -20,7 +20,7 @@ import {
   SidebarMenuSkeleton,
 } from "@/components/ui/sidebar"
 import Image from "next/image"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import Logo from "./logo"
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "./collapsible"
 import { Suspense, use, useState } from "react"
@@ -28,11 +28,15 @@ import { TaskCategory } from "@prisma/client"
 import AddPage from "../task/add-page"
 import PageOptions from "../task/page-options"
 import ChatOptions from "../chat/options"
+import InlineInput from "./inline-input"
+import { renameChat } from "@/lib/actions/chat"
+import { editGroupName } from "@/lib/actions/task"
 interface Props {
   taskPromise: Promise<TaskCategory[]>
   chatPromise: Promise<{ id: string, title: string, pinned: boolean }[]>
+  pinnedChatPromise: Promise<{ id: string, title: string, pinned: boolean }[]>
 }
-export function Navbar({ taskPromise, chatPromise }: Props) {
+export function Navbar({ taskPromise, chatPromise, pinnedChatPromise }: Props) {
   const pathName = usePathname()
   return (
     <Sidebar className="border-r" collapsible="icon">
@@ -46,38 +50,38 @@ export function Navbar({ taskPromise, chatPromise }: Props) {
 
       <SidebarContent>
         <SidebarGroup>
+          <SidebarGroupLabel className="text-xs font-medium text-neutral-500">Chats</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuItem className="ml-2">
-                  <Collapsible defaultOpen className="group/collapsible">
-                    <CollapsibleTrigger className="flex items-center justify-center gap-5">
-                      <div className="flex items-center gap-2">
-                        <MessageCircle className="h-4 w-4" />
-                        <span>Chats</span>
-                      </div>
-                      {/* <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" /> */}
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <SidebarMenuSub>
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton asChild>
-                            <Link href="/" className="flex items-center gap-2 w-full text-left ">
-                              <div className="border-2 border-foreground/80 rounded-md p-0.5">
-                                <Plus className="h-3 w-3" />
-                              </div>
-                              <span>New Chat</span>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                        <SidebarGroupLabel className="text-xs font-medium text-neutral-500">Recent Chats</SidebarGroupLabel>
-                        <Suspense fallback={<NavBarSkelton number={3} />}>
-                          <NavChat chatPromise={chatPromise} />
-                        </Suspense>
-                      </SidebarMenuSub>
-                    </CollapsibleContent>
-                  </Collapsible>
-                </SidebarMenuItem>
+              <SidebarMenuItem className="ml-2">
+                <Collapsible defaultOpen className="group/collapsible">
+                  <CollapsibleTrigger className="flex items-center justify-center gap-5">
+                    <div className="flex items-center gap-2">
+                      <MessageCircle className="h-4 w-4" />
+                      <span>Chats</span>
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild>
+                          <Link href="/" className="flex items-center gap-2 w-full text-left ">
+                            <div className="border-2 border-foreground/80 rounded-md p-0.5">
+                              <Plus className="h-3 w-3" />
+                            </div>
+                            <span>New Chat</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <Suspense fallback={<NavBarSkelton number={3} />}>
+                        <NavChat chatPromise={pinnedChatPromise} text="Pinned Chats" />
+                      </Suspense>
+                      <Suspense fallback={<NavBarSkelton number={3} />}>
+                        <NavChat chatPromise={chatPromise} text="Recent Chats" />
+                      </Suspense>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
@@ -87,14 +91,13 @@ export function Navbar({ taskPromise, chatPromise }: Props) {
           <SidebarGroupLabel className="text-xs font-medium text-neutral-500">Private</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
+              <SidebarMenuItem className="ml-2">
                 <Collapsible defaultOpen className="group/collapsible">
                   <CollapsibleTrigger className="flex items-center justify-center gap-5">
                     <div className="flex items-center gap-2">
                       <ListTodo className="h-4 w-4" />
                       <span>Tasks</span>
                     </div>
-                    {/* <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" /> */}
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
@@ -179,25 +182,14 @@ function NavBarSkelton({ number = 5 }: { number?: number }) {
 function NavTask({ taskPromise }: { taskPromise: Promise<TaskCategory[]> }) {
   const tasks = use(taskPromise)
   const [hoveredTaskId, setHoveredTaskId] = useState<string | null>(null)
-  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null)
-
+  const router = useRouter()
   const handleMouseEnter = (taskId: string) => {
     setHoveredTaskId(taskId)
   }
 
   const handleMouseLeave = (taskId: string) => {
-    if (openDropdownId !== taskId) {
-      setHoveredTaskId(null)
-    }
+    setHoveredTaskId(null)
   }
-
-  const handleDropdownOpenChange = (taskId: string, isOpen: boolean) => {
-    setOpenDropdownId(isOpen ? taskId : null)
-    if (!isOpen) {
-      setHoveredTaskId(null)
-    }
-  }
-
   return tasks.map((task) => (
     <SidebarMenuSubItem key={task.id}>
       <SidebarMenuSubButton asChild>
@@ -206,15 +198,20 @@ function NavTask({ taskPromise }: { taskPromise: Promise<TaskCategory[]> }) {
           onMouseEnter={() => handleMouseEnter(task.id)}
           onMouseLeave={() => handleMouseLeave(task.id)}
         >
-          <Link href={`/${task.id}`} className="flex items-center gap-2 flex-1">
+          <Link href={`/${task.id}`} className="flex items-center gap-2 w-full relative group">
             <StickyNote className="h-4 w-4" />
-            <span>{task.name}</span>
+            <InlineInput value={task.name} onChange={async (val) => {
+              await editGroupName(task.id, val)
+              router.refresh()
+            }} options={{ slice: 20 }} className="flex-1 truncate" />
           </Link>
-          {(hoveredTaskId === task.id || openDropdownId === task.id) && (
-            <div onClick={(e) => e.preventDefault()}>
+          {(hoveredTaskId === task.id) && (
+            <div
+              className="absolute right-0 top-1/2 -translate-y-1/2 backdrop-blur-sm pl-2"
+              onClick={(e) => e.preventDefault()}
+            >
               <PageOptions
                 page={task}
-                onOpenChange={(isOpen) => handleDropdownOpenChange(task.id, isOpen)}
               />
             </div>
           )}
@@ -224,45 +221,48 @@ function NavTask({ taskPromise }: { taskPromise: Promise<TaskCategory[]> }) {
   ))
 }
 
-function NavChat({ chatPromise }: { chatPromise: Promise<{ id: string; title: string, pinned: boolean }[]> }) {
+function NavChat({ text, chatPromise }: { text: string; chatPromise: Promise<{ id: string; title: string, pinned: boolean }[]> }) {
   const chats = use(chatPromise)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
-  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null)
+  const router = useRouter()
 
   const handleMouseEnter = (taskId: string) => {
     setHoveredId(taskId)
   }
 
   const handleMouseLeave = (taskId: string) => {
-    if (openDropdownId !== taskId) {
-      setHoveredId(null)
-    }
+    setHoveredId(null)
   }
 
-  return chats.map((chat) => {
-    const isHovered = hoveredId === chat.id
-    return (
-      <SidebarMenuSubItem key={chat.id}>
-        <SidebarMenuSubButton asChild>
-          <Link href={`/chat/${chat.id}`}
-            className="flex items-center gap-2 w-full relative group"
-            onMouseEnter={() => handleMouseEnter(chat.id)}
-            onMouseLeave={() => handleMouseLeave(chat.id)}>
-            <MessageCircle className="h-4 w-4 flex-shrink-0" />
-            <span className="flex-1 truncate">{chat.title}</span>
-            {(isHovered) && (
-              <div 
-                className="absolute right-0 top-1/2 -translate-y-1/2 backdrop-blur-sm pl-2"
-                onClick={(e) => e.preventDefault()}
-              >
-                <ChatOptions
-                  chat={chat}
-                />
-              </div>
-            )}
-          </Link>
-        </SidebarMenuSubButton>
-      </SidebarMenuSubItem>
-    )
-  })
+  return chats.length == 0 ? null : (
+    <>
+      <SidebarGroupLabel className="text-xs font-medium text-neutral-500">{text}</SidebarGroupLabel>
+      {chats.map((chat) => (
+        <SidebarMenuSubItem key={chat.id}>
+          <SidebarMenuSubButton asChild>
+            <Link href={`/chat/${chat.id}`}
+              className="flex items-center gap-2 w-full relative group"
+              onMouseEnter={() => handleMouseEnter(chat.id)}
+              onMouseLeave={() => handleMouseLeave(chat.id)}>
+              <MessageCircle className="h-4 w-4 flex-shrink-0" />
+              <InlineInput value={chat.title} onChange={async (val) => {
+                await renameChat(chat.id, val)
+                router.refresh()
+              }} options={{ slice: 20 }} className="flex-1 truncate" />
+              {(hoveredId === chat.id) && (
+                <div
+                  className="absolute right-0 top-1/2 -translate-y-1/2 backdrop-blur-sm pl-2"
+                  onClick={(e) => e.preventDefault()}
+                >
+                  <ChatOptions
+                    chat={chat}
+                  />
+                </div>
+              )}
+            </Link>
+          </SidebarMenuSubButton>
+        </SidebarMenuSubItem>
+      ))}
+    </>
+  )
 }
