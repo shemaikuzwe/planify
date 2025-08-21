@@ -73,6 +73,12 @@ export function Navbar({ taskPromise, chatPromise, pinnedChatPromise }: Props) {
                             <span>New Chat</span>
                           </Link>
                         </SidebarMenuSubButton>
+                        <SidebarMenuSubButton asChild>
+                          <Link href="/chat" className="flex items-center gap-2 w-full text-left ">
+                            <MessageCircle className="h-4 w-4" />
+                            <span>Chats</span>
+                          </Link>
+                        </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                       <Suspense fallback={<NavBarSkelton number={3} />}>
                         <NavChat chatPromise={pinnedChatPromise} text="Pinned Chats" />
@@ -239,34 +245,34 @@ function NavChat({ text, chatPromise }: { text: string; chatPromise: Promise<{ i
     <>
       <SidebarGroupLabel className="text-xs font-medium">{text}</SidebarGroupLabel>
       {/* <ScrollArea className="max-h-30 pr-2 w-full"> */}
-        {chats.map((chat) => (
+      {chats.map((chat) => (
 
-          <SidebarMenuSubItem key={chat.id}>
-            <SidebarMenuSubButton asChild>
-              <Link href={`/chat/${chat.id}`}
-                className="flex items-center gap-2 w-full relative group"
-                onMouseEnter={() => handleMouseEnter(chat.id)}
-                onMouseLeave={() => handleMouseLeave()}>
-                <MessageCircle className="h-4 w-4 flex-shrink-0" />
-                <InlineInput value={chat.title} onChange={async (val) => {
-                  await renameChat(chat.id, val)
-                  router.refresh()
-                }} options={{ slice: 20 }} className="flex-1 truncate" />
-                {(hoveredId === chat.id) && (
-                  <div
-                    className="absolute right-0 top-1/2 -translate-y-1/2 backdrop-blur-sm pl-2"
-                    onClick={(e) => e.preventDefault()}
-                  >
-                    <ChatOptions
-                      chat={chat}
-                    />
-                  </div>
-                )}
-              </Link>
-            </SidebarMenuSubButton>
-          </SidebarMenuSubItem>
+        <SidebarMenuSubItem key={chat.id}>
+          <SidebarMenuSubButton asChild>
+            <Link href={`/chat/${chat.id}`}
+              className="flex items-center gap-2 w-full relative group"
+              onMouseEnter={() => handleMouseEnter(chat.id)}
+              onMouseLeave={() => handleMouseLeave()}>
+              <MessageCircle className="h-4 w-4 flex-shrink-0" />
+              <InlineInput value={chat.title} onChange={async (val) => {
+                await renameChat(chat.id, val)
+                router.refresh()
+              }} options={{ slice: 20 }} className="flex-1 truncate" />
+              {(hoveredId === chat.id) && (
+                <div
+                  className="absolute right-0 top-1/2 -translate-y-1/2 backdrop-blur-sm pl-2"
+                  onClick={(e) => e.preventDefault()}
+                >
+                  <ChatOptions
+                    chat={chat}
+                  />
+                </div>
+              )}
+            </Link>
+          </SidebarMenuSubButton>
+        </SidebarMenuSubItem>
 
-        ))}
+      ))}
       {/* </ScrollArea> */}
 
     </>

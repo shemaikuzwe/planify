@@ -107,7 +107,7 @@ async function getChatTitle(messages: UIMessage[]) {
   const title = await generateObject({
     model: groq("openai/gpt-oss-20b"),
     system: `you are a chat title generator assistant  based The main context in chat messages about programming concepts.
-    if you are given achat message generate a small title for it`,
+    if you are given chat message generate a small title for it`,
     messages: modelMessages,
     schema: z.object({
       title: z.string().describe("chat title"),

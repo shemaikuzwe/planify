@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 import { use } from "react";
-import { User } from "@prisma/client";
+import { Chat, User } from "@prisma/client";
 interface Props {
-  chatsPromise: Promise<Array<Chat & { user: User }>>;
+  chatsPromise: Promise<Array<{ id: string; title: string; pinned: boolean; updatedAt: Date } & { user: User }>>;
 }
 export default function ChatHistory({ chatsPromise }: Props) {
   const initialChats = use(chatsPromise);
@@ -37,7 +37,9 @@ export default function ChatHistory({ chatsPromise }: Props) {
         </div>
       </div>
       {chats && chats.length > 0 ? (
-        chats.map((chat) => <ChatItem chat={chat} key={chat.id} />)
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {chats.map((chat) => <ChatItem chat={chat} key={chat.id} />)}
+        </div>
       ) : (
         <div className="w-full h-full max-h-50 flex flex-col justify-center items-center">
           <Search className="h-12 w-12" />
