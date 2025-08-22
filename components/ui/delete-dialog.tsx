@@ -27,8 +27,9 @@ export default function DeleteDialog({ id, type, text, children, onDelete }: Pro
             } else if (type === "chat") {
                 await deleteChat(id)
             }
-            setIsOpen(false)
             onDelete?.()
+            setIsOpen(false)
+           
         })
     }
     return (

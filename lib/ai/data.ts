@@ -4,7 +4,7 @@ import { db } from '@/lib/prisma';
 import { convertToModelMessages, generateObject, UIMessage } from "ai";
 import z from "zod";
 import { groq } from "@ai-sdk/groq";
-import { revalidatePath } from "next/cache";
+import { revalidateTag } from "next/cache";
 
 async function getUserPages(pageName?: string) {
   const session = await auth()
@@ -97,8 +97,7 @@ export async function saveChatData(id: string, messages: UIMessage[]) {
         messages: messages as any,
       },
     });
-    // revalidatePath("/", "layout");
-    return chat;
+    revalidateTag("chats")
   } catch (e) {
     return null;
   }

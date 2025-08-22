@@ -31,7 +31,7 @@ export default function ChatItem({ chat }: Props) {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <DeleteDialog text={chat.title} id={chat.id} type="chat">
+              <DeleteDialog text={chat.title} id={chat.id} type="chat" onDelete={() => router.push("/")}>
                 <Button variant={"destructive"}>
                   <Trash2 className="h-3 w-3" />
                   Delete
