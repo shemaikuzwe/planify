@@ -45,7 +45,7 @@ export default function ChatItem({ chat }: Props) {
         className="p-2 cursor-pointer flex justify-center items-center "
         onClick={() => router.push(`chat/${chat.id}`)}
       >
-        <span className="text-muted-foreground text-sm">{formatDate(chat.updatedAt)}</span>
+        <span className="text-muted-foreground text-sm">{chat.updatedAt ? formatDate(chat.updatedAt) : ""}</span>
       </CardContent>
     </Card>
   );

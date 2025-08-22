@@ -6,11 +6,9 @@ import { MoveRight, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-
 import { use } from "react";
-import { Chat, User } from "@prisma/client";
 interface Props {
-  chatsPromise: Promise<Array<{ id: string; title: string; pinned: boolean; updatedAt: Date } & { user: User }>>;
+  chatsPromise: Promise<Array<{ id: string; title: string; pinned: boolean; updatedAt: Date|null }>>;
 }
 export default function ChatHistory({ chatsPromise }: Props) {
   const initialChats = use(chatsPromise);

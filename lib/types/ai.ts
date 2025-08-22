@@ -14,5 +14,5 @@ export type Chat = {
   id: string;
   title: string;
   pinned: boolean;
-  updatedAt: Date;
+  updatedAt: Date|null;
 }

@@ -80,10 +80,10 @@ export const getChatById = async (id: string | undefined) => {
 };
 export async function saveChatData(id: string, messages: UIMessage[]) {
   try {
-    const session = auth();
+    const session = await auth();
     const existing = await getChatById(id);
     const title = existing ? existing.title : await getChatTitle(messages);
-    const userId = existing ? existing.userId : (await session)?.user?.id;
+    const userId = existing ? existing.userId : session?.user?.id;
     if (!userId) return null;
     const chat = await db.chat.upsert({
       where: { id },
@@ -97,6 +97,7 @@ export async function saveChatData(id: string, messages: UIMessage[]) {
         messages: messages as any,
       },
     });
+    // revalidatePath("/", "layout");
     return chat;
   } catch (e) {
     return null;

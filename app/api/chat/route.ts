@@ -9,12 +9,12 @@ export async function POST(req: Request) {
     const { messages, id }: { messages: UIMessage[], id: string } = await req.json();
     const coreMessage = convertToModelMessages(messages)
     const result = streamText({
-        model: groq('qwen/qwen3-32b'),
+        model: groq('openai/gpt-oss-120b'),
         system: systemPrompt,
         providerOptions: {
             groq: {
                 reasoningFormat: 'hidden',
-                reasoningEffort: 'default',
+                reasoningEffort: 'medium',
                 parallelToolCalls: true,
             },
         },

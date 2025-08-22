@@ -34,8 +34,7 @@ export default function Chat({ id, initialMessages }: ChatProps) {
   const isEmpty = messages.length === 0
   const router = useRouter()
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = () => {
     if (!input.trim()) return;
     sendMessage({ text: input }).then(() => {
       const isNew = !path.includes(id);
@@ -82,16 +81,16 @@ export default function Chat({ id, initialMessages }: ChatProps) {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
-                        handleSubmit(e);
+                        handleSubmit();
                       }
                     }}
                     placeholder="Send a message..."
                     className="border-none px-2 outline-none focus:outline-none focus:ring-0 w-full resize-none"
                     rows={2}
-                  />
+                  />  
 
                   <Button
-                    type="submit"
+                    onClick={handleSubmit}
                     disabled={!input.trim()}
                     size={"icon"}
                   >
@@ -150,7 +149,7 @@ export default function Chat({ id, initialMessages }: ChatProps) {
                 />
 
                 <Button
-                  type="submit"
+                  onClick={handleSubmit}
                   disabled={!input.trim()}
                   size={"icon"}
                 >
