@@ -216,7 +216,8 @@ export default function KanbanBoard({ statusPromise }: Props) {
                                   className={cn(
                                     colorVariants.lightBg,
                                     "rounded-md p-3 shadow-sm cursor-pointer transition-all duration-200 text-start",
-                                    snapshot.isDragging && "shadow-lg scale-105"
+                                    snapshot.isDragging && "shadow-lg scale-105",
+                                    colorVariants.medBg
                                   )}
                                 >
                                   <div className="space-y-2">

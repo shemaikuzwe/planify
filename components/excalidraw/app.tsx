@@ -39,6 +39,10 @@ import { useTheme } from "next-themes";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { createDrawingElementsStorage } from "@/lib/store/excali-store";
 import SaveDialog from "./save-dialog";
+import InlineInput from "../ui/inline-input";
+import { editDrawingName, saveDrawing, updateDrawing } from "@/lib/actions/drawing";
+import DrawingPicker from "../ui/drawing-picker";
+import { Drawing } from "@prisma/client";
 
 type Comment = {
   x: number;
@@ -67,6 +71,7 @@ const initialData = {
 }
 export interface AppProps {
   apiElements?: OrderedExcalidrawElement[],
+  drawingsPromise: Promise<Drawing[]>,
   drawingId?: string,
   drawingName?: string,
   children: React.ReactNode;
@@ -75,6 +80,7 @@ export interface AppProps {
 
 export default function App({
   apiElements,
+  drawingsPromise,
   children,
   drawingId,
   excalidrawLib,
@@ -255,11 +261,27 @@ export default function App({
     );
     return newElement;
   };
+const handleNameChange = (name: string) => {
+    if (drawingId) {
+      editDrawingName(drawingId, name);
+      return;
+    }
+    const formData = new FormData();
+    formData.append("title", name);
+    formData.append("elements", JSON.stringify(elements));
+    saveDrawing(formData);
+    localStorage.removeItem("drawing-new");
+  }
+
   const renderTopRightUI = (isMobile: boolean) => {
     return (
       <>
-        <div className="absolute top-1 left-12 z-[10000]">
-          <h1 className="text-lg">{drawingName?.slice(0, 30) ?? "Untitled"}</h1>
+        <div className="absolute flex justify-center items-center top-0 left-8 z-[10000]">
+          {/* <DrawingPicker drawingsPromise={drawingsPromise}/> */}
+          <InlineInput value={drawingName ?? "Untitled"} onChange={handleNameChange}
+            options={{ slice: 20 }}
+            className="w-36"
+          />
         </div>
         {!isMobile && (
           <LiveCollaborationTrigger
@@ -545,8 +567,8 @@ export default function App({
 
 
   return (
-    <div className={cn("h-full fixed px-4 py-2", {
-      "w-320": collapsed,
+    <div className={cn("h-full fixed px-2 py-2", {
+      "w-330": collapsed,
       "w-270": !collapsed
     })}
       ref={appRef}>

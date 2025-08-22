@@ -4,6 +4,7 @@ import { revalidateTag } from "next/cache";
 import { db } from "../prisma";
 import { addGroupSchema, AddTaskSchema, AddTaskValue, ToggleTaskStatusSchema, } from "../types/schema";
 import { auth } from "@/auth";
+import { z } from "zod";
 
 async function addTask(data: AddTaskValue) {
   const validate = AddTaskSchema.safeParse(data);
@@ -35,6 +36,22 @@ async function editTask(data: AddTaskValue) {
   revalidateTag("tasks")
 }
 
+async function editName(data: { taskId: string, text: string }) {
+  const validate = z.object({
+    taskId: z.string().uuid(),
+    text: z.string().min(1).max(50),
+  }).safeParse(data)
+  if (!validate.success) {
+    return validate.error.flatten().fieldErrors;
+  }
+  if (!validate.data.taskId) return;
+  const { text, taskId } = validate.data
+  await db.task.update({
+    where: { id: taskId },
+    data: { text },
+  })
+  revalidatePath("/")
+}
 async function toggleStatus(taskId: string, status: string) {
   const validate = ToggleTaskStatusSchema.safeParse({ taskId, status });
   if (!validate.success) {
@@ -136,4 +153,5 @@ export {
   deleteStatus,
   changeStatusColor,
   changeTaskStatus,
+  editName
 }

@@ -1,19 +1,19 @@
-import { AlertDialog } from '@radix-ui/react-alert-dialog'
 import React, { useState, useTransition } from 'react'
-import { AlertDialogCancel, AlertDialogContent, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTrigger, DialogDescription, DialogTitle, DialogClose } from '../ui/dialog'
 import { Button } from '../ui/button'
 import { Trash2 } from 'lucide-react'
 import { deleteGroup, deleteTask } from '@/lib/actions/task'
-import { useRouter } from 'next/navigation'
 import { deleteDrawing } from "@/lib/actions/drawing";
+import { deleteChat } from '@/lib/actions/chat'
+import { DialogFooter } from '../ui/dialog'
 interface Props {
     id: string;
-    type: "group" | "task" | "drawing",
+    type: "group" | "task" | "drawing" | "chat",
     text: string,
     children?: React.ReactNode
+    onDelete?: () => void
 }
-export default function DeleteDialog({ id, type, text, children}: Props) {
-    const router = useRouter()
+export default function DeleteDialog({ id, type, text, children, onDelete }: Props) {
     const [isOpen, setIsOpen] = useState(false)
     const [isPending, startTransition] = useTransition()
     const handleDelete = () => {
@@ -24,30 +24,35 @@ export default function DeleteDialog({ id, type, text, children}: Props) {
                 await deleteTask(id)
             } else if (type === "drawing") {
                 await deleteDrawing(id)
+            } else if (type === "chat") {
+                await deleteChat(id)
             }
             setIsOpen(false)
-            router.push("/")
+            onDelete?.()
         })
     }
     return (
-        <AlertDialog open={isOpen} onOpenChange={setIsOpen} >
-            <AlertDialogTrigger asChild >
+        <Dialog open={isOpen} onOpenChange={setIsOpen} >
+            <DialogTrigger asChild >
                 {children ? children : (
                     <Button size={"sm"} variant={`${type === "group" ? "ghost" : "destructive"}`} className='w-7 h-7' >
                         <Trash2 className="w-3.5 h-3.5" />
                     </Button>
                 )}
-            </AlertDialogTrigger>
-            <AlertDialogContent className='w-100'>
-                <AlertDialogTitle className='font-light'>Are you sure you want to delete  <span className='font-bold'>{text}</span>?</AlertDialogTitle>
-                <div className='flex gap-2'>
-                    <AlertDialogCancel>
-                        Cancel
-                    </AlertDialogCancel>
-                    <Button disabled={isPending} variant={"destructive"} onClick={handleDelete}>{isPending ? "Deleting..." : "Delete"}</Button>
-                </div>
+            </DialogTrigger>
+            <DialogContent className=' flex flex-col gap-2 w-full'>
+                <DialogHeader>
+                    <DialogTitle>Delete Confirmation</DialogTitle>
+                    <DialogDescription className='font-light'>Are you sure you want to delete  <span className='font-bold'>{text}</span>?</DialogDescription>
+                </DialogHeader>
 
-            </AlertDialogContent>
-        </AlertDialog>
+                <DialogFooter className='flex gap-2'>
+                    <DialogClose>
+                        Cancel
+                    </DialogClose>
+                    <Button disabled={isPending} variant={"destructive"} onClick={handleDelete}>{isPending ? "Deleting..." : "Delete"}</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     )
 }

@@ -1,5 +1,5 @@
 import "server-only"
-import { db } from "../prisma";
+import { db } from '@/lib/prisma';
 import { auth } from "@/auth";
 import { unstable_cacheTag as cacheTag } from "next/cache"
 

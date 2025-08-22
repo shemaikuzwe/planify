@@ -67,7 +67,7 @@ async function updateDrawing(formData: FormData): Promise<void> {
     revalidateTag("drawings")
 }
 
-async function editDrawingName(drawingId: string, name: string) {
+async function editDrawingName(drawingId: string|undefined, name: string) {
     await db.drawing.update({ where: { id: drawingId }, data: { name } });
     revalidateTag("drawings")
 }

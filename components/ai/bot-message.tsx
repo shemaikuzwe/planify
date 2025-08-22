@@ -1,0 +1,46 @@
+import { AssitantIcon } from "@/components/ui/icons";
+import { cn } from "@/lib/utils";
+import { ChatRequestOptions } from "ai";
+import { useAnimatedText } from "@/hooks/use-animatedText";
+import ButtonRow from "./button-row";
+import { Markdown } from "./markdown";
+
+export function BotMessage({
+  children,
+  className,
+  reload,
+  isLoading,
+}: {
+  children: string;
+  className?: string;
+  isLoading?: boolean;
+  reload: (
+    chatRequestOptions?: ChatRequestOptions
+  ) => Promise<void>;
+}) {
+  const [text, isAnimating] = useAnimatedText(children, {
+    duration: 3,
+    shouldAnimate: isLoading,
+  });
+  return (
+    <div className="group relative flex items-start  md:-ml-12">
+      <div
+        className={cn(
+          "flex size-[24px] shrink-0 select-none items-center justify-center rounded-md  bg-primary text-primary-foreground",
+          className
+        )}
+      >
+        <AssitantIcon size={18} />
+      </div>
+      <div
+        className={cn(
+          "ml-2 flex-1 flex-col text-sm md:text-sm lg:text-base ",
+          className
+        )}
+      >
+        <Markdown>{text}</Markdown>
+        {!isAnimating ? <ButtonRow reload={reload} content={text} /> : null}
+      </div>
+    </div>
+  );
+}
