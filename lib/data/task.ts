@@ -5,12 +5,9 @@ import { unstable_cacheTag as cacheTag } from "next/cache"
 
 export async function getUserTasks(userId: string) {
   "use cache"
-  cacheTag("tasks")
+  cacheTag("tasks","groups")
   const todos = await db.taskCategory.findMany({
     where: { userId },
-    // include: {
-    //   tasks: true,
-    // },
     orderBy: {
       createdAt: "desc",
     }
@@ -18,13 +15,16 @@ export async function getUserTasks(userId: string) {
   return todos;
 }
 export async function getUserSubtasks() {
-  "use cache"
-  cacheTag("tasks")
   const session = await auth()
   const userId = session?.user?.id;
   if (!userId) {
     throw new Error("Unauthorized");
   }
+  return getSubTasks(userId)
+}
+async function getSubTasks(userId: string) {
+  "use cache"
+  cacheTag("tasks","groups")
   const subtasks = await db.taskCategory.findMany({
     where: { user: { id: userId } },
 
@@ -33,7 +33,7 @@ export async function getUserSubtasks() {
 }
 export async function getTaskById(taskId: string) {
   "use cache"
-  cacheTag("tasks",taskId)
+  cacheTag("tasks", taskId)
   const task = await db.task.findFirst({
     where: { id: taskId },
   });
@@ -42,7 +42,7 @@ export async function getTaskById(taskId: string) {
 }
 export async function getCategoryTasks(categoryId: string) {
   "use cache"
-  cacheTag("tasks",categoryId)
+  cacheTag("tasks", categoryId)
   const tasks = await db.taskStatus.findMany({
     where: {
       categoryId
@@ -54,8 +54,8 @@ export async function getCategoryTasks(categoryId: string) {
         }
       }
     },
-    orderBy:{
-      createdAt:"asc"
+    orderBy: {
+      createdAt: "asc"
     }
   })
   return tasks

@@ -76,15 +76,15 @@ async function addGroup(data: { name: string }) {
   await db.taskStatus.create({ data: { name: "TODO", categoryId: category.id } })
   await db.taskStatus.create({ data: { name: "IN PROGRESS", categoryId: category.id,primaryColor:"bg-blue-600" } })
   await db.taskStatus.create({ data: { name: "DONE", categoryId: category.id,primaryColor:"bg-green-600" } })
-  revalidateTag("tasks")
+  revalidateTag("groups")
 }
 async function deleteGroup(categoryId: string) {
   await db.taskCategory.delete({ where: { id: categoryId } });
-  revalidateTag("tasks")
+  revalidateTag("groups")
 }
 async function editGroupName(categoryId: string, name: string) {
   await db.taskCategory.update({ where: { id: categoryId }, data: { name } });
-  revalidateTag("tasks")
+  revalidateTag("groups")
 }
 async function deleteStatus(statusId: string) {
   await db.taskStatus.delete({ where: { id: statusId } });
