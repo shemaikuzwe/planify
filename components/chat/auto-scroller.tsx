@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 interface AutoScrollerProps {
   children: React.ReactNode;
   className?: string;
-  ref: React.RefObject<HTMLDivElement|null|undefined>;
+  ref: React.RefObject<HTMLDivElement|null>;
 }
 const AutoScroller = ({ children, className, ref }: AutoScrollerProps) => {
   useEffect(() => {

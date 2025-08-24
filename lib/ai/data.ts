@@ -78,30 +78,6 @@ export const getChatById = async (id: string | undefined) => {
   });
   return chat;
 };
-export async function saveChatData(id: string, messages: UIMessage[]) {
-  try {
-    const session = await auth();
-    const existing = await getChatById(id);
-    const title = existing ? existing.title : await getChatTitle(messages);
-    const userId = existing ? existing.userId : session?.user?.id;
-    if (!userId) return null;
-    const chat = await db.chat.upsert({
-      where: { id },
-      update: {
-        messages: messages as any,
-      },
-      create: {
-        id: id,
-        userId: userId,
-        title: title,
-        messages: messages as any,
-      },
-    });
-    revalidateTag("chats")
-  } catch (e) {
-    return null;
-  }
-}
 async function getChatTitle(messages: UIMessage[]) {
   const modelMessages = convertToModelMessages(messages);
   const title = await generateObject({
@@ -117,4 +93,4 @@ async function getChatTitle(messages: UIMessage[]) {
   return title.object.title;
 }
 
-export { getUserPages, getUserTasks };
+export { getUserPages, getUserTasks ,getChatTitle };
