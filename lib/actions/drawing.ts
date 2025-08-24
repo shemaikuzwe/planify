@@ -1,6 +1,6 @@
 "use server"
 import { db } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { saveDrawingSchema, updateDrawingSchema } from "@/lib/types/schema";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
@@ -33,7 +33,7 @@ async function saveDrawing(formData: FormData): Promise<void> {
             elements: parsedElements,
         }
     })
-    revalidatePath("/")
+    revalidateTag("drawings")
     redirect(`/whiteboard/${drawing.id}`)
 }
 
@@ -64,20 +64,17 @@ async function updateDrawing(formData: FormData): Promise<void> {
             userId,
         }
     })
-    revalidatePath("/")
+    revalidateTag("drawings")
 }
 
-
-async function editDrawingName(drawingId: string | undefined, name: string) {
+async function editDrawingName(drawingId: string|undefined, name: string) {
     await db.drawing.update({ where: { id: drawingId }, data: { name } });
-    //revalidateTag("drawings");
-    revalidatePath("/")
+    revalidateTag("drawings")
 }
 
 async function deleteDrawing(drawingId: string) {
     await db.drawing.delete({ where: { id: drawingId } });
-    //revalidateTag("drawings");
-    revalidatePath("/")
+    revalidateTag("drawings")
 }
 
 export {

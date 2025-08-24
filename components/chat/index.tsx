@@ -105,11 +105,11 @@ export default function Chat({ id, initialMessages }: ChatProps) {
         <>
           <ScrollArea
             onScrollCapture={handleScroll}
-            className="flex-grow w-full overflow-y-auto mt-3"
+            className="w-full flex-1 overflow-y-auto overflow-x-auto mt-3"
           >
             <AutoScroller
               ref={visibilityRef}
-              className="min-h-full w-full flex flex-col lg:max-w-2xl mx-auto p-1"
+              className="min-h-full w-full flex flex-col lg:max-w-4xl overflow-x-auto px-15"
             >
               <Messages ref={messagesRef} messages={messages} error={error} loading={status == "streaming"} reload={regenerate} />
               {/* Bottom sentinel for precise scroll-to-bottom targeting */}
@@ -123,7 +123,7 @@ export default function Chat({ id, initialMessages }: ChatProps) {
             />
           </div>
 
-          <div className="w-full z-10 mb-14">
+          <div className="w-full z-10">
             <div className="mx-auto p-2 max-w-xl">
               <div className="flex items-center gap-2 p-4 border border-border rounded-md focus-within:ring-2 focus-within:ring-ring/50">
                 <Button
@@ -138,9 +138,9 @@ export default function Chat({ id, initialMessages }: ChatProps) {
                 <textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  onKeyUp={(e) => {
+                  onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      handleSubmit(e);
+                      handleSubmit();
                     }
                   }}
                   placeholder="Send a message..."

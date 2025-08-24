@@ -24,7 +24,7 @@ function MarkdownComponent({ children }: { children: string }) {
     () =>
       ({
         table: ({ node, className, ...props }) => (
-          <div className="my-6">
+          <div className="my-2 overflow-x-auto max-w-full">
             <Table
               className={cn(
                 "w-full border border-border rounded-md",
@@ -84,7 +84,7 @@ function MarkdownComponent({ children }: { children: string }) {
         code: ({ node, inline, className, children, ...props }) => {
           const match = /language-(\w+)/.exec(className || "");
           return !inline && match ? (
-            <div className="my-6">
+            <div className="my-2">
               <pre {...props} className={`${className}`}>
                 <Code language={match[1]} codes={String(children).trim()} />
               </pre>
@@ -126,7 +126,7 @@ function MarkdownComponent({ children }: { children: string }) {
   );
 
   return (
-    <div className="prose dark:prose-invert sm:prose sm:dark:prose-invert md:prose-lg md:dark:prose-lg">
+    <div className="prose dark:prose-invert break-words prose-pre:whitespace-pre-wrap prose-pre:break-words prose-pre:overflow-x-auto">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={components}

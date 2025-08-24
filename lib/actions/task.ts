@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { db } from "../prisma";
 import { addGroupSchema, AddTaskSchema, AddTaskValue, ToggleTaskStatusSchema, } from "../types/schema";
 import { auth } from "@/auth";
@@ -13,6 +13,7 @@ async function addTask(data: AddTaskValue) {
   }
   const { text, time, priority, dueDate, statusId, tags } = validate.data;
   const task = await db.task.create({ data: { time, priority, dueDate: dueDate ? new Date(dueDate) : null, text, statusId, tags } });
+  revalidateTag("tasks")
   return task
 }
 async function editTask(data: AddTaskValue) {
@@ -32,7 +33,7 @@ async function editTask(data: AddTaskValue) {
       tags
     }
   })
-  revalidatePath("/")
+  revalidateTag("tasks")
 }
 
 async function editName(data: { taskId: string, text: string }) {
@@ -60,12 +61,12 @@ async function toggleStatus(taskId: string, status: string) {
     where: { id: taskId },
     data: { statusId: validate.data.status },
   });
-  revalidatePath("/")
+  revalidateTag("tasks")
 }
 async function deleteTask(taskId: string) {
   await db.task.delete({ where: { id: taskId } });
 
-  revalidatePath("/")
+  revalidateTag("tasks")
 }
 
 
@@ -74,7 +75,7 @@ export async function saveTaskDescription(taskId: string, description: string) {
     where: { id: taskId },
     data: { description },
   })
-  revalidatePath("/")
+  revalidateTag("tasks")
 }
 
 // Group
@@ -90,30 +91,30 @@ async function addGroup(data: { name: string }) {
   }
   const category = await db.taskCategory.create({ data: { name: validate.data.name, userId } })
   await db.taskStatus.create({ data: { name: "TODO", categoryId: category.id } })
-  await db.taskStatus.create({ data: { name: "IN PROGRESS", categoryId: category.id, primaryColor: "bg-blue-600" } })
-  await db.taskStatus.create({ data: { name: "DONE", categoryId: category.id, primaryColor: "bg-green-600" } })
-  revalidatePath("/")
+  await db.taskStatus.create({ data: { name: "IN PROGRESS", categoryId: category.id,primaryColor:"bg-blue-600" } })
+  await db.taskStatus.create({ data: { name: "DONE", categoryId: category.id,primaryColor:"bg-green-600" } })
+  revalidateTag("groups")
 }
 async function deleteGroup(categoryId: string) {
   await db.taskCategory.delete({ where: { id: categoryId } });
-  revalidatePath("/")
+  revalidateTag("groups")
 }
 async function editGroupName(categoryId: string, name: string) {
   await db.taskCategory.update({ where: { id: categoryId }, data: { name } });
-  revalidatePath("/")
+  revalidateTag("groups")
 }
 async function deleteStatus(statusId: string) {
   await db.taskStatus.delete({ where: { id: statusId } });
-  revalidatePath("/")
+  revalidateTag("tasks")
 }
 
 async function changeStatusColor(statusId: string, color: string) {
   await db.taskStatus.update({ where: { id: statusId }, data: { primaryColor: color } });
-  revalidatePath("/")
+  revalidateTag("tasks")
 }
 async function changeTaskStatus(taskId: string, statusId: string) {
   await db.task.update({ where: { id: taskId }, data: { statusId } });
-  revalidatePath("/")
+  revalidateTag("tasks")
 }
 
 async function updateTaskIndex(tasks: { id: string; taskIndex: number }[]) {
@@ -125,7 +126,7 @@ async function updateTaskIndex(tasks: { id: string; taskIndex: number }[]) {
       })
     )
   );
-  revalidatePath("/")
+  revalidateTag("tasks")
 }
 
 
@@ -137,7 +138,7 @@ async function addStatus(data: { name: string, id: string | undefined }) {
   const { name, id } = validate.data
   if (!id) throw new Error("id is required");
   await db.taskStatus.create({ data: { name, categoryId: id } });
-  revalidatePath("/")
+  revalidateTag("tasks")
 }
 export {
   addGroup,

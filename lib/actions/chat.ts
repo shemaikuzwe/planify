@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth";
 import { db } from "../prisma";
-import { revalidatePath } from "next/cache";
+import { revalidateTag } from "next/cache";
 
 async function pinChat(id: string, pinned: boolean) {
     const session = await auth();
@@ -19,6 +19,7 @@ async function pinChat(id: string, pinned: boolean) {
             pinned,
         }
     })
+    revalidateTag("chats")
 }
 
 async function deleteChat(id: string) {
@@ -33,6 +34,7 @@ async function deleteChat(id: string) {
             userId,
         }
     })
+    revalidateTag("chats")
 }
 
 async function renameChat(id: string, title: string) {
@@ -50,7 +52,7 @@ async function renameChat(id: string, title: string) {
             title,
         }
     })
-    // revalidatePath("/")
+    revalidateTag("chats")
 }
 
 export { pinChat, deleteChat, renameChat }

@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  experimental:{
+   ppr:true,
+   useCache: true,
+  }
 };
 
 export default nextConfig;
