@@ -43,6 +43,7 @@ import InlineInput from "../ui/inline-input";
 import { editDrawingName, saveDrawing, updateDrawing } from "@/lib/actions/drawing";
 import DrawingPicker from "../ui/drawing-picker";
 import { Drawing } from "@prisma/client";
+import { createFileStorage } from "@/lib/store/files-store";
 
 type Comment = {
   x: number;
@@ -103,10 +104,12 @@ export default function App({
 
   // feat add react-compiler
   const drawingStorage = useMemo(() => createDrawingElementsStorage(drawingId), [drawingId]);
-
+  const fileStorage = useMemo(() => createFileStorage(drawingId), [drawingId])
 
   const [elements, setElements] = useState<OrderedExcalidrawElement[] | null>(null);
   const [appState, setAppState] = useLocalStorage<null | AppState>("appState", null);
+  const [files, setFiles] = useState<undefined | BinaryFiles>(undefined);
+
   const [viewModeEnabled, setViewModeEnabled] = useState(false);
   const [zenModeEnabled, setZenModeEnabled] = useState(false);
   const [gridModeEnabled, setGridModeEnabled] = useState(false);
@@ -126,9 +129,8 @@ export default function App({
     initialStatePromiseRef.current.promise =
       resolvablePromise<ExcalidrawInitialDataState | null>();
     initialStatePromiseRef.current.resolved = false;
+
   }
-
-
   const [excalidrawAPI, setExcalidrawAPI] =
     useState<ExcalidrawImperativeAPI | null>(null);
 
@@ -137,32 +139,23 @@ export default function App({
 
   // Initialize elements from storage when component mounts or drawingStorage changes
   useEffect(() => {
-    console.log(`🔧 App initialization: drawingId=${drawingId || 'default'}, apiElements=${apiElements?.length || 0} elements`);
-
     const storedElements = drawingStorage.getElementsArray();
-    console.log(`📋 localStorage check: ${storedElements.length} elements found`);
+
 
     if (storedElements.length > 0) {
-      // Use localStorage elements if they exist
-      console.log(`📋 Loading ${storedElements.length} elements from localStorage for drawing ${drawingId || 'default'}`);
+
       setElements(storedElements);
     } else if (apiElements && apiElements.length > 0) {
-      // If localStorage is empty but API has elements, sync them to localStorage and use them
-      console.log(`🔄 Syncing ${apiElements.length} API elements to localStorage for drawing ${drawingId || 'default'}`);
-      const syncResult = drawingStorage.syncWithApiElements(apiElements);
-      console.log(`✅ Sync complete:`, syncResult.summary);
 
-      // Get the merged elements after sync
+      const syncResult = drawingStorage.syncWithApiElements(apiElements);
+
       const mergedElements = drawingStorage.getElementsArray();
-      console.log(`📦 After sync: ${mergedElements.length} elements available`);
+
       setElements(mergedElements);
     } else {
-      // Both localStorage and API are empty
-      console.log(`📝 No elements found, starting with empty canvas for drawing ${drawingId || 'default'}`);
       setElements([]);
     }
   }, [drawingStorage, apiElements, drawingId]);
-
   useEffect(() => {
     if (!excalidrawAPI || elements === null || initialStatePromiseRef.current.resolved) {
       return;
@@ -177,11 +170,16 @@ export default function App({
       //   //@ts-ignore
       //   initialStatePromiseRef.current.promise.resolve();
       // };
+      console.log("files", files);
+
       console.log(`🎯 Resolving initial data with ${elements.length} elements for drawing ${drawingId || 'default'}`);
+      const storedFiles = await fileStorage.getFiles();
       // @ts-ignore
       initialStatePromiseRef.current.promise.resolve({
         ...initialData,
         elements,
+        files: storedFiles ?? {},
+        scrollToContent: true,
       });
       initialStatePromiseRef.current.resolved = true;
     };
@@ -205,7 +203,8 @@ export default function App({
       Excalidraw,
       {
         excalidrawAPI: (api: ExcalidrawImperativeAPI) => setExcalidrawAPI(api),
-        initialData: elements ? { ...initialData, elements } : initialStatePromiseRef.current.promise,
+        // Always resolve initial data via promise so we can await files from IndexedDB
+        initialData: initialStatePromiseRef.current.promise,
         onChange: (
           newElements: OrderedExcalidrawElement[],
           state: AppState,
@@ -214,13 +213,12 @@ export default function App({
           setAppState(state);
           // Update local state
           setElements(newElements);
-
-          // Store each element individually with timestamp
+          // Save files (IndexedDB-backed). Fire and forget.
+          fileStorage.saveFile(files)
+          
           newElements.forEach(element => {
             drawingStorage.saveElement(element.id, element);
           });
-
-          // Also save all elements as a batch for easy retrieval
           drawingStorage.saveElements(newElements);
         },
         onPointerUpdate: (payload: {
@@ -261,7 +259,7 @@ export default function App({
     );
     return newElement;
   };
-const handleNameChange = (name: string) => {
+  const handleNameChange = (name: string) => {
     if (drawingId) {
       editDrawingName(drawingId, name);
       return;

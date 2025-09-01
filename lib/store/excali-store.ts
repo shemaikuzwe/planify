@@ -244,10 +244,9 @@ class DrawingElementsStorage {
   }
 }
 
-// Create a factory function for drawing-specific storage instances
+
 export const createDrawingElementsStorage = (drawingId?: string) => {
   return new DrawingElementsStorage(drawingId);
 };
 
-// Create a default singleton instance for backward compatibility
 export const drawingElementsStorage = new DrawingElementsStorage();
