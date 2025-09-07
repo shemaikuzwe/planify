@@ -1,4 +1,5 @@
 import { OrderedExcalidrawElement } from '@excalidraw/excalidraw/element/types';
+import { db } from './dexie';
 
 interface DrawingElementData {
   element: OrderedExcalidrawElement;
@@ -22,43 +23,46 @@ interface SyncResult {
 // Simple localStorage-based storage without Zustand reactivity
 class DrawingElementsStorage {
   private storageKey: string
+  private cache: Record<string, DrawingElementData> = {}
+  private hydrated = false
 
   constructor(drawingId?: string) {
     // Use drawing ID as key for better database synchronization
     this.storageKey = drawingId
       ? `drawing-${drawingId}`
       : 'drawing-new';
+    this.hydrateFromDB();
   }
 
-  private getStoredElements(): Record<string, DrawingElementData> {
+  private async hydrateFromDB() {
     try {
-      const stored = localStorage.getItem(this.storageKey);
-  
-      if (!stored) return {};
-
-      const parsed = JSON.parse(stored);
-      console.log(`📋 Parsed data from ${this.storageKey}:`, Object.keys(parsed).length, 'elements');
-
+      const rec = await db.elements.get(this.storageKey);
+      const raw = rec?.data ?? {};
       // Validate and clean the data structure
       const cleaned: Record<string, DrawingElementData> = {};
-      Object.entries(parsed).forEach(([key, value]: [string, any]) => {
+      Object.entries(raw).forEach(([key, value]: [string, any]) => {
         if (value && typeof value === 'object' && value.element && value.lastUpdated) {
           cleaned[key] = value as DrawingElementData;
         }
       });
-      return cleaned;
-    } catch (error) {
-      this.clearAllElements();
-      return {};
+      this.cache = cleaned;
+      this.hydrated = true;
+    } catch (e) {
+      // On failure, keep empty cache
+      this.cache = {};
+      this.hydrated = true;
     }
   }
 
+  private getStoredElements(): Record<string, DrawingElementData> {
+    // Return the in-memory cache which is hydrated asynchronously
+    return this.cache;
+  }
+
   private setStoredElements(elements: Record<string, DrawingElementData>): void {
-    try {
-      localStorage.setItem(this.storageKey, JSON.stringify(elements));
-    } catch (error) {
-      console.error('Failed to save elements to localStorage:', error);
-    }
+    this.cache = elements;
+    // Fire-and-forget persistence to IndexedDB
+    db.elements.put({ key: this.storageKey, data: elements });
   }
 
   saveElement(id: string, element: OrderedExcalidrawElement): void {
@@ -125,10 +129,8 @@ class DrawingElementsStorage {
    * This method will remove any invalid entries and keep only valid ones
    */
   cleanupStorage(): void {
-    console.log('🧹 Cleaning up storage...');
     const stored = this.getStoredElements(); // This already cleans the data
     this.setStoredElements(stored);
-    console.log('✅ Storage cleanup complete');
   }
 
   /**
