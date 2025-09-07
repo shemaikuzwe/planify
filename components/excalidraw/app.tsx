@@ -116,10 +116,6 @@ export default function App({
   const { theme } = useTheme()
   const [disableImageTool, setDisableImageTool] = useState(false);
   const [isCollaborating, setIsCollaborating] = useState(false);
-  const [commentIcons, setCommentIcons] = useState<{ [id: string]: Comment }>(
-    {},
-  );
-  const [comment, setComment] = useState<Comment | null>(null);
 
   const initialStatePromiseRef = useRef<{
     promise: ResolvablePromise<ExcalidrawInitialDataState | null>;
@@ -221,11 +217,6 @@ export default function App({
           });
           drawingStorage.saveElements(newElements);
         },
-        onPointerUpdate: (payload: {
-          pointer: { x: number; y: number };
-          button: "down" | "up";
-          pointersMap: Gesture["pointers"];
-        }) => setPointerData(payload),
         viewModeEnabled,
         zenModeEnabled,
         gridModeEnabled,
@@ -241,8 +232,6 @@ export default function App({
         },
         renderTopRightUI,
         onLinkOpen,
-        onPointerDown,
-        onScrollChange: rerenderCommentIcons,
         validateEmbeddable: true,
       },
       <>
@@ -278,7 +267,7 @@ export default function App({
           {/* <DrawingPicker drawingsPromise={drawingsPromise}/> */}
           <InlineInput value={drawingName ?? "Untitled"} onChange={handleNameChange}
             options={{ slice: 20 }}
-            className="w-36"
+            className="w-36 mt-2 ml-2 text-md"
           />
         </div>
         {!isMobile && (
@@ -316,254 +305,6 @@ export default function App({
     },
     [],
   );
-
-  const onCopy = async (type: "png" | "svg" | "json") => {
-    if (!excalidrawAPI) {
-      return false;
-    }
-    await exportToClipboard({
-      elements: excalidrawAPI.getSceneElements(),
-      appState: excalidrawAPI.getAppState(),
-      files: excalidrawAPI.getFiles(),
-      type,
-    });
-    window.alert(`Copied to clipboard as ${type} successfully`);
-  };
-
-  const [pointerData, setPointerData] = useState<{
-    pointer: { x: number; y: number };
-    button: "down" | "up";
-    pointersMap: Gesture["pointers"];
-  } | null>(null);
-
-  const onPointerDown = (
-    activeTool: AppState["activeTool"],
-    pointerDownState: ExcalidrawPointerDownState,
-  ) => {
-    if (activeTool.type === "custom" && activeTool.customType === "comment") {
-      const { x, y } = pointerDownState.origin;
-      setComment({ x, y, value: "" });
-    }
-  };
-
-  const rerenderCommentIcons = () => {
-    if (!excalidrawAPI) {
-      return false;
-    }
-    const commentIconsElements = appRef.current.querySelectorAll(
-      ".comment-icon",
-    ) as HTMLElement[];
-    commentIconsElements.forEach((ele) => {
-      const id = ele.id;
-      const appstate = excalidrawAPI.getAppState();
-      const { x, y } = sceneCoordsToViewportCoords(
-        { sceneX: commentIcons[id].x, sceneY: commentIcons[id].y },
-        appstate,
-      );
-      ele.style.left = `${x - COMMENT_ICON_DIMENSION / 2 - appstate!.offsetLeft
-        }px`;
-      ele.style.top = `${y - COMMENT_ICON_DIMENSION / 2 - appstate!.offsetTop
-        }px`;
-    });
-  };
-
-  const onPointerMoveFromPointerDownHandler = (
-    pointerDownState: PointerDownState,
-  ) => {
-    return withBatchedUpdatesThrottled((event) => {
-      if (!excalidrawAPI) {
-        return false;
-      }
-      const { x, y } = viewportCoordsToSceneCoords(
-        {
-          clientX: event.clientX - pointerDownState.hitElementOffsets.x,
-          clientY: event.clientY - pointerDownState.hitElementOffsets.y,
-        },
-        excalidrawAPI.getAppState(),
-      );
-      setCommentIcons({
-        ...commentIcons,
-        [pointerDownState.hitElement.id!]: {
-          ...commentIcons[pointerDownState.hitElement.id!],
-          x,
-          y,
-        },
-      });
-    });
-  };
-  const onPointerUpFromPointerDownHandler = (
-    pointerDownState: PointerDownState,
-  ) => {
-    return withBatchedUpdates((event) => {
-      window.removeEventListener("pointermove", pointerDownState.onMove);
-      window.removeEventListener("pointerup", pointerDownState.onUp);
-      excalidrawAPI?.setActiveTool({ type: "selection" });
-      const distance = distance2d(
-        pointerDownState.x,
-        pointerDownState.y,
-        event.clientX,
-        event.clientY,
-      );
-      if (distance === 0) {
-        if (!comment) {
-          setComment({
-            x: pointerDownState.hitElement.x + 60,
-            y: pointerDownState.hitElement.y,
-            value: pointerDownState.hitElement.value,
-            id: pointerDownState.hitElement.id,
-          });
-        } else {
-          setComment(null);
-        }
-      }
-    });
-  };
-
-  const renderCommentIcons = () => {
-    return Object.values(commentIcons).map((commentIcon) => {
-      if (!excalidrawAPI) {
-        return false;
-      }
-      const appState = excalidrawAPI.getAppState();
-      const { x, y } = sceneCoordsToViewportCoords(
-        { sceneX: commentIcon.x, sceneY: commentIcon.y },
-        excalidrawAPI.getAppState(),
-      );
-      return (
-        <div
-          id={commentIcon.id}
-          key={commentIcon.id}
-          style={{
-            top: `${y - COMMENT_ICON_DIMENSION / 2 - appState!.offsetTop}px`,
-            left: `${x - COMMENT_ICON_DIMENSION / 2 - appState!.offsetLeft}px`,
-            position: "absolute",
-            zIndex: 1,
-            width: `${COMMENT_ICON_DIMENSION}px`,
-            height: `${COMMENT_ICON_DIMENSION}px`,
-            cursor: "pointer",
-            touchAction: "none",
-          }}
-          className="comment-icon"
-          onPointerDown={(event) => {
-            event.preventDefault();
-            if (comment) {
-              commentIcon.value = comment.value;
-              saveComment();
-            }
-            const pointerDownState: any = {
-              x: event.clientX,
-              y: event.clientY,
-              hitElement: commentIcon,
-              hitElementOffsets: { x: event.clientX - x, y: event.clientY - y },
-            };
-            const onPointerMove =
-              onPointerMoveFromPointerDownHandler(pointerDownState);
-            const onPointerUp =
-              onPointerUpFromPointerDownHandler(pointerDownState);
-            window.addEventListener("pointermove", onPointerMove);
-            window.addEventListener("pointerup", onPointerUp);
-
-            pointerDownState.onMove = onPointerMove;
-            pointerDownState.onUp = onPointerUp;
-
-            excalidrawAPI?.setActiveTool({
-              type: "custom",
-              customType: "comment",
-            });
-          }}
-        >
-          {/* <div className="comment-avatar">
-            <img src="images/doremon.png" alt="doremon" />
-          </div> */}
-        </div>
-      );
-    });
-  };
-
-  const saveComment = () => {
-    if (!comment) {
-      return;
-    }
-    if (!comment.id && !comment.value) {
-      setComment(null);
-      return;
-    }
-    const id = comment.id || nanoid();
-    setCommentIcons({
-      ...commentIcons,
-      [id]: {
-        x: comment.id ? comment.x - 60 : comment.x,
-        y: comment.y,
-        id,
-        value: comment.value,
-      },
-    });
-    setComment(null);
-  };
-
-  const renderComment = () => {
-    if (!comment) {
-      return null;
-    }
-    const appState = excalidrawAPI?.getAppState()!;
-    const { x, y } = sceneCoordsToViewportCoords(
-      { sceneX: comment.x, sceneY: comment.y },
-      appState,
-    );
-    let top = y - COMMENT_ICON_DIMENSION / 2 - appState.offsetTop;
-    let left = x - COMMENT_ICON_DIMENSION / 2 - appState.offsetLeft;
-
-    if (
-      top + COMMENT_INPUT_HEIGHT <
-      appState.offsetTop + COMMENT_INPUT_HEIGHT
-    ) {
-      top = COMMENT_ICON_DIMENSION / 2;
-    }
-    if (top + COMMENT_INPUT_HEIGHT > appState.height) {
-      top = appState.height - COMMENT_INPUT_HEIGHT - COMMENT_ICON_DIMENSION / 2;
-    }
-    if (
-      left + COMMENT_INPUT_WIDTH <
-      appState.offsetLeft + COMMENT_INPUT_WIDTH
-    ) {
-      left = COMMENT_ICON_DIMENSION / 2;
-    }
-    if (left + COMMENT_INPUT_WIDTH > appState.width) {
-      left = appState.width - COMMENT_INPUT_WIDTH - COMMENT_ICON_DIMENSION / 2;
-    }
-
-    return (
-      <textarea
-        className="comment"
-        style={{
-          top: `${top}px`,
-          left: `${left}px`,
-          position: "absolute",
-          zIndex: 1,
-          height: `${COMMENT_INPUT_HEIGHT}px`,
-          width: `${COMMENT_INPUT_WIDTH}px`,
-        }}
-        ref={(ref) => {
-          setTimeout(() => ref?.focus());
-        }}
-        placeholder={comment.value ? "Reply" : "Comment"}
-        value={comment.value}
-        onChange={(event) => {
-          setComment({ ...comment, value: event.target.value });
-        }}
-        onBlur={saveComment}
-        onKeyDown={(event) => {
-          if (!event.shiftKey && event.key === "Enter") {
-            event.preventDefault();
-            saveComment();
-          }
-        }}
-      />
-    );
-  };
-
-
-
   return (
     <div className={cn("h-full fixed px-2 py-2", {
       "w-330": collapsed,

@@ -1,101 +1,92 @@
 import { BinaryFiles } from "@excalidraw/excalidraw/types";
-
-class IDBHelper {
-  private dbPromise: Promise<IDBDatabase> | null = null;
-  private readonly dbName = "planify-files-db";
-  private readonly storeName = "files";
-
-  private open(): Promise<IDBDatabase> {
-    if (this.dbPromise) return this.dbPromise;
-    this.dbPromise = new Promise((resolve, reject) => {
-      try {
-        const request = indexedDB.open(this.dbName, 1);
-        request.onupgradeneeded = () => {
-          const db = request.result;
-          if (!db.objectStoreNames.contains(this.storeName)) {
-            db.createObjectStore(this.storeName, { keyPath: "key" });
-          }
-        };
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-      } catch (e) {
-        reject(e);
-      }
-    });
-    return this.dbPromise;
-  }
-
-  async set<T>(key: string, value: T): Promise<void> {
-    const db = await this.open();
-    await new Promise<void>((resolve, reject) => {
-      const tx = db.transaction(this.storeName, "readwrite");
-      const store = tx.objectStore(this.storeName);
-      const req = store.put({ key, value });
-      req.onsuccess = () => resolve();
-      req.onerror = () => reject(req.error);
-    });
-  }
-
-  async get<T>(key: string): Promise<T | null> {
-    const db = await this.open();
-    return await new Promise<T | null>((resolve, reject) => {
-      const tx = db.transaction(this.storeName, "readonly");
-      const store = tx.objectStore(this.storeName);
-      const req = store.get(key);
-      req.onsuccess = () => {
-        resolve(req.result ? (req.result.value as T) : null);
-      };
-      req.onerror = () => reject(req.error);
-    });
-  }
-}
+import { uploadDrawingFiles } from "../actions/drawing";
+import { db } from "./dexie";
 
 class FilesStore {
   private storageKey: string;
-  private idb: IDBHelper | null = null;
+  private drawingId?: string;
 
   constructor(drawingId?: string) {
     this.storageKey = drawingId ? `files-${drawingId}` : `files-new`;
-    if (typeof indexedDB !== "undefined") {
-      this.idb = new IDBHelper();
+    if (drawingId) {
+      this.drawingId = drawingId
     }
   }
 
   async saveFile(files: BinaryFiles): Promise<void> {
     try {
-      if (this.idb) {
-        await this.idb.set<BinaryFiles>(this.storageKey, files);
-        return;
+      console.log("Saving files", files);
+
+      const prev = await db.files.get(this.storageKey);
+      const prevIds = new Set(Object.keys(prev?.files ?? {}));
+      const currentIds = Object.keys(files ?? {});
+      const newIds = currentIds.filter((id) => !prevIds.has(id));
+
+      if (this.drawingId && newIds.length > 0) {
+        const toUpload = this.getFilesByIds(files, newIds);
+        if (toUpload.length > 0) {
+          uploadDrawingFiles(this.drawingId, toUpload);
+        }
       }
+
+
+      await db.files.put({ key: this.storageKey, files, drawingId: this.drawingId });
     } catch (e) {
-      console.warn("FilesStore IndexedDB save failed, falling back to localStorage", e);
-    }
-    try {
-      localStorage.setItem(this.storageKey, JSON.stringify(files));
-    } catch (e) {
-      console.error("FilesStore localStorage save failed", e);
+      console.warn("FilesStore IndexedDB save failed", e);
     }
   }
 
-  async getFiles(): Promise<BinaryFiles | null> {
+  async getFiles() {
     try {
-      if (this.idb) {
-        return await this.idb.get<BinaryFiles>(this.storageKey);
-      }
+      const rec = await db.files.get(this.storageKey);
+      console.log("FilesStore IndexedDB get", rec);
+      return rec?.files ?? null;
     } catch (e) {
-      console.warn("FilesStore IndexedDB get failed, trying localStorage", e);
-    }
-    try {
-      const item = localStorage.getItem(this.storageKey);
-      if (!item) return null;
-      return JSON.parse(item) as BinaryFiles;
-    } catch (e) {
-      console.error("FilesStore localStorage get failed", e);
+      console.warn("FilesStore IndexedDB get failed", e);
       return null;
     }
+  }
+  private dataURLToBlob(dataURL: string): Blob {
+    const [header, base64] = dataURL.split(",");
+    const mimeMatch = /data:(.*?);base64/.exec(header);
+    const mime = mimeMatch?.[1] || "application/octet-stream";
+    const binary = atob(base64);
+    const len = binary.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i);
+    return new Blob([bytes], { type: mime });
+  }
+  private dataURLToFile(dataURL: string, filename: string): File {
+    const blob = this.dataURLToBlob(dataURL);
+    return new File([blob], filename, { type: blob.type });
+  }
+  private getFileFromBinaryFiles(
+    files: BinaryFiles,
+    fileId: string,
+    filename: string = `${fileId}.bin`
+  ) {
+    const record = files[fileId];
+    if (!record) return null;
+    return this.dataURLToFile(record.dataURL, filename);
+  }
+  private getAllFiles(files: BinaryFiles) {
+    return Object.entries(files).map(([id, rec]) =>
+      this.dataURLToFile(rec.dataURL, `${id}`)
+    );
+  }
+  private getFilesByIds(files: BinaryFiles, ids: string[]) {
+    const result: File[] = [];
+    for (const id of ids) {
+      const rec = files[id];
+      if (!rec) continue;
+      result.push(this.dataURLToFile(rec.dataURL, `${id}`));
+    }
+    return result;
   }
 }
 
 export function createFileStorage(drawingId?: string) {
   return new FilesStore(drawingId);
 }
+
+

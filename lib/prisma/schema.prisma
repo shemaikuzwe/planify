@@ -39,14 +39,26 @@ model TaskCategory {
 }
 
 model Drawing {
-    id          String    @id @default(uuid()) @db.Uuid
-    userId      String    @db.Uuid
+    id          String         @id @default(uuid()) @db.Uuid
+    userId      String         @db.Uuid
     description String?
     name        String
-    elements    Json?     @db.Json
-    createdAt   DateTime? @default(now())
-    updatedAt   DateTime? @default(now()) @updatedAt
-    user        User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    elements    Json?          @db.Json
+    createdAt   DateTime?      @default(now())
+    updatedAt   DateTime?      @default(now()) @updatedAt
+    user        User           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    files       DrawingFile[]
+}
+
+model DrawingFile {
+    id        String    @id @default(uuid()) @db.Uuid
+    drawingId String    @db.Uuid
+    url       String
+    mimeType  String
+    name      String
+    createdAt DateTime? @default(now())
+    updatedAt DateTime? @default(now()) @updatedAt
+    drawing   Drawing   @relation(fields: [drawingId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Meeting {
@@ -143,6 +155,7 @@ model Chat {
     userId    String    @db.Uuid
     user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
+
 
 enum PRIORITY {
     HIGH
