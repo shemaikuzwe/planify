@@ -87,14 +87,6 @@ export function Navbar({ taskPromise }: Props) {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Meet" isActive={pathName.includes("/meet")}>
-                  <Link href="/meet" className="flex items-center gap-2 ">
-                    <Presentation className="h-4 w-4" />
-                    <span>Meet</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
