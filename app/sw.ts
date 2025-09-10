@@ -1,6 +1,6 @@
 import { defaultCache } from "@serwist/next/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
-import { Serwist } from "serwist";
+import { BackgroundSyncQueue, Serwist } from "serwist";
 
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
@@ -11,14 +11,15 @@ declare global {
   }
 }
 
-declare const self:any;
-
+declare const self: any;
+const queue = new BackgroundSyncQueue("myQueueName");
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: true,
   runtimeCaching: defaultCache,
+  disableDevLogs: true,
   fallbacks: {
     entries: [
       {
@@ -30,41 +31,61 @@ const serwist = new Serwist({
     ],
   },
 });
- self.addEventListener('push', function (event:any) {
-    if (event.data) {
-      const data = event.data.json()
-      const options = {
-        body: data.body,
-        icon: data.icon || '/logo2.png',
-        badge: '/logo.png',
-        vibrate: [100, 50, 100],
-        data: data.data || {
-          dateOfArrival: Date.now(),
-          primaryKey: '2',
-        },
-      }
-      event.waitUntil(self.registration.showNotification(data.title, options))
+
+self.addEventListener("fetch", (event: any) => {
+  // Add in your own criteria here to return early if this
+  // isn't a request that should use background sync.
+  if (event.request.method !== "POST") {
+    return;
+  }
+
+  const backgroundSync = async () => {
+    try {
+      const response = await fetch(event.request.clone());
+      return response;
+    } catch (error) {
+      await queue.pushRequest({ request: event.request });
+      return Response.error();
     }
-  })
-  self.addEventListener('notificationclick', function (event:any) {
-    console.log('Notification click received.')
-    event.notification.close()
-    
-    const relativeLink = event.notification.data?.link || '/meet'
-    // Convert relative link to absolute URL based on the current service worker scope
-    const urlToOpen = new URL(relativeLink, self.location.origin).href
-    
-    event.waitUntil(
-      clients.matchAll({type: 'window', includeUncontrolled: true}).then(function(clientList) {
-        // If a window tab matching the targeted URL already exists, focus that;
-        for (const client of clientList) {
-          if (client.url === urlToOpen && 'focus' in client) {
-            return client.focus()
-          }
+  };
+
+  event.respondWith(backgroundSync());
+});
+self.addEventListener('push', function (event: any) {
+  if (event.data) {
+    const data = event.data.json()
+    const options = {
+      body: data.body,
+      icon: data.icon || '/logo2.png',
+      badge: '/logo.png',
+      vibrate: [100, 50, 100],
+      data: data.data || {
+        dateOfArrival: Date.now(),
+        primaryKey: '2',
+      },
+    }
+    event.waitUntil(self.registration.showNotification(data.title, options))
+  }
+})
+self.addEventListener('notificationclick', function (event: any) {
+  console.log('Notification click received.')
+  event.notification.close()
+
+  const relativeLink = event.notification.data?.link || '/meet'
+  // Convert relative link to absolute URL based on the current service worker scope
+  const urlToOpen = new URL(relativeLink, self.location.origin).href
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (clientList) {
+      // If a window tab matching the targeted URL already exists, focus that;
+      for (const client of clientList) {
+        if (client.url === urlToOpen && 'focus' in client) {
+          return client.focus()
         }
-        // If no matching tab exists, open a new one to the correct URL
-        return clients.openWindow(urlToOpen)
-      })
-    )
-  })
+      }
+      // If no matching tab exists, open a new one to the correct URL
+      return clients.openWindow(urlToOpen)
+    })
+  )
+})
 serwist.addEventListeners();
