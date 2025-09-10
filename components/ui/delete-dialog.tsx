@@ -4,12 +4,11 @@ import { Button } from '../ui/button'
 import { Trash2 } from 'lucide-react'
 import { deleteGroup, deleteTask } from '@/lib/actions/task'
 import { deleteDrawing } from "@/lib/actions/drawing";
-import { deleteChat } from '@/lib/actions/chat'
 import { DialogFooter } from '../ui/dialog'
 interface Props {
     id: string;
-    type: "group" | "task" | "drawing" | "chat",
-    text: string,
+    type: "group" | "task" | "drawing",
+    text: string,   
     children?: React.ReactNode
     onDelete?: () => void
 }
@@ -24,8 +23,6 @@ export default function DeleteDialog({ id, type, text, children, onDelete }: Pro
                 await deleteTask(id)
             } else if (type === "drawing") {
                 await deleteDrawing(id)
-            } else if (type === "chat") {
-                await deleteChat(id)
             }
             onDelete?.()
             setIsOpen(false)

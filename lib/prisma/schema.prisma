@@ -71,7 +71,6 @@ model Meeting {
     name        String?   @db.VarChar
     meetingId   String?   @db.VarChar
     status      STATUS?   @default(ACTIVE)
-    user        User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Subscription {
@@ -137,23 +136,10 @@ model User {
     account       Account[]
     taskCategory  TaskCategory[]
     drawings      Drawing[]
-    meeting       Meeting[]
     subscription  Subscription[]
     creator       Team[]         @relation("Creator")
     Team          Team?          @relation("TeamMembers", fields: [teamId], references: [id])
     teamId        String?        @db.Uuid
-    chats         Chat[]
-}
-
-model Chat {
-    id        String    @id
-    title     String
-    messages  Json?     @db.Json
-    createdAt DateTime? @default(now())
-    updatedAt DateTime? @default(now()) @updatedAt
-    pinned    Boolean   @default(false)
-    userId    String    @db.Uuid
-    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 

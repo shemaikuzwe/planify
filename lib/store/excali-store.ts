@@ -55,13 +55,11 @@ class DrawingElementsStorage {
   }
 
   private getStoredElements(): Record<string, DrawingElementData> {
-    // Return the in-memory cache which is hydrated asynchronously
     return this.cache;
   }
 
   private setStoredElements(elements: Record<string, DrawingElementData>): void {
     this.cache = elements;
-    // Fire-and-forget persistence to IndexedDB
     db.elements.put({ key: this.storageKey, data: elements });
   }
 
@@ -176,16 +174,13 @@ class DrawingElementsStorage {
       }
     };
 
-    // Track which elements we've processed from API
     const processedApiElementIds = new Set<string>();
 
-    // Process each API element
     apiElements.forEach(apiElement => {
       processedApiElementIds.add(apiElement.id);
       const localElementData = stored[apiElement.id];
 
       if (!localElementData) {
-        // Element doesn't exist in localStorage - always save from API
         const elementData: DrawingElementData = {
           element: apiElement,
           lastUpdated: defaultApiTimestamp
@@ -194,11 +189,9 @@ class DrawingElementsStorage {
         result.newFromApi.push(apiElement);
         result.summary.newFromApiCount++;
       } else {
-        // Element exists in both - compare timestamps
         const comparison = this.compareTimestamps(defaultApiTimestamp, localElementData.lastUpdated);
 
         if (comparison > 0) {
-          // API element is newer - update localStorage
           const elementData: DrawingElementData = {
             element: apiElement,
             lastUpdated: defaultApiTimestamp
@@ -207,7 +200,6 @@ class DrawingElementsStorage {
           result.updatedFromApi.push(apiElement);
           result.summary.updatedFromApiCount++;
         } else {
-          // Local element is newer or equal - keep local
           if (localElementData.element) {
             result.keptFromLocal.push(localElementData.element);
             result.summary.keptFromLocalCount++;
@@ -220,9 +212,7 @@ class DrawingElementsStorage {
       result.summary.totalProcessed++;
     });
 
-    // Find elements that exist only in localStorage
     Object.values(stored).forEach(localElementData => {
-      // Safety check to ensure the data structure is correct
       if (localElementData && localElementData.element && localElementData.element.id) {
         if (!processedApiElementIds.has(localElementData.element.id)) {
           result.onlyInLocal.push(localElementData.element);
@@ -233,7 +223,7 @@ class DrawingElementsStorage {
 
     // Save the updated storage
     this.setStoredElements(stored);
-
+      
     return result;
   }
 

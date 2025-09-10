@@ -20,7 +20,6 @@ async function saveDrawing(formData: FormData): Promise<void> {
     if (!userId) throw new Error("No user ID in session");
     const { elements, title, description } = validate.data;
 
-    // Parse elements string back to JSON
     let parsedElements;
     try {
         parsedElements = JSON.parse(elements);

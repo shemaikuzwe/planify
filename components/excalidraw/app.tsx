@@ -1,4 +1,3 @@
-import { nanoid } from "nanoid";
 import React, {
   useEffect,
   useState,
@@ -26,9 +25,6 @@ import type {
 
 import {
   resolvablePromise,
-  distance2d,
-  withBatchedUpdates,
-  withBatchedUpdatesThrottled,
 } from "./utils";
 
 import CustomFooter from "./footer";
@@ -40,33 +36,11 @@ import { useLocalStorage } from "@/hooks/use-local-storage";
 import { createDrawingElementsStorage } from "@/lib/store/excali-store";
 import SaveDialog from "./save-dialog";
 import InlineInput from "../ui/inline-input";
-import { editDrawingName, saveDrawing, updateDrawing } from "@/lib/actions/drawing";
-import DrawingPicker from "../ui/drawing-picker";
+import { editDrawingName, saveDrawing } from "@/lib/actions/drawing";
 import { Drawing } from "@prisma/client";
 import { createFileStorage } from "@/lib/store/files-store";
 
-type Comment = {
-  x: number;
-  y: number;
-  value: string;
-  id?: string;
-};
 
-type PointerDownState = {
-  x: number;
-  y: number;
-  hitElement: Comment;
-  onMove: any;
-  onUp: any;
-  hitElementOffsets: {
-    x: number;
-    y: number;
-  };
-};
-
-const COMMENT_ICON_DIMENSION = 32;
-const COMMENT_INPUT_HEIGHT = 50;
-const COMMENT_INPUT_WIDTH = 150;
 const initialData = {
   scrollToContent: true,
 }
@@ -166,9 +140,7 @@ export default function App({
       //   //@ts-ignore
       //   initialStatePromiseRef.current.promise.resolve();
       // };
-      console.log("files", files);
-
-      console.log(`🎯 Resolving initial data with ${elements.length} elements for drawing ${drawingId || 'default'}`);
+    
       const storedFiles = await fileStorage.getFiles();
       // @ts-ignore
       initialStatePromiseRef.current.promise.resolve({

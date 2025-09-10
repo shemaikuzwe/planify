@@ -1,4 +1,15 @@
-self.addEventListener('push', function (event) {
+
+  self.addEventListener('install', function(event) {
+    // Activate this service worker immediately after installation
+    self.skipWaiting()
+  })
+  
+  self.addEventListener('activate', function(event) {
+    // Claim any clients immediately so that the service worker starts controlling them without requiring a reload
+    event.waitUntil(self.clients.claim())
+  })
+
+  self.addEventListener('push', function (event) {
     if (event.data) {
       const data = event.data.json()
       const options = {
@@ -14,17 +25,6 @@ self.addEventListener('push', function (event) {
       event.waitUntil(self.registration.showNotification(data.title, options))
     }
   })
-   
-  self.addEventListener('install', function(event) {
-    // Activate this service worker immediately after installation
-    self.skipWaiting()
-  })
-  
-  self.addEventListener('activate', function(event) {
-    // Claim any clients immediately so that the service worker starts controlling them without requiring a reload
-    event.waitUntil(self.clients.claim())
-  })
-  
   self.addEventListener('notificationclick', function (event) {
     console.log('Notification click received.')
     event.notification.close()
