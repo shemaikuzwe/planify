@@ -18,8 +18,6 @@ import type {
   AppState,
   ExcalidrawImperativeAPI,
   ExcalidrawInitialDataState,
-  Gesture,
-  PointerDownState as ExcalidrawPointerDownState,
   BinaryFiles,
 } from "@excalidraw/excalidraw/types";
 
@@ -82,7 +80,6 @@ export default function App({
 
   const [elements, setElements] = useState<OrderedExcalidrawElement[] | null>(null);
   const [appState, setAppState] = useLocalStorage<null | AppState>("appState", null);
-  const [files, setFiles] = useState<undefined | BinaryFiles>(undefined);
 
   const [viewModeEnabled, setViewModeEnabled] = useState(false);
   const [zenModeEnabled, setZenModeEnabled] = useState(false);
@@ -107,25 +104,16 @@ export default function App({
 
   useHandleLibrary({ excalidrawAPI });
 
-  // Initialize elements from storage when component mounts or drawingStorage changes
+  //Elements changes
   useEffect(() => {
-    const storedElements = drawingStorage.getElementsArray();
-
-
-    if (storedElements.length > 0) {
-
-      setElements(storedElements);
-    } else if (apiElements && apiElements.length > 0) {
-
-      const syncResult = drawingStorage.syncWithApiElements(apiElements);
-
-      const mergedElements = drawingStorage.getElementsArray();
-
-      setElements(mergedElements);
-    } else {
-      setElements([]);
+    async function init() {
+      const storedElements = await drawingStorage.getElements()
+      setElements(storedElements)
     }
+    init()
   }, [drawingStorage, apiElements, drawingId]);
+
+  //Files changes
   useEffect(() => {
     if (!excalidrawAPI || elements === null || initialStatePromiseRef.current.resolved) {
       return;
@@ -140,7 +128,6 @@ export default function App({
       //   //@ts-ignore
       //   initialStatePromiseRef.current.promise.resolve();
       // };
-    
       const storedFiles = await fileStorage.getFiles();
       // @ts-ignore
       initialStatePromiseRef.current.promise.resolve({
@@ -179,15 +166,14 @@ export default function App({
           files: BinaryFiles
         ) => {
           setAppState(state);
-          // Update local state
           setElements(newElements);
-          // Save files (IndexedDB-backed). Fire and forget.
-          fileStorage.saveFile(files)
-          
-          newElements.forEach(element => {
-            drawingStorage.saveElement(element.id, element);
+          // Save elements and files asynchronously without blocking UI
+          drawingStorage.saveElements(newElements).catch(error => {
+            console.error('Failed to save elements:', error);
           });
-          drawingStorage.saveElements(newElements);
+          fileStorage.saveFile(files).catch(error => {
+            console.error('Failed to save files:', error);
+          });
         },
         viewModeEnabled,
         zenModeEnabled,
@@ -197,7 +183,7 @@ export default function App({
         UIOptions: {
           canvasActions: {
             toggleTheme: true,
-            theme: theme,
+            theme: theme == "light" ? "light" : "dark",
           },
 
           tools: { image: !disableImageTool },

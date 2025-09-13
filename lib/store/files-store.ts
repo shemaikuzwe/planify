@@ -1,6 +1,7 @@
 import { BinaryFiles } from "@excalidraw/excalidraw/types";
 import { uploadDrawingFiles } from "../actions/drawing";
 import { db } from "./dexie";
+import { syncChange } from "../utils/sync";
 
 class FilesStore {
   private storageKey: string;
@@ -15,32 +16,31 @@ class FilesStore {
 
   async saveFile(files: BinaryFiles): Promise<void> {
     try {
-      console.log("Saving files", files);
-
       const prev = await db.files.get(this.storageKey);
       const prevIds = new Set(Object.keys(prev?.files ?? {}));
       const currentIds = Object.keys(files ?? {});
       const newIds = currentIds.filter((id) => !prevIds.has(id));
-
+      await db.files.put({ key: this.storageKey, files, drawingId: this.drawingId });
+      console.log(`Saved ${currentIds.length} files to ${this.storageKey}`);
       if (this.drawingId && newIds.length > 0) {
         const toUpload = this.getFilesByIds(files, newIds);
         if (toUpload.length > 0) {
           uploadDrawingFiles(this.drawingId, toUpload);
+          syncChange(toUpload);
         }
       }
-
-
-      await db.files.put({ key: this.storageKey, files, drawingId: this.drawingId });
     } catch (e) {
       console.warn("FilesStore IndexedDB save failed", e);
+      throw e;
     }
   }
 
   async getFiles() {
     try {
       const rec = await db.files.get(this.storageKey);
-      console.log("FilesStore IndexedDB get", rec);
-      return rec?.files ?? null;
+      const files = rec?.files ?? null;
+      console.log(`Loaded ${files ? Object.keys(files).length : 0} files from ${this.storageKey}`);
+      return files;
     } catch (e) {
       console.warn("FilesStore IndexedDB get failed", e);
       return null;

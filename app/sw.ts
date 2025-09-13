@@ -1,6 +1,6 @@
 import { defaultCache } from "@serwist/next/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
-import { BackgroundSyncQueue, Serwist } from "serwist";
+import { BackgroundSyncPlugin, BackgroundSyncQueue, NetworkOnly, Serwist } from "serwist";
 
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
@@ -11,8 +11,11 @@ declare global {
   }
 }
 
-declare const self: any;
-const queue = new BackgroundSyncQueue("myQueueName");
+declare const self: ServiceWorkerGlobalScope;
+const queue = new BackgroundSyncQueue("syncQueue", { maxRetentionTime: 60 * 60 * 24 * 7 });
+const backgroundSync = new BackgroundSyncPlugin("bsync", {
+  maxRetentionTime: 24 * 60, 
+});
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
   skipWaiting: true,
@@ -32,7 +35,7 @@ const serwist = new Serwist({
   },
 });
 
-self.addEventListener("fetch", (event: any) => {
+self.addEventListener("fetch", (event) => {
   // Add in your own criteria here to return early if this
   // isn't a request that should use background sync.
   if (event.request.method !== "POST") {
@@ -51,7 +54,16 @@ self.addEventListener("fetch", (event: any) => {
 
   event.respondWith(backgroundSync());
 });
-self.addEventListener('push', function (event: any) {
+
+serwist.registerCapture(
+  /\/api\/bsync\/*.json/,
+  new NetworkOnly({
+    plugins: [backgroundSync],
+  }),
+  "POST",
+);
+
+self.addEventListener('push', function (event) {
   if (event.data) {
     const data = event.data.json()
     const options = {
@@ -67,7 +79,7 @@ self.addEventListener('push', function (event: any) {
     event.waitUntil(self.registration.showNotification(data.title, options))
   }
 })
-self.addEventListener('notificationclick', function (event: any) {
+self.addEventListener('notificationclick', function (event) {
   console.log('Notification click received.')
   event.notification.close()
 

@@ -1,21 +1,20 @@
 import Dexie, { Table } from "dexie";
 import { BinaryFiles } from "@excalidraw/excalidraw/types";
+import { OrderedExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 
 export interface FileRecord {
   key: string;
   files: BinaryFiles;
   drawingId?: string;
 }
-
-export interface DrawingElementsRecord {
+export interface ElementRecord {
   key: string;
-  data: Record<string, { element: any; lastUpdated: string }>;
-  drawingId?: string;
+  elements: OrderedExcalidrawElement[];
 }
 
 class PlanifyDB extends Dexie {
   public files!: Table<FileRecord, string>;
-  public elements!: Table<DrawingElementsRecord, string>;
+  public elements!: Table<ElementRecord, string>;
 
   constructor() {
     super("planify");
@@ -28,5 +27,6 @@ class PlanifyDB extends Dexie {
     });
   }
 }
+const db = new PlanifyDB();
 
-export const db = new PlanifyDB();
+export { db };
