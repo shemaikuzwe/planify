@@ -13,18 +13,25 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { addGroupSchema } from '@/lib/types/schema'
 import { Form, FormField, FormControl, FormItem, FormLabel } from '../ui/form'
 import { Input } from '../ui/input'
-import { db } from "@/lib/store/dexie"
 import EmojiPicker from '../ui/emoji-picker'
 import { toast } from 'sonner'
+import { taskStore } from '@/lib/store/tasks-store'
+import { useSession } from 'next-auth/react'
 
 export default function AddPage() {
     const [isOpen, setIsOpen] = useState(false)
     const form = useForm({
         resolver: zodResolver(addGroupSchema)
     })
+    const session = useSession()
     const onSubmit = async (data: { name: string }) => {
         try {
-          
+            console.log(session)
+            const userId = session.data?.user.id
+            if (!userId) {
+                throw new Error("User not found")
+            }
+            await taskStore.addPage(data.name, userId)
             form.reset()
             setIsOpen(false)
         } catch (error) {

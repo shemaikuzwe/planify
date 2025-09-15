@@ -4,7 +4,7 @@ import { ElementRecord } from "./schema/schema";
 import { Page } from "./schema/schema";
 import { taskStatus } from "./schema/schema";
 import { Task } from "@prisma/client";
-class PlanifyDB extends Dexie {
+export class PlanifyDB extends Dexie {
   public files!: Table<FileRecord, string>;
   public elements!: Table<ElementRecord, string>;
   public pages!: Table<Page>;
@@ -20,10 +20,10 @@ class PlanifyDB extends Dexie {
       files: "&key",
       elements: "&key",
     });
-    this.version(3).stores({
-      pages:"@id",
-      taskStatus:"@id",
-      tasks:"@id"
+    this.version(4).stores({
+      pages:"&id, userId",
+      taskStatus:"&id, categoryId",
+      tasks:"&id, statusId"
     })
   }
 }

@@ -142,22 +142,31 @@ function NavTask() {
         className="flex items-center justify-between gap-2 w-full relative group"
         onMouseEnter={() => handleMouseEnter(task.id)}
         onMouseLeave={() => handleMouseLeave()}
+        asChild
       >
-        <StickyNote className="h-4 w-4" />
-        <InlineInput value={task.name} onChange={async (val) => {
-          await editGroupName(task.id, val)
-          router.refresh()
-        }} options={{ slice: 20 }} className="flex-1 truncate" />
-        {(hoveredTaskId === task.id) && (
-          <div
-            className="absolute right-0 top-1/2 -translate-y-1/2 backdrop-blur-sm pl-2"
-            onClick={(e) => e.preventDefault()}
-          >
-            <PageOptions
-              page={task}
-            />
-          </div>
-        )}
+        <div
+          className="flex items-center justify-between gap-2 w-full"
+          onMouseEnter={() => handleMouseEnter(task.id)}
+          onMouseLeave={() => handleMouseLeave()}
+        >
+          <Link href={`/${task.id}`} className="flex items-center gap-2 w-full relative group">
+            <StickyNote className="h-4 w-4" />
+            <InlineInput value={task.name} onChange={async (val) => {
+              await editGroupName(task.id, val)
+              router.refresh()
+            }} options={{ slice: 20 }} className="flex-1 truncate" />
+          </Link>
+          {(hoveredTaskId === task.id) && (
+            <div
+              className="absolute right-0 top-1/2 -translate-y-1/2 backdrop-blur-sm pl-2"
+              onClick={(e) => e.preventDefault()}
+            >
+              <PageOptions
+                page={task}
+              />
+            </div>
+          )}
+        </div>
       </SidebarMenuSubButton>
     </SidebarMenuSubItem>
   ))

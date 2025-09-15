@@ -12,8 +12,8 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "Planify",
   description: "Planify is a simple and easy app that helps you organize your life.",
-  icons:{
-    icon:"/logo.png"
+  icons: {
+    icon: "/logo.png"
   }
 };
 
@@ -26,7 +26,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${poppins.className} antialiased`}>
         <Providers>
-          <Toaster/>
+          <Toaster />
           {children}
         </Providers>
       </body>

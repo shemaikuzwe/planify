@@ -7,10 +7,9 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { addGroupSchema } from '@/lib/types/schema'
 import { Form, FormField, FormControl, FormItem, FormMessage } from './ui/form'
-import { useMutation} from '@tanstack/react-query'
 import { toast } from 'sonner'
 import z from 'zod'
-import {  addStatus } from '@/lib/actions/task'
+import { taskStore } from '@/lib/store/tasks-store'
 import { useParams } from 'next/navigation'
 
 
@@ -25,18 +24,16 @@ export default function AddGroup() {
             id:taskId
         }
     })
-
-    const mutation = useMutation({
-        mutationFn: addStatus,
-        onSuccess: () => {
-            setOpen(false)
+    const handleSubmit = async (data: FormValues) => {
+        try {
+            await taskStore.addStatus(data)
             form.reset()
-        },
-        onError: (error) => {
-            toast.error('Failed to add group. Please try again.')
-            console.error('Error adding group:', error)
+            setOpen(false)
+        } catch (error) {
+            console.log(error)
+            toast.error("Failed to add group")
         }
-    })
+    }
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
@@ -44,7 +41,7 @@ export default function AddGroup() {
             </DialogTrigger>
             <DialogContent>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))}>
+                    <form onSubmit={form.handleSubmit(handleSubmit)}>
                         <FormField
                             control={form.control}
                             name='name'
@@ -59,12 +56,12 @@ export default function AddGroup() {
                         />
                         <DialogFooter className='mt-2'>
                             <DialogClose asChild>
-                                <Button variant="outline" disabled={mutation.isPending}>
+                                <Button variant="outline">
                                     Cancel
                                 </Button>
                             </DialogClose>
-                            <Button type='submit' disabled={mutation.isPending}>
-                                {mutation.isPending ? 'Adding...' : 'Add Group'}
+                            <Button type='submit' >
+                                Add Group
                             </Button>
                         </DialogFooter>
                     </form>

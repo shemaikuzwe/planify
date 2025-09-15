@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { DragDropContext, Droppable, Draggable, DropResult, DragStart, DragUpdate } from "@hello-pangea/dnd"
 import { Calendar } from "lucide-react"
 import { TaskAddForm } from "./task-add-form"
@@ -17,23 +17,26 @@ import { db } from "@/lib/store/dexie"
 import { taskStatus } from "@/lib/store/schema/schema"
 
 
-export default function KanbanBoard({taskId}:{taskId:string}) {
-  const stat = useLiveQuery(async()=>{
-    const statuses = await db.taskStatus.where("categoryId").equals(taskId).toArray();
-    const statusIds = statuses.map(s => s.id);
+export default function KanbanBoard({ taskId }: { taskId: string }) {
+  const statuses = useLiveQuery(async () => {
+    const statusArray = await db.taskStatus.where("categoryId").equals(taskId).toArray();
+    const statusIds = statusArray.map(s => s.id);
     const allTasks = await db.tasks.where("statusId").anyOf(statusIds).sortBy("taskIndex");
     const taskMap = new Map();
     allTasks.forEach(task => {
       if (!taskMap.has(task.statusId)) taskMap.set(task.statusId, []);
       taskMap.get(task.statusId).push(task);
     });
-    const statusesWithTasks = statuses.map(status => ({
+    const statusesWithTasks = statusArray.map(status => ({
       ...status,
       tasks: taskMap.get(status.id) || []
     }));
     return statusesWithTasks;
   })
-  const [status, setStatus] = useState<taskStatus[]>(stat ?? [])
+  const [status, setStatus] = useState<taskStatus[]>([])
+  useEffect(() => {
+    if (statuses) setStatus(statuses)
+  }, [statuses])
   const [dragState, setDragState] = useState<{
     isDragging: boolean
     draggedOver: { droppableId: string; index: number } | null
@@ -185,11 +188,11 @@ export default function KanbanBoard({taskId}:{taskId:string}) {
     <div>
       <DragDropContext onDragStart={onDragStart} onDragUpdate={onDragUpdate} onDragEnd={onDragEnd}>
         <div className="flex gap-4 overflow-x-auto pb-4">
-          {status.map((stat) => {
-            const colorVariants = getColorVariants(stat.primaryColor)
+          {status.map((statusItem) => {
+            const colorVariants = getColorVariants(statusItem.primaryColor)
 
             return (
-              <Droppable droppableId={stat.id} key={stat.id}>
+              <Droppable droppableId={statusItem.id} key={statusItem.id}>
                 {(provided) => (
                   <div
                     className={cn("p-2 flex-shrink-0", colorVariants.lightBg, "rounded-lg overflow-hidden flex flex-col h-fit")}
@@ -200,28 +203,28 @@ export default function KanbanBoard({taskId}:{taskId:string}) {
                       className={cn("font-medium flex items-center justify-between rounded-md min-w-64", colorVariants.lightBg, "group")}
                     >
                       <div className="flex items-center gap-2">
-                        <span className={cn("p-1 rounded-md text-sm", colorVariants.bgColor, "text-white")}>{stat.name}</span>
-                        <span className="text-sm text-black">{stat.tasks.length}</span>
+                        <span className={cn("p-1 rounded-md text-sm", colorVariants.bgColor, "text-white")}>{statusItem.name}</span>
+                        <span className="text-sm text-black">{statusItem.tasks.length}</span>
                       </div>
                       <GroupOptionsMenu
-                        groupId={stat.id}
-                        groupColor={stat.primaryColor}
+                        groupId={statusItem.id}
+                        groupColor={statusItem.primaryColor}
                       />
                     </div>
 
                     <div className="flex-1 p-2 space-y-2">
-                      {stat.tasks.map((task, index) => (
+                      {statusItem.tasks.map((task, index) => (
                         <div key={task.id}>
                           {/* Drop indicator above task */}
                           {dragState.isDragging &&
-                            dragState.draggedOver?.droppableId === stat.id &&
+                            dragState.draggedOver?.droppableId === statusItem.id &&
                             dragState.draggedOver?.index === index && (
                               <div className={cn("h-0.5 rounded-full mb-2 opacity-80", colorVariants.bgColor)} />
                             )}
 
                           <Draggable draggableId={task.id} index={index}>
                             {(provided, snapshot) => (
-                              <TaskView task={task} currStatus={stat} status={status}>
+                              <TaskView task={task} currStatus={statusItem} status={status}>
                                 <div
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
@@ -266,20 +269,20 @@ export default function KanbanBoard({taskId}:{taskId:string}) {
                       ))}
 
                       {dragState.isDragging &&
-                        dragState.draggedOver?.droppableId === stat.id &&
-                        dragState.draggedOver?.index === stat.tasks.length && (
+                        dragState.draggedOver?.droppableId === statusItem.id &&
+                        dragState.draggedOver?.index === statusItem.tasks.length && (
                           <div className={cn("h-0.5 rounded-full mb-2 opacity-80", colorVariants.bgColor)} />
                         )}
                       {provided.placeholder}
                       <TaskAddForm
-                        statusId={stat.id}
+                        statusId={statusItem.id}
                         bgClass={colorVariants.bgColor}
                         onAddTask={(task) => {
-                          setStatus(prevStatus => 
-                            prevStatus.map(statusItem => 
-                              statusItem.id === stat.id 
-                                ? { ...statusItem, tasks: [...statusItem.tasks, task] }
-                                : statusItem
+                          setStatus(prevStatus =>
+                            prevStatus.map(item =>
+                              item.id === statusItem.id
+                                ? { ...item, tasks: [...item.tasks, task] }
+                                : item
                             )
                           )
                         }}

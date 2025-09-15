@@ -1,8 +1,6 @@
 import { Navbar } from "@/components/ui/navbar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
-
-
 export default function layout({ children }: { children: React.ReactNode }) {
 
     return (
