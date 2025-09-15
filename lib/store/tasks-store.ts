@@ -17,7 +17,7 @@ class TasksStore {
         await this.db.pages.add({ id: pageId, name, userId, createdAt: new Date(), updatedAt: new Date(), taskStatus: [todoStatusId, inProgressStatusId, doneStatusId] })
     }
     async addTask(data: AddTaskValue) {
-        await this.db.tasks.add({
+       const task= await this.db.tasks.add({
             id: crypto.randomUUID(),
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -30,10 +30,29 @@ class TasksStore {
             priority: data.priority ?? null,
             dueDate: data.dueDate ? new Date(data.dueDate) : null,
         })
+        return task 
     }
     async addStatus(data: { name: string, id?: string | undefined }) {
         if (!data.id) throw new Error("id is required");
         await this.db.taskStatus.add({ categoryId: data.id, name: data.name, id: crypto.randomUUID(), createdAt: new Date(), updatedAt: new Date(), tasks: [], primaryColor: "bg-gray-600" })
+    }
+    
+    async updateTaskIndex(tasks:{id:string,taskIndex:number}[]) {
+        await this.db.transaction("rw", this.db.tasks, async () => {
+            tasks.forEach(task => {
+                this.db.tasks.update(task.id, { taskIndex: task.taskIndex });
+            });
+        });
+    }
+
+    async deleteTask(id:string){
+        await this.db.tasks.delete(id)
+    }
+    async deleteStatus(id:string){
+        await this.db.taskStatus.delete(id)
+    }
+    async deletePage(id:string){
+        await this.db.pages.delete(id)
     }
 }
 

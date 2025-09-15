@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { colors } from "@/lib/constants"
 import { changeStatusColor } from "@/lib/actions/task"
+import { db } from "@/lib/store/dexie"
 
 interface Props {
   groupId: string
@@ -55,7 +56,6 @@ export function GroupOptionsMenu({
           <Trash2 className="mr-2 h-4 w-4" />
           Delete Tasks
         </DropdownMenuItem>
-
         <DropdownMenuSeparator />
 
         <DropdownMenuLabel>Colors</DropdownMenuLabel>
@@ -63,7 +63,7 @@ export function GroupOptionsMenu({
         {colors.map((color, index) => (
           <DropdownMenuItem
             key={index}
-            onClick={() => changeGroupColor(color.value)}
+            onClick={async () => db.taskStatus.update(groupId, { primaryColor: color.value })}
             className="flex items-center justify-between"
           >
             <div className="flex items-center">

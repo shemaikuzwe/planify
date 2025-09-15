@@ -15,7 +15,7 @@ import { TaskView } from "./task/task-view"
 import { useLiveQuery } from "dexie-react-hooks"
 import { db } from "@/lib/store/dexie"
 import { taskStatus } from "@/lib/store/schema/schema"
-
+import { taskStore } from "@/lib/store/tasks-store"
 
 export default function KanbanBoard({ taskId }: { taskId: string }) {
   const statuses = useLiveQuery(async () => {
@@ -165,8 +165,8 @@ export default function KanbanBoard({ taskId }: { taskId: string }) {
         }
         setStatus(newStatus)
         Promise.all([
-          changeTaskStatus(draggableId, destListId),
-          updateTaskIndex([
+          db.tasks.update(draggableId, { statusId: destListId }),
+          taskStore.updateTaskIndex([
             ...sourceTasks.map(task => ({
               id: task.id,
               taskIndex: task.taskIndex

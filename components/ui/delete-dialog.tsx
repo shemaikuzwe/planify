@@ -2,8 +2,7 @@ import React, { useState, useTransition } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTrigger, DialogDescription, DialogTitle, DialogClose } from '../ui/dialog'
 import { Button } from '../ui/button'
 import { Trash2 } from 'lucide-react'
-import { deleteGroup, deleteTask } from '@/lib/actions/task'
-import { deleteDrawing } from "@/lib/actions/drawing";
+import { taskStore } from '@/lib/store/tasks-store'
 import { DialogFooter } from '../ui/dialog'
 interface Props {
     id: string;
@@ -18,12 +17,13 @@ export default function DeleteDialog({ id, type, text, children, onDelete }: Pro
     const handleDelete = () => {
         startTransition(async () => {
             if (type === "group") {
-                await deleteGroup(id)
+                await taskStore.deleteStatus(id)
             } else if (type === "task") {
-                await deleteTask(id)
-            } else if (type === "drawing") {
-                await deleteDrawing(id)
-            }
+                await taskStore.deleteTask(id)
+            } 
+            // else if (type === "drawing") {
+            //     await deleteDrawing(id)
+            // }
             onDelete?.()
             setIsOpen(false)
            
