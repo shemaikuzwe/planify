@@ -12,7 +12,6 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu"
 import { colors } from "@/lib/constants"
-import { changeStatusColor } from "@/lib/actions/task"
 import { db } from "@/lib/store/dexie"
 
 interface Props {
@@ -25,11 +24,8 @@ export function GroupOptionsMenu({
   groupColor = "default",
 }: Props) {
   const [isOpen, setIsOpen] = useState(false)
-  const changeGroupColor = async (color: string) => {
-    await changeStatusColor(groupId, color)
-  }
   const deleteGroup = () => {
-
+    db.taskStatus.delete(groupId)
   }
   const editGroup = () => {
 
@@ -54,7 +50,7 @@ export function GroupOptionsMenu({
         </DropdownMenuItem>
         <DropdownMenuItem onClick={deleteGroup} className="text-red-400 hover:text-red-300">
           <Trash2 className="mr-2 h-4 w-4" />
-          Delete Tasks
+          Delete Group
         </DropdownMenuItem>
         <DropdownMenuSeparator />
 

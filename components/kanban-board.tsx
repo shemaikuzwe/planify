@@ -9,7 +9,6 @@ import { cn, formatDate } from "@/lib/utils/utils"
 import { Prisma, Task } from "@prisma/client"
 import AddGroup from "./add-group"
 import { getColorVariants } from "@/lib/utils"
-import { changeTaskStatus, updateTaskIndex } from "@/lib/actions/task"
 import { toast } from "sonner"
 import { TaskView } from "./task/task-view"
 import { useLiveQuery } from "dexie-react-hooks"
@@ -139,7 +138,7 @@ export default function KanbanBoard({ taskId }: { taskId: string }) {
 
         setStatus(newStatus)
 
-        updateTaskIndex(reorderedTasks.map(task => ({
+        taskStore.updateTaskIndex(reorderedTasks.map(task => ({
           id: task.id,
           taskIndex: task.taskIndex
         })))

@@ -152,7 +152,7 @@ function NavTask() {
           <Link href={`/${task.id}`} className="flex items-center gap-2 w-full relative group">
             <StickyNote className="h-4 w-4" />
             <InlineInput value={task.name} onChange={async (val) => {
-              await editGroupName(task.id, val)
+              await db.pages.update(task.id, { name: val })
               router.refresh()
             }} options={{ slice: 20 }} className="flex-1 truncate" />
           </Link>

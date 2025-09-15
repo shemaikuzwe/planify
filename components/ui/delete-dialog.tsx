@@ -17,7 +17,7 @@ export default function DeleteDialog({ id, type, text, children, onDelete }: Pro
     const handleDelete = () => {
         startTransition(async () => {
             if (type === "group") {
-                await taskStore.deleteStatus(id)
+                await taskStore.deletePage(id)
             } else if (type === "task") {
                 await taskStore.deleteTask(id)
             } 
