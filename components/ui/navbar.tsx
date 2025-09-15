@@ -1,7 +1,8 @@
 "use client"
-import { Settings, ListTodo, Presentation, StickyNote } from "lucide-react"
+import { Settings, ListTodo, StickyNote } from "lucide-react"
 import Link from "next/link"
 import User from "@/components/profile/user"
+import { useLiveQuery } from "dexie-react-hooks";
 import {
   Sidebar,
   SidebarContent,
@@ -17,22 +18,18 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-  SidebarMenuSkeleton,
 } from "@/components/ui/sidebar"
 import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import Logo from "./logo"
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "./collapsible"
-import { Suspense, use, useState } from "react"
-import { TaskCategory } from "@prisma/client"
 import AddPage from "../task/add-page"
-import PageOptions from "../task/page-options"
 import InlineInput from "./inline-input"
-import { editGroupName } from "@/lib/actions/task"
-interface Props {
-  taskPromise: Promise<TaskCategory[]>
-}
-export function Navbar({ taskPromise }: Props) {
+import { db } from "@/lib/store/dexie";
+import { useState } from "react";
+import { editGroupName } from "@/lib/actions/task";
+import PageOptions from "../task/page-options";
+export function Navbar() {
   const pathName = usePathname()
   return (
     <Sidebar className="border-r" collapsible="icon">
@@ -59,9 +56,7 @@ export function Navbar({ taskPromise }: Props) {
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
-                      <Suspense fallback={<NavBarSkelton />}>
-                        <NavTask taskPromise={taskPromise} />
-                      </Suspense>
+                      <NavTask />
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton asChild>
                           <AddPage />
@@ -118,19 +113,19 @@ export function Navbar({ taskPromise }: Props) {
     </Sidebar>
   )
 }
-function NavBarSkelton({ number = 5 }: { number?: number }) {
-  return (
-    <SidebarMenu>
-      {Array.from({ length: number }).map((_, index) => (
-        <SidebarMenuItem key={index}>
-          <SidebarMenuSkeleton showIcon />
-        </SidebarMenuItem>
-      ))}
-    </SidebarMenu>
-  )
-}
-function NavTask({ taskPromise }: { taskPromise: Promise<TaskCategory[]> }) {
-  const tasks = use(taskPromise)
+// function NavBarSkelton({ number = 5 }: { number?: number }) {
+//   return (
+//     <SidebarMenu>
+//       {Array.from({ length: number }).map((_, index) => (
+//         <SidebarMenuItem key={index}>
+//           <SidebarMenuSkeleton showIcon />
+//         </SidebarMenuItem>
+//       ))}
+//     </SidebarMenu>
+//   )
+// }
+function NavTask() {
+  const tasks = useLiveQuery(async () => await db.pages.toArray())
   const [hoveredTaskId, setHoveredTaskId] = useState<string | null>(null)
   const router = useRouter()
   const handleMouseEnter = (taskId: string) => {
@@ -140,32 +135,29 @@ function NavTask({ taskPromise }: { taskPromise: Promise<TaskCategory[]> }) {
   const handleMouseLeave = () => {
     setHoveredTaskId(null)
   }
-  return tasks.map((task) => (
+  return tasks && tasks.length > 0 && tasks.map((task) => (
     <SidebarMenuSubItem key={task.id}>
-      <SidebarMenuSubButton asChild>
-        <div
-          className="flex items-center justify-between gap-2 w-full"
-          onMouseEnter={() => handleMouseEnter(task.id)}
-          onMouseLeave={() => handleMouseLeave()}
-        >
-          <Link href={`/${task.id}`} className="flex items-center gap-2 w-full relative group">
-            <StickyNote className="h-4 w-4" />
-            <InlineInput value={task.name} onChange={async (val) => {
-              await editGroupName(task.id, val)
-              router.refresh()
-            }} options={{ slice: 20 }} className="flex-1 truncate" />
-          </Link>
-          {(hoveredTaskId === task.id) && (
-            <div
-              className="absolute right-0 top-1/2 -translate-y-1/2 backdrop-blur-sm pl-2"
-              onClick={(e) => e.preventDefault()}
-            >
-              <PageOptions
-                page={task}
-              />
-            </div>
-          )}
-        </div>
+      <SidebarMenuSubButton
+        href={`/${task.id}`}
+        className="flex items-center justify-between gap-2 w-full relative group"
+        onMouseEnter={() => handleMouseEnter(task.id)}
+        onMouseLeave={() => handleMouseLeave()}
+      >
+        <StickyNote className="h-4 w-4" />
+        <InlineInput value={task.name} onChange={async (val) => {
+          await editGroupName(task.id, val)
+          router.refresh()
+        }} options={{ slice: 20 }} className="flex-1 truncate" />
+        {(hoveredTaskId === task.id) && (
+          <div
+            className="absolute right-0 top-1/2 -translate-y-1/2 backdrop-blur-sm pl-2"
+            onClick={(e) => e.preventDefault()}
+          >
+            <PageOptions
+              page={task}
+            />
+          </div>
+        )}
       </SidebarMenuSubButton>
     </SidebarMenuSubItem>
   ))

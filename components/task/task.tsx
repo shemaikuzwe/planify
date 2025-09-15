@@ -2,8 +2,7 @@
 
 import { use, useState } from "react"
 import { Calendar1, Check, Clock, Loader, Pen, Plus } from "lucide-react"
-import type { TaskCategory, Task } from "@prisma/client"
-import type { TaskStatus } from "@/lib/types"
+import type { TaskCategory, Task, TaskStatus } from "@prisma/client"
 import { editGroupName, toggleStatus } from "@/lib/actions/task"
 import { TaskStatusIndicator } from "../ui/task-status"
 import Link from "next/link"

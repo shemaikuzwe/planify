@@ -1,4 +1,4 @@
-import React, { useState, useTransition } from 'react'
+import React, { useState } from 'react'
 import {
     AlertDialog,
     AlertDialogCancel,
@@ -13,23 +13,20 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { addGroupSchema } from '@/lib/types/schema'
 import { Form, FormField, FormControl, FormItem, FormLabel } from '../ui/form'
 import { Input } from '../ui/input'
-import { addGroup } from '@/lib/actions/task'
+import { db } from "@/lib/store/dexie"
 import EmojiPicker from '../ui/emoji-picker'
 import { toast } from 'sonner'
 
 export default function AddPage() {
     const [isOpen, setIsOpen] = useState(false)
-    const [isPending, startTransition] = useTransition()
     const form = useForm({
         resolver: zodResolver(addGroupSchema)
     })
     const onSubmit = async (data: { name: string }) => {
         try {
-            startTransition(async () => {
-                await addGroup(data)
-                form.reset()
-                setIsOpen(false)
-            })
+          
+            form.reset()
+            setIsOpen(false)
         } catch (error) {
             console.log(error)
             toast.error("Failed to add page")
@@ -78,7 +75,7 @@ export default function AddPage() {
                             <AlertDialogCancel>
                                 Cancel
                             </AlertDialogCancel>
-                            <Button type="submit" disabled={isPending}>{isPending ? "Adding..." : "Add"}</Button>
+                            <Button type="submit">Add</Button>
                         </div>
                     </form>
                 </Form>

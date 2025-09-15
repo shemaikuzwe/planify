@@ -1,20 +1,15 @@
 import Dexie, { Table } from "dexie";
-import { BinaryFiles } from "@excalidraw/excalidraw/types";
-import { OrderedExcalidrawElement } from "@excalidraw/excalidraw/element/types";
-
-export interface FileRecord {
-  key: string;
-  files: BinaryFiles;
-  drawingId?: string;
-}
-export interface ElementRecord {
-  key: string;
-  elements: OrderedExcalidrawElement[];
-}
-
+import { FileRecord } from "./schema/schema";
+import { ElementRecord } from "./schema/schema";
+import { Page } from "./schema/schema";
+import { taskStatus } from "./schema/schema";
+import { Task } from "@prisma/client";
 class PlanifyDB extends Dexie {
   public files!: Table<FileRecord, string>;
   public elements!: Table<ElementRecord, string>;
+  public pages!: Table<Page>;
+  public taskStatus!: Table<taskStatus>;
+  public tasks!: Table<Task>;
 
   constructor() {
     super("planify");
@@ -25,8 +20,12 @@ class PlanifyDB extends Dexie {
       files: "&key",
       elements: "&key",
     });
+    this.version(3).stores({
+      pages:"@id",
+      taskStatus:"@id",
+      tasks:"@id"
+    })
   }
 }
 const db = new PlanifyDB();
-
 export { db };

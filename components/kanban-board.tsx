@@ -1,26 +1,39 @@
 "use client"
 
-import { use, useState } from "react"
+import { useState } from "react"
 import { DragDropContext, Droppable, Draggable, DropResult, DragStart, DragUpdate } from "@hello-pangea/dnd"
 import { Calendar } from "lucide-react"
 import { TaskAddForm } from "./task-add-form"
 import { GroupOptionsMenu } from "./group-options-menu"
 import { cn, formatDate } from "@/lib/utils/utils"
 import { Prisma, Task } from "@prisma/client"
-import { TaskStatusTask } from "@/lib/types"
 import AddGroup from "./add-group"
 import { getColorVariants } from "@/lib/utils"
 import { changeTaskStatus, updateTaskIndex } from "@/lib/actions/task"
 import { toast } from "sonner"
 import { TaskView } from "./task/task-view"
+import { useLiveQuery } from "dexie-react-hooks"
+import { db } from "@/lib/store/dexie"
+import { taskStatus } from "@/lib/store/schema/schema"
 
-interface Props {
-  statusPromise: Promise<TaskStatusTask[]>
-}
 
-export default function KanbanBoard({ statusPromise }: Props) {
-  const stat = use(statusPromise)
-  const [status, setStatus] = useState<TaskStatusTask[]>(stat)
+export default function KanbanBoard({taskId}:{taskId:string}) {
+  const stat = useLiveQuery(async()=>{
+    const statuses = await db.taskStatus.where("categoryId").equals(taskId).toArray();
+    const statusIds = statuses.map(s => s.id);
+    const allTasks = await db.tasks.where("statusId").anyOf(statusIds).sortBy("taskIndex");
+    const taskMap = new Map();
+    allTasks.forEach(task => {
+      if (!taskMap.has(task.statusId)) taskMap.set(task.statusId, []);
+      taskMap.get(task.statusId).push(task);
+    });
+    const statusesWithTasks = statuses.map(status => ({
+      ...status,
+      tasks: taskMap.get(status.id) || []
+    }));
+    return statusesWithTasks;
+  })
+  const [status, setStatus] = useState<taskStatus[]>(stat ?? [])
   const [dragState, setDragState] = useState<{
     isDragging: boolean
     draggedOver: { droppableId: string; index: number } | null
