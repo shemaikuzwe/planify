@@ -31,12 +31,11 @@ import { useSidebar } from "../ui/sidebar";
 import { cn } from "@/lib/utils/utils";
 import { useTheme } from "next-themes";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import { createDrawingElementsStorage } from "@/lib/store/excali-store";
+import { createDrawingStorage } from "@/lib/store/excali-store";
 import SaveDialog from "./save-dialog";
 import InlineInput from "../ui/inline-input";
 import { editDrawingName, saveDrawing } from "@/lib/actions/drawing";
 import { Drawing } from "@prisma/client";
-import { createFileStorage } from "@/lib/store/files-store";
 
 
 const initialData = {
@@ -75,8 +74,7 @@ export default function App({
   const appRef = useRef<any>(null);
 
   // feat add react-compiler
-  const drawingStorage = useMemo(() => createDrawingElementsStorage(drawingId), [drawingId]);
-  const fileStorage = useMemo(() => createFileStorage(drawingId), [drawingId])
+  const drawingStorage = useMemo(() => createDrawingStorage(drawingId), [drawingId]);
 
   const [elements, setElements] = useState<OrderedExcalidrawElement[] | null>(null);
   const [appState, setAppState] = useLocalStorage<null | AppState>("appState", null);
@@ -128,7 +126,7 @@ export default function App({
       //   //@ts-ignore
       //   initialStatePromiseRef.current.promise.resolve();
       // };
-      const storedFiles = await fileStorage.getFiles();
+      const storedFiles = await drawingStorage.getFiles();
       // @ts-ignore
       initialStatePromiseRef.current.promise.resolve({
         ...initialData,
@@ -171,7 +169,7 @@ export default function App({
           drawingStorage.saveElements(newElements).catch(error => {
             console.error('Failed to save elements:', error);
           });
-          fileStorage.saveFile(files).catch(error => {
+          drawingStorage.saveFile(files).catch(error => {
             console.error('Failed to save files:', error);
           });
         },

@@ -5,10 +5,13 @@ import { TaskCategory, TaskStatus, Task } from "@prisma/client"
 export interface FileRecord {
     key: string;
     files: BinaryFiles;
-    drawingId?: string;
 }
 export interface ElementRecord {
-    key: string;
+    userId:string;
+    id: string;
+    name: string;
+    createdAt: Date;
+    updatedAt: Date;
     elements: OrderedExcalidrawElement[];
 }
 
