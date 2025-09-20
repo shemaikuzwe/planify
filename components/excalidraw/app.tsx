@@ -41,7 +41,7 @@ const initialData = {
   scrollToContent: true,
 }
 export interface AppProps {
-  drawing?: ElementRecord|undefined,
+  drawing?: ElementRecord | undefined,
   children: React.ReactNode;
   excalidrawLib: typeof TExcalidraw;
 }
@@ -68,14 +68,8 @@ export default function App({
   const { data: session, status } = useSession()
   // feat add react-compiler
   const drawingStorage = useMemo(() => {
-    if (drawing) {
-      console.log('Creating storage for existing drawing:', drawing.id);
-      return createDrawingStorage(drawing.id);
-    }
-
-    console.log('Creating storage for new drawing');
-    return createDrawingStorage();
-  }, [drawing, session?.user?.id]);
+    return createDrawingStorage(drawing?.id);
+  }, [drawing]);
 
   const [elements, setElements] = useState<OrderedExcalidrawElement[] | null>(null);
   const [appState, setAppState] = useLocalStorage<null | AppState>("appState", null);
@@ -212,20 +206,20 @@ export default function App({
           state: AppState,
           files: BinaryFiles
         ) => {
-          // setAppState(state);
-          // setElements(newElements);
-          // if (!drawingStorage) return;
-          // // Save elements only if changed
-          // if (JSON.stringify(newElements) !== JSON.stringify(prevElementsRef.current)) {
-          //   drawingStorage.saveElements(newElements).catch(error => {
-          //     console.error('Failed to save elements:', error);
-          //   });
-          //   prevElementsRef.current = newElements;
-          // }
-          // // Save files
-          // drawingStorage.saveFile(files).catch(error => {
-          //   console.error('Failed to save files:', error);
-          // });
+          setAppState(state);
+          setElements(newElements);
+          if (!drawingStorage) return;
+          // Save elements only if changed
+          if (JSON.stringify(newElements) !== JSON.stringify(prevElementsRef.current)) {
+            drawingStorage.saveElements(newElements).catch(error => {
+              console.error('Failed to save elements:', error);
+            });
+            prevElementsRef.current = newElements;
+          }
+          // Save files
+          drawingStorage.saveFile(files).catch(error => {
+            console.error('Failed to save files:', error);
+          });
         },
         viewModeEnabled,
         zenModeEnabled,
@@ -307,7 +301,7 @@ export default function App({
     },
     [],
   );
- 
+
 
 
   return (

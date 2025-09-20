@@ -5,15 +5,14 @@ import { uploadDrawingFiles } from '../actions/drawing';
 class DrawingStorage {
   private id: string
 
-
   constructor(drawingId?: string) {
     if (drawingId) {
       this.id = drawingId;
     } else {
       this.id = crypto.randomUUID();
-
       this.createNewDrawing();
     }
+    console.log("Initialized with this id", this.id);
   }
   async createNewDrawing() {
     const existingDrawings = await db.drawings.where('name').startsWith('untitled').toArray();
@@ -28,7 +27,7 @@ class DrawingStorage {
     await db.drawings.put({
       id: this.id,
       name,
-      userId:"",
+      userId: "",
       createdAt: new Date(),
       updatedAt: new Date(),
       elements: []
@@ -46,11 +45,24 @@ class DrawingStorage {
   }
   async saveElements(elements: OrderedExcalidrawElement[]): Promise<void> {
     try {
-      // await db.drawings.update(this.id, {
-      //   id: this.id,
-      //   updatedAt: new Date(),
-      //   elements
-      // });
+      const drawing = await this.getDrawingById()
+      if (drawing) {
+        await db.drawings.update(this.id, {
+          id: this.id,
+          updatedAt: new Date(),
+          elements
+        })
+      } else {
+        await db.drawings.put({
+          id: this.id,
+          updatedAt: new Date(),
+          elements,
+          createdAt: new Date(),
+          userId: "",
+          name: "untitled",
+        })
+      }
+      console.log("saved elements",this.id);
     } catch (error) {
       console.error('Failed to save elements:', error);
     }
@@ -60,6 +72,10 @@ class DrawingStorage {
   }
   async getDrawings() {
     return await db.drawings.toArray()
+  }
+  private async getDrawingById() {
+    const drawing = await db.drawings.get(this.id)
+    return drawing
   }
   private async getAllKeys(): Promise<string[]> {
     const keys = await db.drawings.toCollection().keys()
@@ -79,7 +95,6 @@ class DrawingStorage {
       const currentIds = Object.keys(files ?? {});
       const newIds = currentIds.filter((id) => !prevIds.has(id));
       await db.files.put({ key: this.id, files });
-      console.log(`Saved ${currentIds.length} files to ${this.id}`);
       if (this.id && newIds.length > 0) {
         const toUpload = this.getFilesByIds(files, newIds);
         if (toUpload.length > 0) {
@@ -97,7 +112,6 @@ class DrawingStorage {
     try {
       const rec = await db.files.get(this.id);
       const files = rec?.files ?? null;
-      console.log(`Loaded ${files ? Object.keys(files).length : 0} files from ${this.id}`);
       return files;
     } catch (e) {
       console.warn("FilesStore IndexedDB get failed", e);
