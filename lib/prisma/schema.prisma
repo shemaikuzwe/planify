@@ -41,7 +41,6 @@ model TaskCategory {
 model Drawing {
     id          String         @id @default(uuid()) @db.Uuid
     userId      String         @db.Uuid
-    description String?
     name        String
     elements    Json?          @db.Json
     createdAt   DateTime?      @default(now())
@@ -61,17 +60,6 @@ model DrawingFile {
     drawing   Drawing   @relation(fields: [drawingId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
-model Meeting {
-    id          String    @id @default(uuid()) @db.Uuid
-    userId      String    @db.Uuid
-    description String?
-    startTime   DateTime  @db.Timestamp(6)
-    createdAt   DateTime? @default(now())
-    updatedAt   DateTime? @default(now()) @updatedAt
-    name        String?   @db.VarChar
-    meetingId   String?   @db.VarChar
-    status      STATUS?   @default(ACTIVE)
-}
 
 model Subscription {
     id        String    @id @default(uuid()) @db.Uuid

@@ -1,22 +1,17 @@
-"use cache"
+"use client"
 import ExcalidrawClient from "@/components/excalidraw/excalidraw";
-import { redirect } from "next/navigation";
-import { Suspense } from "react";
-import { getDrawingById, getUserDrawings } from "@/lib/data/drawing";
+import { db } from "@/lib/store/dexie";
+import { useLiveQuery } from "dexie-react-hooks";
+import { useParams } from "next/navigation";
 
-export default async function Page({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-    if (!id) redirect("/excalidraw");
-    const drawing = await getDrawingById(id);
-    if (!drawing) {
-        redirect("/excalidraw")
-    }
-    const drawingsPromise = getUserDrawings(drawing.userId)
+export default function Page() {
+    // const { id } =useParams<{id:string}>();
+    // if (!id) throw new Error("No drawing id");
+    // const drawing = useLiveQuery(() => db.drawings.get(id))
+    // console.log("drawing",drawing)
     return (
         <div className="h-full w-fit">
-            <Suspense>
-                <ExcalidrawClient drawingsPromise={drawingsPromise} drawing={drawing} />
-            </Suspense>
+            <ExcalidrawClient  />
         </div>
     );
 }

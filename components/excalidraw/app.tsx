@@ -32,31 +32,24 @@ import { cn } from "@/lib/utils/utils";
 import { useTheme } from "next-themes";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { createDrawingStorage } from "@/lib/store/excali-store";
-import SaveDialog from "./save-dialog";
 import InlineInput from "../ui/inline-input";
-import { editDrawingName, saveDrawing } from "@/lib/actions/drawing";
-import { Drawing } from "@prisma/client";
+import { useSession } from "next-auth/react";
+import { ElementRecord } from "@/lib/store/schema/schema";
 
 
 const initialData = {
   scrollToContent: true,
 }
 export interface AppProps {
-  apiElements?: OrderedExcalidrawElement[],
-  drawingsPromise: Promise<Drawing[]>,
-  drawingId?: string,
-  drawingName?: string,
+  drawing?: ElementRecord|undefined,
   children: React.ReactNode;
   excalidrawLib: typeof TExcalidraw;
 }
 
 export default function App({
-  apiElements,
-  drawingsPromise,
   children,
-  drawingId,
+  drawing,
   excalidrawLib,
-  drawingName,
 }: AppProps) {
   const {
     exportToClipboard,
@@ -72,12 +65,21 @@ export default function App({
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const appRef = useRef<any>(null);
-
+  const { data: session, status } = useSession()
   // feat add react-compiler
-  const drawingStorage = useMemo(() => createDrawingStorage(drawingId), [drawingId]);
+  const drawingStorage = useMemo(() => {
+    if (drawing) {
+      console.log('Creating storage for existing drawing:', drawing.id);
+      return createDrawingStorage(drawing.id);
+    }
+
+    console.log('Creating storage for new drawing');
+    return createDrawingStorage();
+  }, [drawing, session?.user?.id]);
 
   const [elements, setElements] = useState<OrderedExcalidrawElement[] | null>(null);
   const [appState, setAppState] = useLocalStorage<null | AppState>("appState", null);
+  const prevElementsRef = useRef<OrderedExcalidrawElement[]>([]);
 
   const [viewModeEnabled, setViewModeEnabled] = useState(false);
   const [zenModeEnabled, setZenModeEnabled] = useState(false);
@@ -101,43 +103,76 @@ export default function App({
 
 
   useHandleLibrary({ excalidrawAPI });
-
   //Elements changes
   useEffect(() => {
+    if (!drawingStorage) return;
+
     async function init() {
-      const storedElements = await drawingStorage.getElements()
-      setElements(storedElements)
+      const storedElements = await drawingStorage?.getElements()
+      if (storedElements) {
+        setElements(storedElements)
+        prevElementsRef.current = storedElements
+      } else {
+        setElements([])
+        prevElementsRef.current = []
+      }
     }
     init()
-  }, [drawingStorage, apiElements, drawingId]);
+  }, [drawingStorage]);
 
   //Files changes
   useEffect(() => {
-    if (!excalidrawAPI || elements === null || initialStatePromiseRef.current.resolved) {
+    if (!excalidrawAPI || elements === null || initialStatePromiseRef.current.resolved || !drawingStorage) {
       return;
     }
     const fetchData = async () => {
-      // const res = await fetch("/images/rocket.jpeg");
-      // const imageData = await res.blob();
-      // const reader = new FileReader();
-      // reader.readAsDataURL(imageData);
-
-      // reader.onload = function () {
-      //   //@ts-ignore
-      //   initialStatePromiseRef.current.promise.resolve();
-      // };
-      const storedFiles = await drawingStorage.getFiles();
-      // @ts-ignore
-      initialStatePromiseRef.current.promise.resolve({
-        ...initialData,
-        elements,
-        files: storedFiles ?? {},
-        scrollToContent: true,
-      });
-      initialStatePromiseRef.current.resolved = true;
+      try {
+        const storedFiles = await drawingStorage!.getFiles();
+        // @ts-ignore
+        initialStatePromiseRef.current.promise.resolve({
+          ...initialData,
+          elements,
+          files: storedFiles ?? {},
+          scrollToContent: true,
+        });
+        initialStatePromiseRef.current.resolved = true;
+        console.log('Initial data promise resolved successfully');
+      } catch (error) {
+        console.error('Failed to resolve initial data promise:', error);
+        // Fallback: resolve with basic data
+        // @ts-ignore
+        initialStatePromiseRef.current.promise.resolve({
+          ...initialData,
+          elements: elements || [],
+          files: {},
+          scrollToContent: true,
+        });
+        initialStatePromiseRef.current.resolved = true;
+      }
     };
     fetchData();
-  }, [excalidrawAPI, convertToExcalidrawElements, MIME_TYPES, elements, drawingId]);
+  }, [excalidrawAPI, convertToExcalidrawElements, MIME_TYPES, elements, drawing, drawingStorage]);
+
+  // Fallback: ensure promise is resolved after a timeout
+  useEffect(() => {
+    if (initialStatePromiseRef.current.resolved) return;
+
+    const timeout = setTimeout(() => {
+      if (!initialStatePromiseRef.current.resolved) {
+        console.log('Resolving initial data promise due to timeout');
+        // @ts-ignore
+        initialStatePromiseRef.current.promise.resolve({
+          ...initialData,
+          elements: elements || [],
+          files: {},
+          scrollToContent: true,
+        });
+        initialStatePromiseRef.current.resolved = true;
+      }
+    }, 5000); // 5 second timeout
+
+    return () => clearTimeout(timeout);
+  }, [elements]);
 
 
   const renderExcalidraw = (children: React.ReactNode) => {
@@ -152,6 +187,20 @@ export default function App({
     if (!Excalidraw) {
       return;
     }
+
+    // Ensure the initial data promise is resolved with default data if not already resolved
+    if (!initialStatePromiseRef.current.resolved) {
+      console.log('Resolving initial data promise with default data');
+      // @ts-ignore
+      initialStatePromiseRef.current.promise.resolve({
+        ...initialData,
+        elements: elements || [],
+        files: {},
+        scrollToContent: true,
+      });
+      initialStatePromiseRef.current.resolved = true;
+    }
+
     const newElement = cloneElement(
       Excalidraw,
       {
@@ -163,15 +212,20 @@ export default function App({
           state: AppState,
           files: BinaryFiles
         ) => {
-          setAppState(state);
-          setElements(newElements);
-          // Save elements and files asynchronously without blocking UI
-          drawingStorage.saveElements(newElements).catch(error => {
-            console.error('Failed to save elements:', error);
-          });
-          drawingStorage.saveFile(files).catch(error => {
-            console.error('Failed to save files:', error);
-          });
+          // setAppState(state);
+          // setElements(newElements);
+          // if (!drawingStorage) return;
+          // // Save elements only if changed
+          // if (JSON.stringify(newElements) !== JSON.stringify(prevElementsRef.current)) {
+          //   drawingStorage.saveElements(newElements).catch(error => {
+          //     console.error('Failed to save elements:', error);
+          //   });
+          //   prevElementsRef.current = newElements;
+          // }
+          // // Save files
+          // drawingStorage.saveFile(files).catch(error => {
+          //   console.error('Failed to save files:', error);
+          // });
         },
         viewModeEnabled,
         zenModeEnabled,
@@ -205,15 +259,8 @@ export default function App({
     return newElement;
   };
   const handleNameChange = (name: string) => {
-    if (drawingId) {
-      editDrawingName(drawingId, name);
-      return;
-    }
-    const formData = new FormData();
-    formData.append("title", name);
-    formData.append("elements", JSON.stringify(elements));
-    saveDrawing(formData);
-    localStorage.removeItem("drawing-new");
+    if (!drawingStorage) return;
+    drawingStorage.editDrawingName(name)
   }
 
   const renderTopRightUI = (isMobile: boolean) => {
@@ -221,7 +268,7 @@ export default function App({
       <>
         <div className="absolute flex justify-center items-center top-0 left-8 z-[10000]">
           {/* <DrawingPicker drawingsPromise={drawingsPromise}/> */}
-          <InlineInput value={drawingName ?? "Untitled"} onChange={handleNameChange}
+          <InlineInput value={drawing?.name ?? "Untitled"} onChange={handleNameChange}
             options={{ slice: 20 }}
             className="w-36 mt-2 ml-2 text-md"
           />
@@ -234,7 +281,6 @@ export default function App({
             }}
           />
         )}
-        <SaveDialog elements={elements} drawingId={drawingId} />
       </>
     );
   };
@@ -261,6 +307,9 @@ export default function App({
     },
     [],
   );
+ 
+
+
   return (
     <div className={cn("h-full fixed px-2 py-2", {
       "w-330": collapsed,

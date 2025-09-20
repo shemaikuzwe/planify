@@ -2,38 +2,41 @@ import { OrderedExcalidrawElement } from '@excalidraw/excalidraw/element/types';
 import { db } from './dexie';
 import { BinaryFiles } from '@excalidraw/excalidraw/types';
 import { uploadDrawingFiles } from '../actions/drawing';
-import { syncChange } from '../utils/sync';
 class DrawingStorage {
   private id: string
-  constructor(drawingId?: string, userId?: string) {
+
+
+  constructor(drawingId?: string) {
     if (drawingId) {
       this.id = drawingId;
     } else {
       this.id = crypto.randomUUID();
-      if (!userId) throw new Error("userId is required")
-      this.createNewDrawing(userId)
+
+      this.createNewDrawing();
     }
   }
-  async createNewDrawing(userId: string) {
+  async createNewDrawing() {
     const existingDrawings = await db.drawings.where('name').startsWith('untitled').toArray();
-    const numbers = existingDrawings.map(d => {
+    const numbers = existingDrawings?.map(d => {
       const match = d.name.match(/^untitled(?: (\d+))?$/);
       return match ? parseInt(match[1] || '0') : 0;
     });
     const maxNum = numbers.length > 0 ? Math.max(...numbers) : 0;
     const name = maxNum === 0 ? 'untitled' : `untitled ${maxNum + 1}`;
+    console.log("Creating new drawing", name);
+
     await db.drawings.put({
       id: this.id,
       name,
-      userId,
+      userId:"",
       createdAt: new Date(),
       updatedAt: new Date(),
       elements: []
     });
   }
-  async getElements() {
+  async getElements(): Promise<OrderedExcalidrawElement[]> {
     try {
-      const element = await db.drawings.get(this.id);
+      let element = await db.drawings.get(this.id);
       const elements = element?.elements ?? [];
       return elements;
     } catch (error) {
@@ -43,14 +46,17 @@ class DrawingStorage {
   }
   async saveElements(elements: OrderedExcalidrawElement[]): Promise<void> {
     try {
-      await db.drawings.update(this.id, {
-        id: this.id,
-        updatedAt: new Date(),
-        elements
-      });
+      // await db.drawings.update(this.id, {
+      //   id: this.id,
+      //   updatedAt: new Date(),
+      //   elements
+      // });
     } catch (error) {
       console.error('Failed to save elements:', error);
     }
+  }
+  async editDrawingName(name: string) {
+    await db.drawings.update(this.id, { name })
   }
   async getDrawings() {
     return await db.drawings.toArray()
@@ -78,7 +84,7 @@ class DrawingStorage {
         const toUpload = this.getFilesByIds(files, newIds);
         if (toUpload.length > 0) {
           uploadDrawingFiles(this.id, toUpload);
-          syncChange(toUpload);
+          // syncChange(toUpload);
         }
       }
     } catch (e) {

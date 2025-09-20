@@ -25,7 +25,7 @@ export default function InlineInput({ value, onChange, options, className }: Pro
     return (
         <div>
             {isEditing ? (
-                <Input
+                <input
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onBlur={handleSave}

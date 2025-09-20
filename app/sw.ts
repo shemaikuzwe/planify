@@ -35,6 +35,7 @@ const serwist = new Serwist({
   },
 });
 
+
 self.addEventListener("fetch", (event) => {
   // Add in your own criteria here to return early if this
   // isn't a request that should use background sync.

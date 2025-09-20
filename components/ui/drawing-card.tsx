@@ -16,12 +16,11 @@ import { editDrawingName as saveEditDrawingName } from "@/lib/actions/drawing";
 interface DrawingCardProps {
     id: string
     name: string
-    description: string | null
-    createdAt: Date | null
+    updatedAt: Date | null
 
 }
 
-export function DrawingCard({ id, name, description, createdAt }: DrawingCardProps) {
+export function DrawingCard({ id, name, updatedAt }: DrawingCardProps) {
     const router = useRouter()
     const [editingDrawingId, setEditingDrawingId] = useState(false)
     const [editDrawingName, setEditDrawingName] = useState("")
@@ -89,11 +88,8 @@ export function DrawingCard({ id, name, description, createdAt }: DrawingCardPro
                     ) : (
                         <p className="text-sm" onDoubleClick={handleDoubleClick}>{name}</p>
                     )}
-                    <div className="flex flex-col items-baseline space-x-1">
-                        {description && <p className="text-sm text-muted-foreground">{description}</p>}
-                    </div>
                     <div className="flex items-center justify-between text-xs w-full">
-                        <span>{createdAt ? formatDate(createdAt) : ""}</span>
+                        <span>{updatedAt ? formatDate(updatedAt) : ""}</span>
                         <ChevronRight size={20} className="cursor-pointer" onClick={() => router.push(`/whiteboard/${id}`)} />
                     </div>
                 </div>

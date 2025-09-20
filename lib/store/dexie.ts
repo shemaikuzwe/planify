@@ -16,10 +16,10 @@ export class PlanifyDB extends Dexie {
     this.version(1).stores({
       files: "&key",
     });
-    this.version(2).stores({
-      files: "&key",
-      drawings: "&id, userId",
-    });
+     this.version(3).stores({
+       files: "&key",
+       drawings: "&id, userId, name",
+     });
     this.version(4).stores({
       pages:"&id, userId",
       taskStatus:"&id, categoryId",

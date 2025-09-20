@@ -1,6 +1,5 @@
 "use client"
 
-import React from "react"
 import Link from "next/link"
 import { MessageSquare, Plus, Palette } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -12,7 +11,7 @@ interface Props{
 }
 export default function NotFoundCard({text, link, linkText}: Props) {
   return (
-    <div className="flex flex-col items-center justify-center px-4 w-80">
+    <div className="flex flex-col items-center justify-center px-4 w-110">
       <Card className="w-full max-w-md shadow-none border-dashed border-2">
         <CardContent className="flex flex-col items-center justify-center p-5 text-center">
           <div className="relative mb-6">

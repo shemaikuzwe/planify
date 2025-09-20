@@ -1,8 +1,8 @@
 "use client"
+import { ElementRecord } from "@/lib/store/schema/schema";
 import { Drawing } from "@prisma/client";
 import dynamic from "next/dynamic";
 import Script from "next/script";
-
 
 const ExcalidrawWithClientOnly = dynamic(
     async () => (await import("@/components/excalidraw/excalidraw-wrapper")).default,
@@ -11,17 +11,18 @@ const ExcalidrawWithClientOnly = dynamic(
     },
 );
 
-export default function ExcalidrawClient({ drawingsPromise,drawing }: { drawingsPromise: Promise<Drawing[]>,drawing?: Drawing }) {
+interface ExcalidrawClientProps {
+    drawing?: ElementRecord | undefined;
 
+}
+
+export default function ExcalidrawClient({ drawing }: ExcalidrawClientProps) {
     return (
         <div className="h-full w-fit">
-            <Script id="load-env-variables" strategy="beforeInteractive">
+            <Script id="load-env-variables" strategy="afterInteractive">
                 {`window["EXCALIDRAW_ASSET_PATH"] = window.origin;`}
             </Script>
-
-
-            <ExcalidrawWithClientOnly drawingsPromise={drawingsPromise} drawing={drawing}  />
-
+            <ExcalidrawWithClientOnly drawing={drawing} />
         </div>
     );
 }
