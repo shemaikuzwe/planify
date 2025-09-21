@@ -30,15 +30,20 @@ import type { ResolvablePromise } from "./utils";
 import { useSidebar } from "../ui/sidebar";
 import { cn } from "@/lib/utils/utils";
 import { useTheme } from "next-themes";
-import { useLocalStorage } from "@/hooks/use-local-storage";
 import { createDrawingStorage } from "@/lib/store/excali-store";
 import InlineInput from "../ui/inline-input";
-import { useSession } from "next-auth/react";
 import { ElementRecord } from "@/lib/store/schema/schema";
 
 
-const initialData = {
+type InitialData = {
+  scrollToContent: boolean
+  files: BinaryFiles|null
+  elements: OrderedExcalidrawElement[]
+}
+const initialData: InitialData = {
   scrollToContent: true,
+  files: {},
+  elements: []
 }
 export interface AppProps {
   drawing?: ElementRecord | undefined,
@@ -52,11 +57,7 @@ export default function App({
   excalidrawLib,
 }: AppProps) {
   const {
-    exportToClipboard,
     useHandleLibrary,
-    MIME_TYPES,
-    sceneCoordsToViewportCoords,
-    viewportCoordsToSceneCoords,
     Footer,
     WelcomeScreen,
     LiveCollaborationTrigger,
@@ -65,15 +66,12 @@ export default function App({
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const appRef = useRef<any>(null);
-  const { data: session, status } = useSession()
   // feat add react-compiler
   const drawingStorage = useMemo(() => {
     return createDrawingStorage(drawing?.id);
-  }, [drawing]);
+  }, [drawing?.id]);
 
   const [elements, setElements] = useState<OrderedExcalidrawElement[] | null>(null);
-  const [appState, setAppState] = useLocalStorage<null | AppState>("appState", null);
-  const prevElementsRef = useRef<OrderedExcalidrawElement[]>([]);
 
   const [viewModeEnabled, setViewModeEnabled] = useState(false);
   const [zenModeEnabled, setZenModeEnabled] = useState(false);
@@ -97,77 +95,6 @@ export default function App({
 
 
   useHandleLibrary({ excalidrawAPI });
-  //Elements changes
-  useEffect(() => {
-    if (!drawingStorage) return;
-
-    async function init() {
-      const storedElements = await drawingStorage?.getElements()
-      if (storedElements) {
-        setElements(storedElements)
-        prevElementsRef.current = storedElements
-      } else {
-        setElements([])
-        prevElementsRef.current = []
-      }
-    }
-    init()
-  }, [drawingStorage]);
-
-  //Files changes
-  useEffect(() => {
-    if (!excalidrawAPI || elements === null || initialStatePromiseRef.current.resolved || !drawingStorage) {
-      return;
-    }
-    const fetchData = async () => {
-      try {
-        const storedFiles = await drawingStorage!.getFiles();
-        // @ts-ignore
-        initialStatePromiseRef.current.promise.resolve({
-          ...initialData,
-          elements,
-          files: storedFiles ?? {},
-          scrollToContent: true,
-        });
-        initialStatePromiseRef.current.resolved = true;
-        console.log('Initial data promise resolved successfully');
-      } catch (error) {
-        console.error('Failed to resolve initial data promise:', error);
-        // Fallback: resolve with basic data
-        // @ts-ignore
-        initialStatePromiseRef.current.promise.resolve({
-          ...initialData,
-          elements: elements || [],
-          files: {},
-          scrollToContent: true,
-        });
-        initialStatePromiseRef.current.resolved = true;
-      }
-    };
-    fetchData();
-  }, [excalidrawAPI, convertToExcalidrawElements, MIME_TYPES, elements, drawing, drawingStorage]);
-
-  // Fallback: ensure promise is resolved after a timeout
-  useEffect(() => {
-    if (initialStatePromiseRef.current.resolved) return;
-
-    const timeout = setTimeout(() => {
-      if (!initialStatePromiseRef.current.resolved) {
-        console.log('Resolving initial data promise due to timeout');
-        // @ts-ignore
-        initialStatePromiseRef.current.promise.resolve({
-          ...initialData,
-          elements: elements || [],
-          files: {},
-          scrollToContent: true,
-        });
-        initialStatePromiseRef.current.resolved = true;
-      }
-    }, 5000); // 5 second timeout
-
-    return () => clearTimeout(timeout);
-  }, [elements]);
-
 
   const renderExcalidraw = (children: React.ReactNode) => {
     const Excalidraw: any = Children.toArray(children).find(
@@ -182,40 +109,35 @@ export default function App({
       return;
     }
 
-    // Ensure the initial data promise is resolved with default data if not already resolved
-    if (!initialStatePromiseRef.current.resolved) {
-      console.log('Resolving initial data promise with default data');
-      // @ts-ignore
-      initialStatePromiseRef.current.promise.resolve({
-        ...initialData,
-        elements: elements || [],
-        files: {},
-        scrollToContent: true,
-      });
-      initialStatePromiseRef.current.resolved = true;
-    }
+
+    useEffect(() => {
+      if (!drawingStorage) return;
+      async function init() {
+        const [storedFiles, storedElements] = await Promise.all([drawingStorage.getFiles(), drawingStorage?.getElements()])
+        setElements(storedElements)
+        initialData.files = storedFiles
+        initialData.elements = storedElements
+      }
+      init()
+    }, [drawingStorage])
 
     const newElement = cloneElement(
       Excalidraw,
       {
         excalidrawAPI: (api: ExcalidrawImperativeAPI) => setExcalidrawAPI(api),
         // Always resolve initial data via promise so we can await files from IndexedDB
-        initialData: initialStatePromiseRef.current.promise,
+        initialData: initialData,
         onChange: (
           newElements: OrderedExcalidrawElement[],
           state: AppState,
           files: BinaryFiles
         ) => {
-          setAppState(state);
-          setElements(newElements);
+          // setElements(newElements);
           if (!drawingStorage) return;
-          // Save elements only if changed
-          if (JSON.stringify(newElements) !== JSON.stringify(prevElementsRef.current)) {
-            drawingStorage.saveElements(newElements).catch(error => {
-              console.error('Failed to save elements:', error);
-            });
-            prevElementsRef.current = newElements;
-          }
+
+          drawingStorage.saveElements(newElements).catch(error => {
+            console.error('Failed to save elements:', error);
+          });
           // Save files
           drawingStorage.saveFile(files).catch(error => {
             console.error('Failed to save files:', error);

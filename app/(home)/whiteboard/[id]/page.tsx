@@ -5,7 +5,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useParams } from "next/navigation";
 
 export default function Page() {
-    const { id } =useParams<{id:string}>();
+    const { id } = useParams<{ id: string }>();
     if (!id) throw new Error("No drawing id");
     const drawing = useLiveQuery(() => db.drawings.get(id))
     return (

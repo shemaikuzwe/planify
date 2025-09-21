@@ -12,7 +12,7 @@ class DrawingStorage {
       this.id = crypto.randomUUID();
       this.createNewDrawing();
     }
-    console.log("Initialized with this id", this.id);
+
   }
   async createNewDrawing() {
     const existingDrawings = await db.drawings.where('name').startsWith('untitled').toArray();
@@ -22,7 +22,6 @@ class DrawingStorage {
     });
     const maxNum = numbers.length > 0 ? Math.max(...numbers) : 0;
     const name = maxNum === 0 ? 'untitled' : `untitled ${maxNum + 1}`;
-    console.log("Creating new drawing", name);
 
     await db.drawings.put({
       id: this.id,
@@ -35,9 +34,8 @@ class DrawingStorage {
   }
   async getElements(): Promise<OrderedExcalidrawElement[]> {
     try {
-      let element = await db.drawings.get(this.id);
-      const elements = element?.elements ?? [];
-      return elements;
+      const drawing = await this.getDrawingById()
+      return drawing?.elements ?? [];
     } catch (error) {
       console.error('Failed to load elements:', error);
       return [];
@@ -47,6 +45,7 @@ class DrawingStorage {
     try {
       const drawing = await this.getDrawingById()
       if (drawing) {
+        if(drawing.elements === elements) return;
         await db.drawings.update(this.id, {
           id: this.id,
           updatedAt: new Date(),
@@ -62,7 +61,6 @@ class DrawingStorage {
           name: "untitled",
         })
       }
-      console.log("saved elements",this.id);
     } catch (error) {
       console.error('Failed to save elements:', error);
     }
