@@ -3,9 +3,9 @@ import React, {
   useState,
   useRef,
   useCallback,
-  useMemo,
   Children,
   cloneElement,
+  useMemo,
 } from "react";
 
 import type * as TExcalidraw from "@excalidraw/excalidraw";
@@ -17,27 +17,23 @@ import type {
 import type {
   AppState,
   ExcalidrawImperativeAPI,
-  ExcalidrawInitialDataState,
   BinaryFiles,
 } from "@excalidraw/excalidraw/types";
 
-import {
-  resolvablePromise,
-} from "./utils";
-
 import CustomFooter from "./footer";
-import type { ResolvablePromise } from "./utils";
 import { useSidebar } from "../ui/sidebar";
 import { cn } from "@/lib/utils/utils";
 import { useTheme } from "next-themes";
 import { createDrawingStorage } from "@/lib/store/excali-store";
 import InlineInput from "../ui/inline-input";
-import { ElementRecord } from "@/lib/store/schema/schema";
+import { useParams } from "next/navigation";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "@/lib/store/dexie";
 
 
 type InitialData = {
   scrollToContent: boolean
-  files: BinaryFiles|null
+  files: BinaryFiles | null
   elements: OrderedExcalidrawElement[]
 }
 const initialData: InitialData = {
@@ -46,14 +42,12 @@ const initialData: InitialData = {
   elements: []
 }
 export interface AppProps {
-  drawing?: ElementRecord | undefined,
   children: React.ReactNode;
   excalidrawLib: typeof TExcalidraw;
 }
 
 export default function App({
   children,
-  drawing,
   excalidrawLib,
 }: AppProps) {
   const {
@@ -66,12 +60,11 @@ export default function App({
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const appRef = useRef<any>(null);
-  // feat add react-compiler
-  const drawingStorage = useMemo(() => {
-    return createDrawingStorage(drawing?.id);
-  }, [drawing?.id]);
-
+  const { id } = useParams<{ id: string }>();
+  const drawingStorage = useMemo(() => createDrawingStorage(id), [id]);
   const [elements, setElements] = useState<OrderedExcalidrawElement[] | null>(null);
+
+  const drawing = useLiveQuery(async () => db.drawings.get(id))
 
   const [viewModeEnabled, setViewModeEnabled] = useState(false);
   const [zenModeEnabled, setZenModeEnabled] = useState(false);
@@ -80,19 +73,10 @@ export default function App({
   const [disableImageTool, setDisableImageTool] = useState(false);
   const [isCollaborating, setIsCollaborating] = useState(false);
 
-  const initialStatePromiseRef = useRef<{
-    promise: ResolvablePromise<ExcalidrawInitialDataState | null>;
-    resolved: boolean;
-  }>({ promise: null!, resolved: false });
-  if (!initialStatePromiseRef.current.promise) {
-    initialStatePromiseRef.current.promise =
-      resolvablePromise<ExcalidrawInitialDataState | null>();
-    initialStatePromiseRef.current.resolved = false;
 
-  }
   const [excalidrawAPI, setExcalidrawAPI] =
     useState<ExcalidrawImperativeAPI | null>(null);
-
+ 
 
   useHandleLibrary({ excalidrawAPI });
 
@@ -108,11 +92,11 @@ export default function App({
     if (!Excalidraw) {
       return;
     }
-
+  
 
     useEffect(() => {
-      if (!drawingStorage) return;
       async function init() {
+        if (!drawingStorage) return;
         const [storedFiles, storedElements] = await Promise.all([drawingStorage.getFiles(), drawingStorage?.getElements()])
         setElements(storedElements)
         initialData.files = storedFiles
@@ -132,12 +116,13 @@ export default function App({
           state: AppState,
           files: BinaryFiles
         ) => {
-          // setElements(newElements);
-          if (!drawingStorage) return;
-
-          drawingStorage.saveElements(newElements).catch(error => {
-            console.error('Failed to save elements:', error);
-          });
+          // if (!drawingStorage) return;
+          setElements(newElements)
+          if (!(JSON.stringify(newElements) === JSON.stringify(elements))) {
+            drawingStorage.saveElements(newElements).catch(error => {
+              console.error('Failed to save elements:', error);
+            });
+          }
           // Save files
           drawingStorage.saveFile(files).catch(error => {
             console.error('Failed to save files:', error);
@@ -223,8 +208,6 @@ export default function App({
     },
     [],
   );
-
-
 
   return (
     <div className={cn("h-full fixed px-2 py-2", {

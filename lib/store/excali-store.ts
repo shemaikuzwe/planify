@@ -2,36 +2,31 @@ import { OrderedExcalidrawElement } from '@excalidraw/excalidraw/element/types';
 import { db } from './dexie';
 import { BinaryFiles } from '@excalidraw/excalidraw/types';
 import { uploadDrawingFiles } from '../actions/drawing';
-class DrawingStorage {
-  private id: string
+export class DrawingStorage {
+  id: string
 
-  constructor(drawingId?: string) {
-    if (drawingId) {
-      this.id = drawingId;
-    } else {
-      this.id = crypto.randomUUID();
-      this.createNewDrawing();
-    }
-
+  constructor(drawingId: string) {
+    this.id = drawingId;
+    console.log("Initialized with this id", this.id);
   }
-  async createNewDrawing() {
-    const existingDrawings = await db.drawings.where('name').startsWith('untitled').toArray();
-    const numbers = existingDrawings?.map(d => {
-      const match = d.name.match(/^untitled(?: (\d+))?$/);
-      return match ? parseInt(match[1] || '0') : 0;
-    });
-    const maxNum = numbers.length > 0 ? Math.max(...numbers) : 0;
-    const name = maxNum === 0 ? 'untitled' : `untitled ${maxNum + 1}`;
+  // async createNewDrawing() {
+  //   const existingDrawings = await db.drawings.where('name').startsWith('untitled').toArray();
+  //   const numbers = existingDrawings?.map(d => {
+  //     const match = d.name.match(/^untitled(?: (\d+))?$/);
+  //     return match ? parseInt(match[1] || '0') : 0;
+  //   });
+  //   const maxNum = numbers.length > 0 ? Math.max(...numbers) : 0;
+  //   const name = maxNum === 0 ? 'untitled' : `untitled ${maxNum + 1}`;
 
-    await db.drawings.put({
-      id: this.id,
-      name,
-      userId: "",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      elements: []
-    });
-  }
+  //   await db.drawings.put({
+  //     id: this.id,
+  //     name,
+  //     userId: "",
+  //     createdAt: new Date(),
+  //     updatedAt: new Date(),
+  //     elements: []
+  //   });
+  // }
   async getElements(): Promise<OrderedExcalidrawElement[]> {
     try {
       const drawing = await this.getDrawingById()
@@ -43,9 +38,9 @@ class DrawingStorage {
   }
   async saveElements(elements: OrderedExcalidrawElement[]): Promise<void> {
     try {
+      console.log(`attempting to save this element`,this.id);
       const drawing = await this.getDrawingById()
       if (drawing) {
-        if(drawing.elements === elements) return;
         await db.drawings.update(this.id, {
           id: this.id,
           updatedAt: new Date(),
@@ -61,6 +56,7 @@ class DrawingStorage {
           name: "untitled",
         })
       }
+      console.log(`saved this element`,this.id);
     } catch (error) {
       console.error('Failed to save elements:', error);
     }
@@ -85,7 +81,6 @@ class DrawingStorage {
 
 
   //Files
-
   async saveFile(files: BinaryFiles): Promise<void> {
     try {
       const prev = await db.files.get(this.id);
@@ -141,6 +136,6 @@ class DrawingStorage {
   }
 }
 
-export const createDrawingStorage = (drawingId?: string) => {
+export const createDrawingStorage = (drawingId: string) => {
   return new DrawingStorage(drawingId);
 };

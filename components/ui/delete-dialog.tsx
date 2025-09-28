@@ -4,10 +4,11 @@ import { Button } from '../ui/button'
 import { Trash2 } from 'lucide-react'
 import { taskStore } from '@/lib/store/tasks-store'
 import { DialogFooter } from '../ui/dialog'
+import { db } from '@/lib/store/dexie'
 interface Props {
     id: string;
     type: "group" | "task" | "drawing",
-    text: string,   
+    text: string,
     children?: React.ReactNode
     onDelete?: () => void
 }
@@ -20,13 +21,13 @@ export default function DeleteDialog({ id, type, text, children, onDelete }: Pro
                 await taskStore.deletePage(id)
             } else if (type === "task") {
                 await taskStore.deleteTask(id)
-            } 
-            // else if (type === "drawing") {
-            //     await deleteDrawing(id)
-            // }
+            }
+            else if (type === "drawing") {
+                await db.drawings.delete(id)
+            }
             onDelete?.()
             setIsOpen(false)
-           
+
         })
     }
     return (

@@ -11,8 +11,7 @@ import { formatDate } from "@/lib/utils/utils"
 import DeleteDialog from "./delete-dialog"
 import { useState } from "react"
 import { Input } from "./input"
-
-import { editDrawingName as saveEditDrawingName } from "@/lib/actions/drawing";
+import { db } from "@/lib/store/dexie"
 interface DrawingCardProps {
     id: string
     name: string
@@ -35,7 +34,7 @@ export function DrawingCard({ id, name, updatedAt }: DrawingCardProps) {
     }
     const saveDrawingName = async () => {
         if (!editDrawingName.trim() || !editingDrawingId) return
-        await saveEditDrawingName(id, editDrawingName)
+        db.drawings.update(id, { name: editDrawingName })
         setEditingDrawingId(false)
     }
     return (

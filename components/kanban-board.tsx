@@ -26,7 +26,7 @@ export default function KanbanBoard({ taskId }: { taskId: string }) {
       if (!taskMap.has(task.statusId)) taskMap.set(task.statusId, []);
       taskMap.get(task.statusId).push(task);
     });
-    const statusesWithTasks = statusArray.map(status => ({
+    const statusesWithTasks = statusArray.sort((a, b) => (a.createdAt?.getTime() ?? 0) - (b.createdAt?.getTime() ?? 0)).map(status => ({
       ...status,
       tasks: taskMap.get(status.id) || []
     }));
