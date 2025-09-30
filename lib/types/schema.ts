@@ -5,7 +5,7 @@ export const AddTaskSchema = z.object({
   priority: z.enum(["HIGH", "MEDIUM", "LOW"]).optional(),
   dueDate: z.string().optional(),
   taskId: z.string().uuid().optional(),
-  tags:z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional(),
   statusId: z.string().uuid(),
 });
 export type AddTaskValue = z.infer<typeof AddTaskSchema>;
@@ -39,27 +39,24 @@ export const saveDrawingSchema = z.object({
 
 export const updateDrawingSchema = z.object({
   elements: z.string(),
-   drawingId: z.string().uuid(),
+  drawingId: z.string().uuid(),
 });
 
-export const addGroupSchema = z.object({
+export const addPageSchema = z.object({
   name: z.string().min(2),
-  id: z.string().uuid().optional()
+  pageId: z.string().uuid(),
+  todoId: z.string().uuid(),
+  inProgressId: z.string().uuid(),
+  doneId: z.string().uuid(),
 });
-
-export const meetSchema = z.object({
-  name: z.string().min(2).max(100),
-  description: z.string().min(2).optional(),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, { message: "Invalid datetime" }).optional(),
-});
-
-export type MeetData = z.infer<typeof meetSchema>;
-
-export const teamSchema = z.object({
-  name: z.string().min(2).max(100),
-  slogan: z.string().min(2).optional(),
-  members: z.array(z.string().email()).min(1),
-});
-
-export type TeamData = z.infer<typeof teamSchema>;
-
+export const syncOptions = [
+  "save-element",
+  "editDrawingName",
+  "addPage",
+  "addTask",
+  "updateTaksIndex",
+  "deleteTask",
+  "deleteStatus",
+  "deletePage",
+] as const;
+export type SyncType = (typeof syncOptions)[number];

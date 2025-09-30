@@ -16,16 +16,17 @@ export class PlanifyDB extends Dexie {
     this.version(1).stores({
       files: "&key",
     });
-     this.version(3).stores({
-       files: "&key",
-       drawings: "&id, userId, name",
-     });
+    this.version(3).stores({
+      files: "&key",
+      drawings: "&id, userId, name",
+    });
     this.version(4).stores({
-      pages:"&id, userId",
-      taskStatus:"&id, categoryId",
-      tasks:"&id, statusId"
-    })  
+      pages: "&id, userId",
+      taskStatus: "&id, categoryId",
+      tasks: "&id, statusId",
+    });
   }
 }
 const db = new PlanifyDB();
+db.drawings.hook("creating", () => {});
 export { db };
