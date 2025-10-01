@@ -28,5 +28,4 @@ export class PlanifyDB extends Dexie {
   }
 }
 const db = new PlanifyDB();
-db.drawings.hook("creating", () => {});
 export { db };

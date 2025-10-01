@@ -56,7 +56,7 @@ class TasksStore {
     });
   }
   async addTask(data: AddTaskValue) {
-    const task = await this.db.tasks.add({
+    const taskId = await this.db.tasks.add({
       id: crypto.randomUUID(),
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -69,37 +69,95 @@ class TasksStore {
       priority: data.priority ?? null,
       dueDate: data.dueDate ? new Date(data.dueDate) : null,
     });
+    const task = await this.db.tasks.get(taskId);
+    if (!task) throw new Error("Task not found");
+    syncChange("addTask", {
+      taskId: task.id,
+      text: task.text,
+      description: task.description,
+      time: task.time,
+      tags: task.tags,
+      statusId: task.statusId,
+      priority: task.priority,
+      dueDate: task.dueDate,
+    });
     return task;
   }
-  async addStatus(data: { name: string; id?: string | undefined }) {
+  async editTaskDescription(id: string, description: string) {
+    if (!id) throw new Error("id is required");
+    const task = await this.db.tasks.get(id);
+    if (!task) throw new Error("Task not found");
+    await this.db.tasks.update(id, { description });
+    syncChange("editTaskDescription", {
+      taskId: task.id,
+      description: description,
+    });
+  }
+  async addStatus(data: { name: string; id: string }) {
     if (!data.id) throw new Error("id is required");
-    await this.db.taskStatus.add({
+    const statusId = await this.db.taskStatus.add({
       categoryId: data.id,
       name: data.name,
       id: crypto.randomUUID(),
       createdAt: new Date(),
       updatedAt: new Date(),
       tasks: [],
-      primaryColor: "bg-gray-600",
+      primaryColor: "bg-neutral-600",
+    });
+    syncChange("addStatus", {
+      statusId: statusId,
+      name: data.name,
+      pageId: data.id,
+    });
+  }
+  async toggleStatus(taskId: string, statusId: string) {
+    await this.db.tasks.update(taskId, { statusId });
+    syncChange("toggleStatus", {
+      taskId: taskId,
+      statusId: statusId,
     });
   }
 
-  async updateTaskIndex(tasks: { id: string; taskIndex: number }[]) {
+  async updateTaskIndex(
+    tasks: { id: string; taskIndex: number }[],
+    opts?: { taskId: string; statusId: string },
+  ) {
+    //we will update the task status
+    if (opts) {
+      await db.tasks.update(opts.taskId, { statusId: opts.statusId });
+    }
     await this.db.transaction("rw", this.db.tasks, async () => {
       tasks.forEach((task) => {
         this.db.tasks.update(task.id, { taskIndex: task.taskIndex });
       });
     });
+    syncChange("updateTaskIndex", {
+      tasks: tasks.map((task) => ({
+        id: task.id,
+        taskIndex: task.taskIndex,
+      })),
+      opts: opts ? { taskId: opts.taskId, statusId: opts.statusId } : undefined,
+    });
+  }
+  async editName(id: string, name: string) {
+    await this.db.tasks.update(id, { text: name });
+    syncChange("editTaskName", {
+      id: id,
+      name: name,
+    });
   }
 
   async deleteTask(id: string) {
     await this.db.tasks.delete(id);
+    syncChange("deleteTask", id);
   }
   async deleteStatus(id: string) {
     await this.db.taskStatus.delete(id);
+    syncChange("deleteStatus", id);
   }
   async deletePage(id: string) {
     await this.db.pages.delete(id);
+    syncChange("deletePage", id);
   }
 }
 

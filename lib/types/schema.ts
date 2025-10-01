@@ -10,36 +10,19 @@ export const AddTaskSchema = z.object({
 });
 export type AddTaskValue = z.infer<typeof AddTaskSchema>;
 
-export const AddCategorySchema = z.object({
-  name: z
-    .string({ required_error: "Category name is required" })
-    .min(1)
-    .max(50),
-  userId: z.string(),
-});
-
-export const addDailyTodoSchema = z.object({
-  name: z
-    .string({ required_error: "Daily todo name is required" })
-    .min(1)
-    .max(50),
-  userId: z.string(),
-});
-
 export const ToggleTaskStatusSchema = z.object({
   taskId: z.string().uuid(),
   status: z.string(),
 });
 
-export const saveDrawingSchema = z.object({
+export const addDrawingSchema = z.object({
   elements: z.string(),
-  title: z.string().min(2),
-  description: z.string().optional(),
+  id: z.string(),
 });
 
-export const updateDrawingSchema = z.object({
+export const saveElement = z.object({
   elements: z.string(),
-  drawingId: z.string().uuid(),
+  id: z.string().uuid(),
 });
 
 export const addPageSchema = z.object({
@@ -49,14 +32,50 @@ export const addPageSchema = z.object({
   inProgressId: z.string().uuid(),
   doneId: z.string().uuid(),
 });
+
+export const addStatusSchema = z.object({
+  name: z.string().min(2),
+  statusId: z.string().uuid(),
+  pageId: z.string().uuid(),
+});
+
+export const updateTaksIndexSchema = z.object({
+  tasks: z.array(
+    z.object({ id: z.string().uuid(), taskIndex: z.number().min(0) }),
+  ),
+  opts: z
+    .object({
+      taskId: z.string().uuid(),
+      statusId: z.string().uuid(),
+    })
+    .optional(),
+});
+
+export const editDrawingNameSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(2),
+});
+
 export const syncOptions = [
   "save-element",
   "editDrawingName",
+  "editTaskDescription",
   "addPage",
   "addTask",
-  "updateTaksIndex",
+  "addStatus",
+  "toggleStatus",
+  "updateTaskIndex",
   "deleteTask",
   "deleteStatus",
   "deletePage",
+  "deleteDrawing",
+  "editTaskName",
 ] as const;
 export type SyncType = (typeof syncOptions)[number];
+export const teamSchema = z.object({
+  name: z.string().min(2).max(100),
+  slogan: z.string().min(2).optional(),
+  members: z.array(z.string().email()).min(1),
+});
+
+export type TeamData = z.infer<typeof teamSchema>;

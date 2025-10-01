@@ -3,7 +3,6 @@
 import { revalidateTag, revalidatePath } from "next/cache";
 import { db } from "../prisma";
 import {
-  addGroupSchema,
   AddTaskSchema,
   AddTaskValue,
   ToggleTaskStatusSchema,
@@ -17,7 +16,7 @@ async function addTask(data: AddTaskValue) {
     return validate.error.flatten().fieldErrors;
   }
   const { text, time, priority, dueDate, statusId, tags } = validate.data;
-  const task = await db.task.create({
+  await db.task.create({
     data: {
       time,
       priority,
@@ -27,8 +26,6 @@ async function addTask(data: AddTaskValue) {
       tags,
     },
   });
-  revalidateTag("tasks");
-  return task;
 }
 async function editTask(data: AddTaskValue) {
   const validate = AddTaskSchema.safeParse(data);
@@ -47,7 +44,6 @@ async function editTask(data: AddTaskValue) {
       tags,
     },
   });
-  revalidateTag("tasks");
 }
 
 async function editName(data: { taskId: string; text: string }) {
@@ -66,7 +62,6 @@ async function editName(data: { taskId: string; text: string }) {
     where: { id: taskId },
     data: { text },
   });
-  revalidatePath("/");
 }
 async function toggleStatus(taskId: string, status: string) {
   const validate = ToggleTaskStatusSchema.safeParse({ taskId, status });
@@ -77,23 +72,24 @@ async function toggleStatus(taskId: string, status: string) {
     where: { id: taskId },
     data: { statusId: validate.data.status },
   });
-  revalidateTag("tasks");
 }
 async function deleteTask(taskId: string) {
   await db.task.delete({ where: { id: taskId } });
-
-  revalidateTag("tasks");
 }
 
-export async function saveTaskDescription(taskId: string, description: string) {
+export async function editTaskDescription(taskId: string, description: string) {
   await db.task.update({
     where: { id: taskId },
     data: { description },
   });
-  revalidateTag("tasks");
 }
 
-// Group
+export async function editTaskName(taskId: string, name: string) {
+  await db.task.update({
+    where: { id: taskId },
+    data: { name },
+  });
+}
 
 async function addPage(data: {
   name: string;
@@ -128,17 +124,14 @@ async function addPage(data: {
     },
   });
 }
-async function deleteGroup(categoryId: string) {
-  await db.taskCategory.delete({ where: { id: categoryId } });
-  revalidateTag("groups");
+async function deletePage(pageId: string) {
+  await db.taskCategory.delete({ where: { id: pageId } });
 }
 async function editGroupName(categoryId: string, name: string) {
   await db.taskCategory.update({ where: { id: categoryId }, data: { name } });
-  revalidateTag("groups");
 }
 async function deleteStatus(statusId: string) {
   await db.taskStatus.delete({ where: { id: statusId } });
-  revalidateTag("tasks");
 }
 
 async function changeStatusColor(statusId: string, color: string) {
@@ -153,7 +146,16 @@ async function changeTaskStatus(taskId: string, statusId: string) {
   revalidateTag("tasks");
 }
 
-async function updateTaskIndex(tasks: { id: string; taskIndex: number }[]) {
+async function updateTaskIndex(
+  tasks: { id: string; taskIndex: number }[],
+  opts?: { taskId: string; statusId: string },
+) {
+  if (opts) {
+    await db.task.update({
+      where: { id: opts.taskId },
+      data: { statusId: opts.statusId },
+    });
+  }
   await db.$transaction(
     tasks.map((task) =>
       db.task.update({
@@ -162,22 +164,19 @@ async function updateTaskIndex(tasks: { id: string; taskIndex: number }[]) {
       }),
     ),
   );
-  revalidateTag("tasks");
 }
-
-async function addStatus(data: { name: string; id: string | undefined }) {
-  const validate = addGroupSchema.safeParse(data);
-  if (!validate.success) {
-    throw validate.error.flatten().fieldErrors;
-  }
-  const { name, id } = validate.data;
-  if (!id) throw new Error("id is required");
-  await db.taskStatus.create({ data: { name, categoryId: id } });
-  revalidateTag("tasks");
+async function addStatus(data: {
+  statusId: string;
+  name: string;
+  pageId: string;
+}) {
+  await db.taskStatus.create({
+    data: { name: data.name, categoryId: data.pageId },
+  });
 }
 export {
   addPage,
-  deleteGroup,
+  deletePage,
   editGroupName,
   addTask,
   editTask,
