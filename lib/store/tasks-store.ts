@@ -36,7 +36,7 @@ export class TasksStore {
       time: data.time,
       tags: data.tags,
       statusId: data.statusId,
-      priority: data.priority,
+      priority: data.priority as unknown as any,
       dueDate: data.dueDate,
     });
     const task = await this.db.tasks.get(id);
@@ -48,7 +48,7 @@ export class TasksStore {
       time: task.time,
       tags: task.tags,
       statusId: task.statusId,
-      priority: task.priority,
+      priority: task.priority as unknown as any,
       dueDate: task.dueDate,
     });
     return task;
@@ -199,7 +199,7 @@ export class TasksStore {
       time: data.time ?? null,
       tags: data.tags ?? [],
       statusId: data.statusId,
-      priority: data.priority ?? null,
+      priority: (data.priority as unknown as any) ?? null,
       dueDate: data.dueDate ? new Date(data.dueDate) : null,
     });
   }

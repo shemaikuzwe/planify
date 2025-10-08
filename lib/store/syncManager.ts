@@ -9,9 +9,8 @@ import {
   updateTaksIndexSchema,
 } from "../types/schema";
 import { TasksStore, taskStore } from "./tasks-store";
-import { createDrawingStorage, DrawingStorage } from "./excali-store";
+import { DrawingStorage } from "./excali-store";
 import z from "zod";
-import { updateTaskIndex } from "../actions/task";
 
 class SyncManager {
   private apiUrl: string;
@@ -31,7 +30,6 @@ class SyncManager {
         return;
       }
       const lastSyncedAt = await this.db.metadata.get("lastSync");
-      console.log("lastSyncedAt", lastSyncedAt);
       const res = await fetch(
         `${this.apiUrl}/api/bsync?sync=${lastSyncedAt?.lastSyncedAt?.toUTCString()}`,
       );
@@ -110,13 +108,15 @@ class SyncManager {
             if (!exist) {
               await this.db.drawings.put({
                 id: data.id,
-                elements: data.elements,
+                elements: data.elements as unknown as any,
                 createdAt: new Date(),
                 updatedAt: new Date(),
+                name: "Untitled",
+                userId: (event as any).userId,
               });
             } else {
               await this.db.drawings.update(data.id, {
-                elements: data.elements,
+                elements: data.elements as unknown as any,
                 updatedAt: new Date(),
               });
             }
@@ -185,65 +185,71 @@ class SyncManager {
     }
     const { tables, metadata } = await res.json();
     for (const [table, data] of Object.entries(tables)) {
-      if (table === "pages") {
-        await this.db.pages.bulkAdd(
-          data.map((page) => ({
-            id: page.id,
-            name: page.name,
-            createdAt: page.createdAt,
-            updatedAt: page.updatedAt,
-            userId: page.userId,
-            taskStatus: page.taskStatus.map((status) => status.id),
-          })),
-        );
+      if (!Array.isArray(data)) {
+        continue;
       }
-      if (table === "taskStatus") {
-        await this.db.taskStatus.bulkAdd(
-          data.map((status) => ({
-            id: status.id,
-            name: status.name,
-            primaryColor: status.primaryColor,
-            createdAt: status.createdAt,
-            updatedAt: status.updatedAt,
-            userId: status.userId,
-            categoryId: status.categoryId,
-          })),
-        );
+      switch (table) {
+        case "pages":
+          await this.db.pages.bulkAdd(
+            data.map((page: any) => ({
+              id: page.id,
+              name: page.name,
+              createdAt: page.createdAt,
+              updatedAt: page.updatedAt,
+              userId: page.userId,
+              taskStatus: page.taskStatus.map((status: any) => status.id),
+            })),
+          );
+          break;
+        case "taskStatus":
+          await this.db.taskStatus.bulkAdd(
+            data.map((status: any) => ({
+              id: status.id,
+              name: status.name,
+              primaryColor: status.primaryColor,
+              createdAt: status.createdAt,
+              updatedAt: status.updatedAt,
+              userId: status.userId,
+              categoryId: status.categoryId,
+              tasks: [],
+            })),
+          );
+          break;
+        case "tasks":
+          await this.db.tasks.bulkAdd(
+            data.map((task: any) => ({
+              id: task.id,
+              text: task.text,
+              description: task.description,
+              createdAt: task.createdAt,
+              updatedAt: task.updatedAt,
+              tags: task.tags,
+              taskIndex: task.taskIndex,
+              statusId: task.statusId,
+              time: task.time ?? null,
+              dueDate: task.dueDate ?? null,
+              priority: task.priority ?? null,
+            })),
+          );
+          break;
+        case "drawings":
+          await this.db.drawings.bulkAdd(
+            data.map((drawing: any) => ({
+              id: drawing.id,
+              name: drawing.name,
+              createdAt: drawing.createdAt,
+              updatedAt: drawing.updatedAt,
+              elements: drawing.elements ?? [],
+              userId: drawing.userId,
+            })),
+          );
+          break;
       }
-      if (table === "tasks") {
-        await this.db.tasks.bulkAdd(
-          data.map((task) => ({
-            id: task.id,
-            text: task.text,
-            description: task.description,
-            createdAt: task.createdAt,
-            updatedAt: task.updatedAt,
-            tags: task.tags,
-            taskIndex: task.taskIndex,
-            statusId: task.statusId,
-            time: task.time ?? null,
-            dueDate: task.dueDate ?? null,
-            priority: task.priority ?? null,
-          })),
-        );
-      }
-      if (table === "drawings") {
-        await this.db.drawings.bulkAdd(
-          data.map((drawing) => ({
-            id: drawing.id,
-            name: drawing.name,
-            createdAt: drawing.createdAt,
-            updatedAt: drawing.updatedAt,
-            elements: drawing.elements ?? [],
-            userId: drawing.userId,
-          })),
-        );
-      }
-      await this.db.metadata.put({
-        key: "lastSync",
-        lastSyncedAt: new Date(metadata.lastSyncedAt),
-      });
     }
+    await this.db.metadata.put({
+      key: "lastSync",
+      lastSyncedAt: new Date(metadata.lastSyncedAt),
+    });
   }
 }
 
