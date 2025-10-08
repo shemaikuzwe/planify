@@ -1,5 +1,5 @@
 import Dexie, { Table } from "dexie";
-import { FileRecord } from "./schema/schema";
+import { FileRecord, Metadata } from "./schema/schema";
 import { ElementRecord } from "./schema/schema";
 import { Page } from "./schema/schema";
 import { taskStatus } from "./schema/schema";
@@ -10,6 +10,7 @@ export class PlanifyDB extends Dexie {
   public pages!: Table<Page>;
   public taskStatus!: Table<taskStatus>;
   public tasks!: Table<Task>;
+  public metadata!: Table<Metadata>;
 
   constructor() {
     super("planify");
@@ -24,6 +25,9 @@ export class PlanifyDB extends Dexie {
       pages: "&id, userId",
       taskStatus: "&id, categoryId",
       tasks: "&id, statusId",
+    });
+    this.version(5).stores({
+      metadata: "&key",
     });
   }
 }

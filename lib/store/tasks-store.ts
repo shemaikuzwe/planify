@@ -2,7 +2,7 @@ import { db, PlanifyDB } from "./dexie";
 import { AddTaskValue } from "../types/schema";
 import { syncChange } from "../utils/sync";
 
-class TasksStore {
+export class TasksStore {
   private db: PlanifyDB;
   constructor(db: PlanifyDB) {
     this.db = db;
@@ -12,64 +12,34 @@ class TasksStore {
     const todoStatusId = crypto.randomUUID();
     const inProgressStatusId = crypto.randomUUID();
     const doneStatusId = crypto.randomUUID();
-    const todo = await this.db.taskStatus.add({
-      name: "TODO",
-      categoryId: pageId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      id: todoStatusId,
-      primaryColor: "bg-gray-600",
-      tasks: [],
-    });
-    const inProgress = await this.db.taskStatus.add({
-      name: "IN PROGRESS",
-      categoryId: pageId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      id: inProgressStatusId,
-      primaryColor: "bg-blue-600",
-      tasks: [],
-    });
-    const done = await this.db.taskStatus.add({
-      name: "DONE",
-      categoryId: pageId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      id: doneStatusId,
-      primaryColor: "bg-green-600",
-      tasks: [],
-    });
-    const page = await this.db.pages.add({
-      id: pageId,
+    await this.createPage({
       name,
       userId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      taskStatus: [todoStatusId, inProgressStatusId, doneStatusId],
+      pageId,
+      todoStatusId,
+      doneStatusId,
+      inProgressStatusId,
     });
     syncChange("addPage", {
-      pageId: page,
+      pageId: pageId,
       name,
-      todoId: todo,
-      inProgressId: inProgress,
-      doneId: done,
+      todoId: todoStatusId,
+      inProgressId: inProgressStatusId,
+      doneId: doneStatusId,
     });
   }
   async addTask(data: AddTaskValue) {
-    const taskId = await this.db.tasks.add({
-      id: crypto.randomUUID(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      taskIndex: 0,
+    const id = crypto.randomUUID();
+    await this.createTask({
+      id,
       text: data.text,
-      description: null,
-      time: data.time ?? null,
-      tags: data.tags ?? [],
+      time: data.time,
+      tags: data.tags,
       statusId: data.statusId,
-      priority: data.priority ?? null,
-      dueDate: data.dueDate ? new Date(data.dueDate) : null,
+      priority: data.priority,
+      dueDate: data.dueDate,
     });
-    const task = await this.db.tasks.get(taskId);
+    const task = await this.db.tasks.get(id);
     if (!task) throw new Error("Task not found");
     syncChange("addTask", {
       taskId: task.id,
@@ -158,6 +128,80 @@ class TasksStore {
   async deletePage(id: string) {
     await this.db.pages.delete(id);
     syncChange("deletePage", id);
+  }
+  async createPage({
+    pageId,
+    todoStatusId,
+    inProgressStatusId,
+    doneStatusId,
+    name,
+    userId,
+  }: {
+    pageId: string;
+    todoStatusId: string;
+    inProgressStatusId: string;
+    doneStatusId: string;
+    name: string;
+    userId?: string;
+  }) {
+    await this.db.taskStatus.add({
+      name: "TODO",
+      categoryId: pageId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      id: todoStatusId,
+      primaryColor: "bg-gray-600",
+      tasks: [],
+    });
+    await this.db.taskStatus.add({
+      name: "IN PROGRESS",
+      categoryId: pageId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      id: inProgressStatusId,
+      primaryColor: "bg-blue-600",
+      tasks: [],
+    });
+    await this.db.taskStatus.add({
+      name: "DONE",
+      categoryId: pageId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      id: doneStatusId,
+      primaryColor: "bg-green-600",
+      tasks: [],
+    });
+    await this.db.pages.add({
+      id: pageId,
+      name,
+      userId: userId || "",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      taskStatus: [todoStatusId, inProgressStatusId, doneStatusId],
+    });
+  }
+  async createTask(data: {
+    id: string;
+    text: string;
+    time?: string;
+    tags?: string[];
+    statusId: string;
+    priority: string;
+    dueDate?: string;
+  }) {
+    await this.db.tasks.add({
+      id: data.id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      taskIndex: 0,
+      text: data.text,
+      description: null,
+      time: data.time ?? null,
+      tags: data.tags ?? [],
+      statusId: data.statusId,
+      priority: data.priority ?? null,
+      dueDate: data.dueDate ? new Date(data.dueDate) : null,
+    });
   }
 }
 

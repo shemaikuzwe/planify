@@ -87,7 +87,7 @@ export async function editTaskDescription(taskId: string, description: string) {
 export async function editTaskName(taskId: string, name: string) {
   await db.task.update({
     where: { id: taskId },
-    data: { name },
+    data: { text:name },
   });
 }
 

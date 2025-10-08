@@ -3,6 +3,7 @@ import { db } from "./dexie";
 import { BinaryFiles } from "@excalidraw/excalidraw/types";
 import { uploadDrawingFiles } from "../actions/drawing";
 import { syncChange } from "../utils/sync";
+
 export class DrawingStorage {
   id: string;
 

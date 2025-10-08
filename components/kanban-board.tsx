@@ -41,7 +41,9 @@ export default function KanbanBoard({ taskId }: { taskId: string }) {
     });
     const statusesWithTasks = statusArray
       .sort(
-        (a, b) => (a.createdAt?.getTime() ?? 0) - (b.createdAt?.getTime() ?? 0),
+        (a, b) =>
+          (new Date(a.createdAt ?? Date.now())?.getTime() ?? 0) -
+          (new Date(b.createdAt ?? Date.now())?.getTime() ?? 0),
       )
       .map((status) => ({
         ...status,

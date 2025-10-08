@@ -47,6 +47,8 @@ model Drawing {
   updatedAt DateTime?     @default(now()) @updatedAt
   user      User          @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   files     DrawingFile[]
+
+  @@index([userId])
 }
 
 model DrawingFile {
@@ -126,7 +128,17 @@ model User {
   subscription  Subscription[]
   creator       Team[]         @relation("Creator")
   Team          Team?          @relation("TeamMembers", fields: [teamId], references: [id])
+  events        Events[]
   teamId        String?        @db.Uuid
+}
+
+model Events {
+  id        String    @id @default(uuid()) @db.Uuid
+  type      SyncType
+  data      Json
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId    String    @db.Uuid
+  createdAt DateTime? @default(now())
 }
 
 enum PRIORITY {
@@ -139,4 +151,20 @@ enum STATUS {
   ACTIVE
   ENDED
   CANCELLED
+}
+
+enum SyncType {
+  save_element
+  editDrawingName
+  editTaskDescription
+  addPage
+  addTask
+  addStatus
+  toggleStatus
+  updateTaskIndex
+  deleteTask
+  deleteStatus
+  deletePage
+  deleteDrawing
+  editTaskName
 }

@@ -3,10 +3,8 @@ import { revalidateTag } from "next/cache";
 import { addDrawingSchema } from "@/lib/types/schema";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { UTApi } from "uploadthing/server";
-import { syncChange } from "../utils/sync";
 
-const utapi = new UTApi({ logLevel: "Error" });
+// const utapi = new UTApi({ logLevel: "Error" });
 
 async function saveDrawing(data: { id: string; elements: any }): Promise<void> {
   const validate = addDrawingSchema.safeParse(data);
@@ -36,7 +34,6 @@ async function editDrawingName(drawingId: string, name: string) {
 
 async function deleteDrawing(drawingId: string) {
   await db.drawing.delete({ where: { id: drawingId } });
-  syncChange("deleteDrawing", drawingId);
 }
 async function uploadDrawingFiles(key: string, files: File[]): Promise<void> {
   // const uploadedFiles = await utapi.uploadFiles(files)

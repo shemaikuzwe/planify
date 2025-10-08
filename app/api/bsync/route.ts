@@ -1,3 +1,4 @@
+import { auth } from "@/auth";
 import {
   deleteDrawing,
   editDrawingName,
@@ -15,6 +16,7 @@ import {
   editTaskName,
   updateTaskIndex,
 } from "@/lib/actions/task";
+import { db } from "@/lib/prisma";
 import {
   addPageSchema,
   addStatusSchema,
@@ -24,11 +26,103 @@ import {
   SyncType,
   updateTaksIndexSchema,
 } from "@/lib/types/schema";
-import { NextRequest, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
 import z from "zod";
+
+const searchParamsSchema = z.object({
+  sync: z.string().optional(),
+});
+
+export async function GET(req: NextRequest) {
+  try {
+    const session = await auth();
+    const userId = session?.user.id;
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const { sync } = searchParamsSchema.parse(
+      Object.fromEntries(req.nextUrl.searchParams.entries()),
+    );
+    if (!sync) {
+      const pages = await db.taskCategory.findMany({
+        where: {
+          userId: userId,
+        },
+        include: {
+          taskStatus: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      });
+      const taskStatuses = await db.taskStatus.findMany({
+        where: {
+          categoryId: {
+            in: pages.map((page) => page.id),
+          },
+        },
+      });
+      const drawings = await db.drawing.findMany({
+        where: {
+          userId: userId,
+        },
+      });
+      const [tasks, files] = await Promise.all([
+        db.task.findMany({
+          where: {
+            statusId: {
+              in: taskStatuses.map((taskStatus) => taskStatus.id),
+            },
+          },
+        }),
+
+        db.drawingFile.findMany({
+          where: {
+            drawingId: {
+              in: drawings.map((drawing) => drawing.id),
+            },
+          },
+        }),
+      ]);
+      return NextResponse.json(
+        {
+          tables: { pages, taskStatus: taskStatuses, tasks, files, drawings },
+          metadata: {
+            lastSyncedAt: new Date().toISOString(),
+          },
+        },
+        { status: 200 },
+      );
+    }
+    const syncDate = new Date(sync);
+    const events = await db.events.findMany({
+      where: {
+        createdAt: {
+          gt: syncDate,
+        },
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+    });
+    return NextResponse.json(events, { status: 200 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { message: "Something went wrong" },
+      { status: 500 },
+    );
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth();
+    const userId = session?.user.id;
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const body = await request.json();
     switch (body.type as SyncType) {
       case "addPage": {
@@ -126,6 +220,15 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });
       }
     }
+    after(async () => {
+      await db.events.create({
+        data: {
+          type: body.type,
+          data: body.data,
+          userId: userId,
+        },
+      });
+    });
 
     return NextResponse.json(
       { message: "Synced successfully" },

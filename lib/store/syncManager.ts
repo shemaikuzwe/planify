@@ -1,48 +1,153 @@
-import { db } from "./dexie";
+import { Events } from "@prisma/client";
+import { db, PlanifyDB } from "./dexie";
+import { addPageSchema, AddTaskSchema } from "../types/schema";
+import { TasksStore, taskStore } from "./tasks-store";
+import { createDrawingStorage, DrawingStorage } from "./excali-store";
 
 class SyncManager {
   private apiUrl: string;
-  constructor(apiUrl: string) {
+  private db: PlanifyDB;
+  private taskStore: TasksStore;
+  constructor(apiUrl: string, db: PlanifyDB, taskStore: TasksStore) {
     this.apiUrl = apiUrl;
+    this.db = db;
+    this.taskStore = taskStore;
   }
-  async initialSync() {
+  async sync() {
     try {
-      const res = await fetch(`${this.apiUrl}/initial-sync`);
-      const { tables } = await res.json();
-      // Use transaction to ensure atomicity
-      await db.transaction("rw", db.tables, async () => {
-        // Clear existing data (if any)
-        for (const table of db.tables) {
-          await table.clear();
-        }
-
-        // Insert data for each table
-        for (const [tableName, data] of Object.entries(tables)) {
-          const table = db.table(tableName);
-          if (table && Array.isArray(data)) {
-            await table.bulkAdd(data);
-
-            // // Update sync metadata
-            // await db.syncMetadata.put({
-            //   id: tableName,
-            //   tableName,
-            //   lastSyncTimestamp: timestamp,
-            // });
+      const isFirstRun = await this.isLocalDBEmpty();
+      if (isFirstRun) {
+        console.log("attemping full sync");
+        await this.fullSync();
+        return;
+      }
+      const lastSyncedAt = await this.db.metadata.get("lastSync");
+      console.log("lastSyncedAt", lastSyncedAt);
+      const res = await fetch(
+        `${this.apiUrl}/api/bsync?sync=${lastSyncedAt?.lastSyncedAt?.toUTCString()}`,
+      );
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      const events = (await res.json()) as Events[];
+      console.log("events", events);
+      for (const event of events) {
+        //TODO:change this to use extends class for one fxn
+        switch (event.type) {
+          case "addPage": {
+            const data = addPageSchema.parse(event.data);
+            await this.taskStore.createPage({
+              pageId: data.pageId,
+              doneStatusId: data.doneId,
+              inProgressStatusId: data.inProgressId,
+              name: data.name,
+              todoStatusId: data.todoId,
+            });
+            break;
+          }
+          case "addTask": {
+            const data = AddTaskSchema.parse(event.data);
+            if (!data.taskId) {
+              throw new Error("Task ID is required");
+            }
+            await this.taskStore.createTask({
+              id: data.taskId,
+              statusId: data.statusId,
+              text: data.text,
+              tags: data.tags,
+              time: data.time,
+              priority: data.priority ?? "",
+              dueDate: data.dueDate,
+            });
+            break;
+          }
+          case "deletePage": {
+            const data = deletePageSchema.parse(event.data);
+            await this.taskStore.deletePage(data.pageId);
           }
         }
-      });
+      }
     } catch (err) {
-      console.error("Error during initial sync:", err);
+      console.error("Error during full sync:", err.message);
     }
   }
-  async isLocalDbEmpty(): Promise<boolean> {
-    const tables = db.tables.filter((t) => t.name !== "syncMetadata");
-
-    for (const table of tables) {
-      const count = await table.count();
-      if (count > 0) return false;
+  private async isLocalDBEmpty() {
+    const lastSync = await this.db.metadata.get("lastSync");
+    return !lastSync;
+  }
+  private async fullSync() {
+    const res = await fetch(`${this.apiUrl}/api/bsync`);
+    if (!res.ok) {
+      throw new Error(`Failed to sync: ${res.status} ${res.statusText}`);
     }
-
-    return true;
+    const { tables, metadata } = await res.json();
+    for (const [table, data] of Object.entries(tables)) {
+      if (table === "pages") {
+        await this.db.pages.bulkAdd(
+          data.map((page) => ({
+            id: page.id,
+            name: page.name,
+            createdAt: page.createdAt,
+            updatedAt: page.updatedAt,
+            userId: page.userId,
+            taskStatus: page.taskStatus.map((status) => status.id),
+          })),
+        );
+      }
+      if (table === "taskStatus") {
+        await this.db.taskStatus.bulkAdd(
+          data.map((status) => ({
+            id: status.id,
+            name: status.name,
+            primaryColor: status.primaryColor,
+            createdAt: status.createdAt,
+            updatedAt: status.updatedAt,
+            userId: status.userId,
+            categoryId: status.categoryId,
+          })),
+        );
+      }
+      if (table === "tasks") {
+        await this.db.tasks.bulkAdd(
+          data.map((task) => ({
+            id: task.id,
+            text: task.text,
+            description: task.description,
+            createdAt: task.createdAt,
+            updatedAt: task.updatedAt,
+            tags: task.tags,
+            taskIndex: task.taskIndex,
+            statusId: task.statusId,
+            time: task.time ?? null,
+            dueDate: task.dueDate ?? null,
+            priority: task.priority ?? null,
+          })),
+        );
+      }
+      if (table === "drawings") {
+        await this.db.drawings.bulkAdd(
+          data.map((drawing) => ({
+            id: drawing.id,
+            name: drawing.name,
+            createdAt: drawing.createdAt,
+            updatedAt: drawing.updatedAt,
+            elements: drawing.elements ?? [],
+            userId: drawing.userId,
+          })),
+        );
+      }
+      await this.db.metadata.put({
+        key: "lastSync",
+        lastSyncedAt: new Date(metadata.lastSyncedAt),
+      });
+    }
   }
 }
+
+const syncManager = new SyncManager(
+  process.env.NEXT_PUBLIC_BASE_URL!,
+  db,
+  taskStore,
+);
+
+export { syncManager };
