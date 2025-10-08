@@ -57,7 +57,7 @@ export const editDrawingNameSchema = z.object({
 });
 
 export const syncOptions = [
-  "save-element",
+  "save_element",
   "editDrawingName",
   "editTaskDescription",
   "addPage",

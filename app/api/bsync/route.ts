@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
         await updateTaskIndex(validate.tasks, validate.opts);
         break;
       }
-      case "save-element": {
+      case "save_element": {
         const validate = saveElement.parse(body.data);
         await saveDrawing(validate);
         break;
