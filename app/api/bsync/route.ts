@@ -96,6 +96,7 @@ export async function GET(req: NextRequest) {
       );
     }
     const syncDate = new Date(sync);
+    console.log("syncDate", syncDate);
     const events = await db.events.findMany({
       where: {
         createdAt: {
@@ -106,7 +107,10 @@ export async function GET(req: NextRequest) {
         createdAt: "asc",
       },
     });
-    return NextResponse.json(events, { status: 200 });
+    return NextResponse.json(
+      { events, metadata: { lastSyncedAt: new Date().toISOString() } },
+      { status: 200 },
+    );
   } catch (error) {
     console.error(error);
     return NextResponse.json(
@@ -168,23 +172,23 @@ export async function POST(request: NextRequest) {
         break;
       }
       case "deleteTask": {
-        const id = z.string().uuid().parse(body.data);
-        await deleteTask(id);
+        const data = z.object({ id: z.string().uuid() }).parse(body.data);
+        await deleteTask(data.id);
         break;
       }
       case "deleteStatus": {
-        const id = z.string().uuid().uuid().parse(body.data);
-        await deleteStatus(id);
+        const data = z.object({ id: z.string().uuid() }).parse(body.data);
+        await deleteStatus(data.id);
         break;
       }
       case "deletePage": {
-        const id = z.string().uuid().parse(body.data);
-        await deletePage(id);
+        const data = z.object({ id: z.string().uuid() }).parse(body.data);
+        await deletePage(data.id);
         break;
       }
       case "deleteDrawing":
-        const id = z.string().uuid().parse(body.data);
-        await deleteDrawing(id);
+        const data = z.object({ id: z.string().uuid() }).parse(body.data);
+        await deleteDrawing(data.id);
         break;
       case "editTaskDescription": {
         const validate = z
@@ -226,6 +230,7 @@ export async function POST(request: NextRequest) {
           type: body.type,
           data: body.data,
           userId: userId,
+          createdAt: body.metadata.lastSyncedAt,
         },
       });
     });

@@ -119,15 +119,15 @@ export class TasksStore {
 
   async deleteTask(id: string) {
     await this.db.tasks.delete(id);
-    syncChange("deleteTask", id);
+    syncChange("deleteTask", { id: id });
   }
   async deleteStatus(id: string) {
     await this.db.taskStatus.delete(id);
-    syncChange("deleteStatus", id);
+    syncChange("deleteStatus", { id: id });
   }
   async deletePage(id: string) {
     await this.db.pages.delete(id);
-    syncChange("deletePage", id);
+    syncChange("deletePage", { id: id });
   }
   async createPage({
     pageId,

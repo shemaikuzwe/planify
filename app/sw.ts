@@ -6,6 +6,7 @@ import {
   NetworkOnly,
   Serwist,
 } from "serwist";
+import { syncManager } from "../lib/store/syncManager";
 
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
@@ -109,4 +110,12 @@ self.addEventListener("notificationclick", function (event) {
       }),
   );
 });
+
+// self.addEventListener("message", (event) => {
+//   if (event.data && event.data.type === "SYNC") {
+//     console.log("Service worker received SYNC message, starting sync.");
+//     event.waitUntil(syncManager.sync());
+//   }
+// });
+
 serwist.addEventListeners();

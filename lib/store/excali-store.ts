@@ -58,7 +58,7 @@ export class DrawingStorage {
           name: "untitled",
         });
       }
-      syncChange("save-element", {
+      syncChange("save_element", {
         id: this.id,
         elements: JSON.stringify(elements),
       });

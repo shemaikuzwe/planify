@@ -9,7 +9,6 @@ import {
   updateTaksIndexSchema,
 } from "../types/schema";
 import { TasksStore, taskStore } from "./tasks-store";
-import { DrawingStorage } from "./excali-store";
 import z from "zod";
 
 class SyncManager {
@@ -30,16 +29,27 @@ class SyncManager {
         return;
       }
       const lastSyncedAt = await this.db.metadata.get("lastSync");
+      console.log("lastSyncedAt", lastSyncedAt);
       const res = await fetch(
         `${this.apiUrl}/api/bsync?sync=${lastSyncedAt?.lastSyncedAt?.toUTCString()}`,
       );
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
-      const events = (await res.json()) as Events[];
-      console.log("events", events);
+      const { events, metadata } = (await res.json()) as {
+        events: Events[];
+        metadata: any;
+      };
+      console.log("attempt events sync", events);
+      if (!events.length) {
+        await this.db.metadata.put({
+          key: "lastSync",
+          lastSyncedAt: new Date(metadata.lastSyncedAt),
+        });
+        return;
+      }
       for (const event of events) {
-        //TODO:change this to use extends class for one fxn
+        //TODO:change this to use extends class for one fxnI
         switch (event.type) {
           case "addPage": {
             const data = addPageSchema.parse(event.data);
@@ -74,8 +84,8 @@ class SyncManager {
               categoryId: data.pageId,
               name: data.name,
               id: data.statusId,
-              createdAt: new Date(), // TODO:Add All fields
-              updatedAt: new Date(),
+              createdAt: event.createdAt,
+              updatedAt: event.createdAt,
               primaryColor: "bg-gray-600",
               tasks: [],
             });
@@ -87,7 +97,10 @@ class SyncManager {
                 status: z.string().uuid(),
               })
               .parse(event.data);
-            await this.db.tasks.update(data.id, { statusId: data.status });
+            await this.db.tasks.update(data.id, {
+              statusId: data.status,
+              updatedAt: event.createdAt,
+            });
           }
           case "updateTaskIndex": {
             const data = updateTaksIndexSchema.parse(event.data);
@@ -153,22 +166,42 @@ class SyncManager {
             });
           }
           case "deleteTask": {
-            const data = z.string().uuid().parse(event.data);
-            await this.db.tasks.delete(data);
+            const data = z
+              .object({
+                id: z.string().uuid(),
+              })
+              .parse(event.data);
+            await this.db.tasks.delete(data.id);
           }
           case "deleteStatus": {
-            const data = z.string().uuid().parse(event.data);
-            await this.db.taskStatus.delete(data);
+            const data = z
+              .object({
+                id: z.string().uuid(),
+              })
+              .parse(event.data);
+            await this.db.taskStatus.delete(data.id);
           }
           case "deleteDrawing": {
-            const data = z.string().uuid().parse(event.data);
-            await this.db.drawings.delete(data);
+            const data = z
+              .object({
+                id: z.string().uuid(),
+              })
+              .parse(event.data);
+            await this.db.drawings.delete(data.id);
           }
           case "deletePage": {
-            const data = z.string().uuid().parse(event.data);
-            await this.taskStore.deletePage(data);
+            const data = z
+              .object({
+                id: z.string().uuid(),
+              })
+              .parse(event.data);
+            await this.taskStore.deletePage(data.id);
           }
         }
+        await this.db.metadata.put({
+          key: "lastSync",
+          lastSyncedAt: new Date(metadata.lastSyncedAt),
+        });
       }
     } catch (err) {
       console.error("Error during full sync:", err);
@@ -179,6 +212,8 @@ class SyncManager {
     return !lastSync;
   }
   private async fullSync() {
+    await this.db.delete(); //delete all data locally
+    await this.db.open();
     const res = await fetch(`${this.apiUrl}/api/bsync`);
     if (!res.ok) {
       throw new Error(`Failed to sync: ${res.status} ${res.statusText}`);
