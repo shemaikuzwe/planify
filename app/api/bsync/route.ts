@@ -12,6 +12,7 @@ import {
   deletePage,
   deleteStatus,
   deleteTask,
+  editPageName,
   editTaskDescription,
   editTaskName,
   updateTaskIndex,
@@ -96,7 +97,6 @@ export async function GET(req: NextRequest) {
       );
     }
     const syncDate = new Date(sync);
-    console.log("syncDate", syncDate);
     const events = await db.events.findMany({
       where: {
         createdAt: {
@@ -128,6 +128,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const body = await request.json();
+    console.log(body.data);
     switch (body.type as SyncType) {
       case "addPage": {
         const validate = addPageSchema.parse(body.data);
@@ -193,11 +194,12 @@ export async function POST(request: NextRequest) {
       case "editTaskDescription": {
         const validate = z
           .object({
-            id: z.string().uuid(),
+            taskId: z.string().uuid(),
             description: z.string().min(1),
           })
           .parse(body.data);
-        await editTaskDescription(validate.id, validate.description);
+        console.log("desc", validate.description);
+        await editTaskDescription(validate.taskId, validate.description);
         break;
       }
       case "editTaskName": {
@@ -208,6 +210,16 @@ export async function POST(request: NextRequest) {
           })
           .parse(body.data);
         await editTaskName(validate.id, validate.name);
+        break;
+      }
+      case "editPageName": {
+        const validate = z
+          .object({
+            id: z.string().uuid(),
+            name: z.string().min(1),
+          })
+          .parse(body.data);
+        await editPageName(validate.id, validate.name);
         break;
       }
       case "toggleStatus": {
@@ -230,7 +242,7 @@ export async function POST(request: NextRequest) {
           type: body.type,
           data: body.data,
           userId: userId,
-          createdAt: body.metadata.lastSyncedAt,
+          createdAt: new Date(body.metadata.lastSyncedAt).toISOString(),
         },
       });
     });
@@ -240,6 +252,7 @@ export async function POST(request: NextRequest) {
       { status: 200 },
     );
   } catch (err) {
+    console.error(err);
     return NextResponse.json({ error: "Failed to sync" }, { status: 500 });
   }
 }

@@ -10,28 +10,35 @@ import {
 } from "../types/schema";
 import { TasksStore, taskStore } from "./tasks-store";
 import z from "zod";
+import { differenceInDays } from "date-fns";
 
 class SyncManager {
   private apiUrl: string;
   private db: PlanifyDB;
   private taskStore: TasksStore;
-  constructor(apiUrl: string, db: PlanifyDB, taskStore: TasksStore) {
+  private syncInterval: number;
+  constructor(
+    apiUrl: string,
+    db: PlanifyDB,
+    taskStore: TasksStore,
+    syncInterval: number = 2,
+  ) {
     this.apiUrl = apiUrl;
     this.db = db;
     this.taskStore = taskStore;
+    this.syncInterval = syncInterval;
   }
-  async sync() {
+  private async runSync() {
     try {
-      const isFirstRun = await this.isLocalDBEmpty();
+      const isFirstRun = await this.shouldFullSync();
       if (isFirstRun) {
         console.log("attemping full sync");
         await this.fullSync();
         return;
       }
       const lastSyncedAt = await this.db.metadata.get("lastSync");
-      console.log("lastSyncedAt", lastSyncedAt);
       const res = await fetch(
-        `${this.apiUrl}/api/bsync?sync=${lastSyncedAt?.lastSyncedAt?.toUTCString()}`,
+        `${this.apiUrl}/api/bsync?sync=${lastSyncedAt?.lastSyncedAt?.toISOString()}`,
       );
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
@@ -115,6 +122,15 @@ class SyncManager {
               });
             });
           }
+          case "editPageName": {
+            const data = z
+              .object({
+                id: z.string().uuid(),
+                name: z.string(),
+              })
+              .parse(event.data);
+            await this.db.pages.update(data.id, { name: data.name });
+          }
           case "save_element": {
             const data = saveElement.parse(event.data);
             const exist = await this.db.drawings.get(data.id);
@@ -144,11 +160,11 @@ class SyncManager {
           case "editTaskDescription": {
             const data = z
               .object({
-                id: z.string().uuid(),
+                taskId: z.string().uuid(),
                 description: z.string().min(1),
               })
               .parse(event.data);
-            await this.db.tasks.update(data.id, {
+            await this.db.tasks.update(data.taskId, {
               description: data.description,
               updatedAt: new Date(),
             });
@@ -165,6 +181,7 @@ class SyncManager {
               updatedAt: new Date(),
             });
           }
+
           case "deleteTask": {
             const data = z
               .object({
@@ -207,10 +224,23 @@ class SyncManager {
       console.error("Error during full sync:", err);
     }
   }
-  private async isLocalDBEmpty() {
+  private async shouldFullSync() {
     const lastSync = await this.db.metadata.get("lastSync");
-    return !lastSync;
+    if (!lastSync) return true;
+    const daysSinceLastSync = differenceInDays(
+      new Date(),
+      new Date(lastSync.lastSyncedAt),
+    );
+    return daysSinceLastSync > 7;
   }
+
+  async sync() {
+    // setInterval(async () => {
+    //   await this.runSync();
+    // }, 1000 * this.syncInterval);
+    await this.runSync();
+  }
+
   private async fullSync() {
     await this.db.delete(); //delete all data locally
     await this.db.open();
@@ -292,6 +322,7 @@ const syncManager = new SyncManager(
   process.env.NEXT_PUBLIC_BASE_URL!,
   db,
   taskStore,
+  process.env.NODE_ENV === "production" ? 10 : 5,
 );
 
 export { syncManager };

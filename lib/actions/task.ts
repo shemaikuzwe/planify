@@ -87,7 +87,7 @@ export async function editTaskDescription(taskId: string, description: string) {
 export async function editTaskName(taskId: string, name: string) {
   await db.task.update({
     where: { id: taskId },
-    data: { text:name },
+    data: { text: name },
   });
 }
 
@@ -127,7 +127,7 @@ async function addPage(data: {
 async function deletePage(pageId: string) {
   await db.taskCategory.delete({ where: { id: pageId } });
 }
-async function editGroupName(categoryId: string, name: string) {
+async function editPageName(categoryId: string, name: string) {
   await db.taskCategory.update({ where: { id: categoryId }, data: { name } });
 }
 async function deleteStatus(statusId: string) {
@@ -177,7 +177,7 @@ async function addStatus(data: {
 export {
   addPage,
   deletePage,
-  editGroupName,
+  editPageName,
   addTask,
   editTask,
   updateTaskIndex,

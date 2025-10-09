@@ -70,6 +70,7 @@ export const syncOptions = [
   "deletePage",
   "deleteDrawing",
   "editTaskName",
+  "editPageName",
 ] as const;
 export type SyncType = (typeof syncOptions)[number];
 export const teamSchema = z.object({

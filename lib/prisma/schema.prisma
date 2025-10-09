@@ -167,4 +167,5 @@ enum SyncType {
   deletePage
   deleteDrawing
   editTaskName
+  editPageName
 }
