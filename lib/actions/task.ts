@@ -1,6 +1,4 @@
 "use server";
-
-import { revalidateTag, revalidatePath } from "next/cache";
 import { db } from "../prisma";
 import {
   AddTaskSchema,
@@ -15,9 +13,11 @@ async function addTask(data: AddTaskValue) {
   if (!validate.success) {
     return validate.error.flatten().fieldErrors;
   }
-  const { text, time, priority, dueDate, statusId, tags } = validate.data;
+  const { text, time, priority, dueDate, statusId, tags, taskId } =
+    validate.data;
   await db.task.create({
     data: {
+      id: taskId,
       time,
       priority,
       dueDate: dueDate ? new Date(dueDate) : null,
@@ -139,11 +139,9 @@ async function changeStatusColor(statusId: string, color: string) {
     where: { id: statusId },
     data: { primaryColor: color },
   });
-  revalidateTag("tasks");
 }
 async function changeTaskStatus(taskId: string, statusId: string) {
   await db.task.update({ where: { id: taskId }, data: { statusId } });
-  revalidateTag("tasks");
 }
 
 async function updateTaskIndex(

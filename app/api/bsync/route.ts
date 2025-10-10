@@ -8,6 +8,7 @@ import {
   addPage,
   addStatus,
   addTask,
+  changeStatusColor,
   changeTaskStatus,
   deletePage,
   deleteStatus,
@@ -22,6 +23,7 @@ import {
   addPageSchema,
   addStatusSchema,
   AddTaskSchema,
+  changeStatusSchema,
   editDrawingNameSchema,
   saveElement,
   SyncType,
@@ -128,7 +130,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const body = await request.json();
-    console.log(body.data);
     switch (body.type as SyncType) {
       case "addPage": {
         const validate = addPageSchema.parse(body.data);
@@ -144,6 +145,7 @@ export async function POST(request: NextRequest) {
       case "addTask": {
         const validate = AddTaskSchema.parse(body.data);
         await addTask({
+          taskId: validate.taskId,
           text: validate.text,
           tags: validate.tags,
           statusId: validate.statusId,
@@ -164,12 +166,18 @@ export async function POST(request: NextRequest) {
       }
       case "save_element": {
         const validate = saveElement.parse(body.data);
+        console.log("test this id", validate.id);
         await saveDrawing(validate);
         break;
       }
       case "editDrawingName": {
         const validate = editDrawingNameSchema.parse(body.data);
         await editDrawingName(validate.id, validate.name);
+        break;
+      }
+      case "changeStatusColor": {
+        const validate = changeStatusSchema.parse(body.data);
+        await changeStatusColor(validate.statusId, validate.color);
         break;
       }
       case "deleteTask": {
@@ -198,7 +206,6 @@ export async function POST(request: NextRequest) {
             description: z.string().min(1),
           })
           .parse(body.data);
-        console.log("desc", validate.description);
         await editTaskDescription(validate.taskId, validate.description);
         break;
       }

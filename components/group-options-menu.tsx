@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { MoreVertical, Grid3X3, Trash2, Check } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import { MoreVertical, Grid3X3, Trash2, Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,26 +10,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuLabel,
-} from "@/components/ui/dropdown-menu"
-import { colors } from "@/lib/constants"
-import { db } from "@/lib/store/dexie"
+} from "@/components/ui/dropdown-menu";
+import { colors } from "@/lib/constants";
+import { db } from "@/lib/store/dexie";
+import { syncChange } from "@/lib/utils/sync";
 
 interface Props {
-  groupId: string
-  groupColor?: string
+  groupId: string;
+  groupColor?: string;
 }
 
-export function GroupOptionsMenu({
-  groupId,
-  groupColor = "default",
-}: Props) {
-  const [isOpen, setIsOpen] = useState(false)
+export function GroupOptionsMenu({ groupId, groupColor = "default" }: Props) {
+  const [isOpen, setIsOpen] = useState(false);
   const deleteGroup = () => {
-    db.taskStatus.delete(groupId)
-  }
-  const editGroup = () => {
-
-  }
+    db.taskStatus.delete(groupId);
+  };
+  const editGroup = () => {};
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -48,7 +44,10 @@ export function GroupOptionsMenu({
           <Grid3X3 className="mr-2 h-4 w-4" />
           Edit groups
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={deleteGroup} className="text-red-400 hover:text-red-300">
+        <DropdownMenuItem
+          onClick={deleteGroup}
+          className="text-red-400 hover:text-red-300"
+        >
           <Trash2 className="mr-2 h-4 w-4" />
           Delete Group
         </DropdownMenuItem>
@@ -59,7 +58,15 @@ export function GroupOptionsMenu({
         {colors.map((color, index) => (
           <DropdownMenuItem
             key={index}
-            onClick={async () => db.taskStatus.update(groupId, { primaryColor: color.value })}
+            onClick={async () => {
+              await db.taskStatus.update(groupId, {
+                primaryColor: color.value,
+              });
+              syncChange("changeStatusColor", {
+                statusId: groupId,
+                color: color.value,
+              });
+            }}
             className="flex items-center justify-between"
           >
             <div className="flex items-center">
@@ -71,6 +78,5 @@ export function GroupOptionsMenu({
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }
-

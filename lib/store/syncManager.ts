@@ -4,6 +4,7 @@ import {
   addPageSchema,
   addStatusSchema,
   AddTaskSchema,
+  changeStatusSchema,
   editDrawingNameSchema,
   saveElement,
   updateTaksIndexSchema,
@@ -56,7 +57,6 @@ class SyncManager {
         return;
       }
       for (const event of events) {
-        //TODO:change this to use extends class for one fxnI
         switch (event.type) {
           case "addPage": {
             const data = addPageSchema.parse(event.data);
@@ -96,6 +96,7 @@ class SyncManager {
               primaryColor: "bg-gray-600",
               tasks: [],
             });
+            break;
           }
           case "toggleStatus": {
             const data = z
@@ -108,6 +109,7 @@ class SyncManager {
               statusId: data.status,
               updatedAt: event.createdAt,
             });
+            break;
           }
           case "updateTaskIndex": {
             const data = updateTaksIndexSchema.parse(event.data);
@@ -121,6 +123,7 @@ class SyncManager {
                 this.db.tasks.update(task.id, { taskIndex: task.taskIndex });
               });
             });
+            break;
           }
           case "editPageName": {
             const data = z
@@ -130,6 +133,14 @@ class SyncManager {
               })
               .parse(event.data);
             await this.db.pages.update(data.id, { name: data.name });
+            break;
+          }
+          case "changeStatusColor": {
+            const data = changeStatusSchema.parse(event.data);
+            await this.db.taskStatus.update(data.statusId, {
+              primaryColor: data.color,
+            });
+            break;
           }
           case "save_element": {
             const data = saveElement.parse(event.data);
@@ -149,6 +160,7 @@ class SyncManager {
                 updatedAt: new Date(),
               });
             }
+            break;
           }
           case "editDrawingName": {
             const data = editDrawingNameSchema.parse(event.data);
@@ -156,6 +168,7 @@ class SyncManager {
               name: data.name,
               updatedAt: new Date(),
             });
+            break;
           }
           case "editTaskDescription": {
             const data = z
@@ -168,6 +181,7 @@ class SyncManager {
               description: data.description,
               updatedAt: new Date(),
             });
+            break;
           }
           case "editTaskName": {
             const data = z
@@ -180,6 +194,7 @@ class SyncManager {
               text: data.name,
               updatedAt: new Date(),
             });
+            break;
           }
 
           case "deleteTask": {
@@ -189,6 +204,7 @@ class SyncManager {
               })
               .parse(event.data);
             await this.db.tasks.delete(data.id);
+            break;
           }
           case "deleteStatus": {
             const data = z
@@ -197,6 +213,7 @@ class SyncManager {
               })
               .parse(event.data);
             await this.db.taskStatus.delete(data.id);
+            break;
           }
           case "deleteDrawing": {
             const data = z
@@ -205,6 +222,7 @@ class SyncManager {
               })
               .parse(event.data);
             await this.db.drawings.delete(data.id);
+            break;
           }
           case "deletePage": {
             const data = z
@@ -213,6 +231,7 @@ class SyncManager {
               })
               .parse(event.data);
             await this.taskStore.deletePage(data.id);
+            break;
           }
         }
         await this.db.metadata.put({

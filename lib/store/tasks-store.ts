@@ -56,7 +56,8 @@ export class TasksStore {
   async editTaskDescription(id: string, description: string) {
     if (!id) throw new Error("id is required");
     const task = await this.db.tasks.get(id);
-    if (!task || task.id) throw new Error("Task not found");
+
+    if (!task || !task.id) throw new Error("Task not found");
     await this.db.tasks.update(id, { description });
     syncChange("editTaskDescription", {
       taskId: task.id,

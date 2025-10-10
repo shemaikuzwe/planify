@@ -168,4 +168,5 @@ enum SyncType {
   deleteDrawing
   editTaskName
   editPageName
+  changeStatusColor
 }
