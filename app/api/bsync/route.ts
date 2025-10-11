@@ -166,7 +166,6 @@ export async function POST(request: NextRequest) {
       }
       case "save_element": {
         const validate = saveElement.parse(body.data);
-        console.log("test this id", validate.id);
         await saveDrawing(validate);
         break;
       }
@@ -259,7 +258,7 @@ export async function POST(request: NextRequest) {
       { status: 200 },
     );
   } catch (err) {
-    console.error(err);
+    console.error("error", err);
     return NextResponse.json({ error: "Failed to sync" }, { status: 500 });
   }
 }

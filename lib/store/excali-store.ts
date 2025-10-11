@@ -32,6 +32,8 @@ export class DrawingStorage {
   async getElements(): Promise<OrderedExcalidrawElement[]> {
     try {
       const drawing = await this.getDrawingById();
+      console.log("me i found", this.id);
+      console.log("drawing", drawing?.elements);
       return drawing?.elements ?? [];
     } catch (error) {
       console.error("Failed to load elements:", error);
@@ -60,7 +62,7 @@ export class DrawingStorage {
       }
       syncChange("save_element", {
         id: this.id,
-        elements: JSON.stringify(elements),
+        elements: elements,
       });
       console.log(`saved this element`, this.id);
     } catch (error) {

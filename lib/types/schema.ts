@@ -16,12 +16,12 @@ export const ToggleTaskStatusSchema = z.object({
 });
 
 export const addDrawingSchema = z.object({
-  elements: z.string(),
+  elements: z.array(z.any()),
   id: z.string(),
 });
 
 export const saveElement = z.object({
-  elements: z.string(),
+  elements: z.array(z.any()),
   id: z.string().uuid(),
 });
 

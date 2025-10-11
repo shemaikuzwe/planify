@@ -6,7 +6,10 @@ import { redirect } from "next/navigation";
 
 // const utapi = new UTApi({ logLevel: "Error" });
 
-async function saveDrawing(data: { id: string; elements: any }): Promise<void> {
+async function saveDrawing(data: {
+  id: string;
+  elements: any[];
+}): Promise<void> {
   const validate = addDrawingSchema.safeParse(data);
   if (!validate.success) {
     throw validate.error.flatten().fieldErrors;
@@ -15,14 +18,14 @@ async function saveDrawing(data: { id: string; elements: any }): Promise<void> {
   const userId = session?.user.id;
   if (!userId) throw new Error("No user ID in session");
   const { elements, id } = validate.data;
-  const parsedElements = JSON.parse(elements);
+
   await db.drawing.upsert({
     where: { id },
-    update: { elements: parsedElements },
+    update: { elements },
     create: {
       id,
       name: "Untitled",
-      elements: parsedElements,
+      elements,
       userId: userId,
     },
   });
