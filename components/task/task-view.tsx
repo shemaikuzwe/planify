@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useState } from "react";
 import { Edit2, CheckCheck, X, Clock, Calendar1, Pen } from "lucide-react";
 import { Button } from "@/components/ui/button";
