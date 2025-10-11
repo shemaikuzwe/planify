@@ -1,156 +1,172 @@
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Account {
-    userId            String  @unique @db.Uuid
-    type              String
-    provider          String
-    providerAccountId String
-    refresh_token     String?
-    access_token      String?
-    expires_at        Int?
-    token_type        String?
-    scope             String?
-    id_token          String?
-    session_state     String?
+  userId            String  @unique @db.Uuid
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@id([provider, providerAccountId])
+  @@id([provider, providerAccountId])
 }
 
 model TaskCategory {
-    id         String       @id @default(uuid()) @db.Uuid
-    name       String
-    createdAt  DateTime?    @default(now())
-    updatedAt  DateTime?    @updatedAt
-    taskStatus TaskStatus[]
-    userId     String       @db.Uuid
-    user       User         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id         String       @id @default(uuid()) @db.Uuid
+  name       String
+  createdAt  DateTime?    @default(now())
+  updatedAt  DateTime?    @updatedAt
+  taskStatus TaskStatus[]
+  userId     String       @db.Uuid
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Drawing {
-    id          String         @id @default(uuid()) @db.Uuid
-    userId      String         @db.Uuid
-    description String?
-    name        String
-    elements    Json?          @db.Json
-    createdAt   DateTime?      @default(now())
-    updatedAt   DateTime?      @default(now()) @updatedAt
-    user        User           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    files       DrawingFile[]
+  id        String        @id @default(uuid()) @db.Uuid
+  userId    String        @db.Uuid
+  name      String
+  elements  Json?         @db.Json
+  createdAt DateTime?     @default(now())
+  updatedAt DateTime?     @default(now()) @updatedAt
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  files     DrawingFile[]
+
+  @@index([userId])
 }
 
 model DrawingFile {
-    id        String    @id @default(uuid()) @db.Uuid
-    drawingId String    @db.Uuid
-    url       String
-    mimeType  String
-    name      String
-    createdAt DateTime? @default(now())
-    updatedAt DateTime? @default(now()) @updatedAt
-    drawing   Drawing   @relation(fields: [drawingId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-}
-
-model Meeting {
-    id          String    @id @default(uuid()) @db.Uuid
-    userId      String    @db.Uuid
-    description String?
-    startTime   DateTime  @db.Timestamp(6)
-    createdAt   DateTime? @default(now())
-    updatedAt   DateTime? @default(now()) @updatedAt
-    name        String?   @db.VarChar
-    meetingId   String?   @db.VarChar
-    status      STATUS?   @default(ACTIVE)
+  id        String    @id @default(uuid()) @db.Uuid
+  drawingId String    @db.Uuid
+  url       String
+  mimeType  String
+  name      String
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @default(now()) @updatedAt
+  drawing   Drawing   @relation(fields: [drawingId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Subscription {
-    id        String    @id @default(uuid()) @db.Uuid
-    userId    String    @db.Uuid
-    sub       Json?     @db.Json
-    createdAt DateTime? @default(now())
-    updatedAt DateTime? @updatedAt
-    endpoint  String    @unique
-    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  sub       Json?     @db.Json
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+  endpoint  String    @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Task {
-    id          String     @id @default(uuid()) @db.Uuid
-    taskIndex   Int        @default(autoincrement())
-    text        String
-    description String?
-    time        String?
-    tags        Json?
-    statusId    String     @db.Uuid
-    status      TaskStatus @relation(fields: [statusId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    priority    PRIORITY?  @default(MEDIUM)
-    dueDate     DateTime?
-    createdAt   DateTime?  @default(now())
-    updatedAt   DateTime?  @updatedAt
+  id          String     @id @default(uuid()) @db.Uuid
+  taskIndex   Int        @default(autoincrement())
+  text        String
+  description String?
+  time        String?
+  tags        Json?
+  statusId    String     @db.Uuid
+  status      TaskStatus @relation(fields: [statusId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  priority    PRIORITY?  @default(MEDIUM)
+  dueDate     DateTime?
+  createdAt   DateTime?  @default(now())
+  updatedAt   DateTime?  @updatedAt
 }
 
 model TaskStatus {
-    id           String       @id @default(uuid()) @db.Uuid
-    name         String
-    primaryColor String       @default("bg-neutral-600")
-    tasks        Task[]
-    createdAt    DateTime?    @default(now())
-    updatedAt    DateTime?    @updatedAt
-    categoryId   String       @db.Uuid
-    categories   TaskCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id           String       @id @default(uuid()) @db.Uuid
+  name         String
+  primaryColor String       @default("bg-neutral-600")
+  tasks        Task[]
+  createdAt    DateTime?    @default(now())
+  updatedAt    DateTime?    @updatedAt
+  categoryId   String       @db.Uuid
+  categories   TaskCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-    @@unique([name, categoryId])
+  @@unique([name, categoryId])
 }
 
 model Team {
-    id          String    @id @default(uuid()) @db.Uuid
-    name        String    @db.VarChar
-    slogan      String?
-    createdById String    @unique @db.Uuid
-    createdAt   DateTime? @default(now())
-    updatedAt   DateTime? @default(now()) @updatedAt
-    teamId      String?   @unique @db.VarChar
-    createdBy   User      @relation("Creator", fields: [createdById], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    members     User[]    @relation("TeamMembers")
+  id          String    @id @default(uuid()) @db.Uuid
+  name        String    @db.VarChar
+  slogan      String?
+  createdById String    @unique @db.Uuid
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @default(now()) @updatedAt
+  teamId      String?   @unique @db.VarChar
+  createdBy   User      @relation("Creator", fields: [createdById], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  members     User[]    @relation("TeamMembers")
 
-    @@index([teamId])
+  @@index([teamId])
 }
 
 model User {
-    id            String         @id @default(uuid()) @db.Uuid
-    name          String?
-    email         String?        @unique()
-    emailVerified DateTime?
-    image         String?
-    createdAt     DateTime?      @default(now())
-    updatedAt     DateTime?      @updatedAt
-    account       Account[]
-    taskCategory  TaskCategory[]
-    drawings      Drawing[]
-    subscription  Subscription[]
-    creator       Team[]         @relation("Creator")
-    Team          Team?          @relation("TeamMembers", fields: [teamId], references: [id])
-    teamId        String?        @db.Uuid
+  id            String         @id @default(uuid()) @db.Uuid
+  name          String?
+  email         String?        @unique()
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime?      @default(now())
+  updatedAt     DateTime?      @updatedAt
+  account       Account[]
+  taskCategory  TaskCategory[]
+  drawings      Drawing[]
+  subscription  Subscription[]
+  creator       Team[]         @relation("Creator")
+  Team          Team?          @relation("TeamMembers", fields: [teamId], references: [id])
+  events        Events[]
+  teamId        String?        @db.Uuid
 }
 
+model Events {
+  id        String    @id @default(uuid()) @db.Uuid
+  type      SyncType
+  data      Json
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId    String    @db.Uuid
+  createdAt DateTime? @default(now())
+}
 
 enum PRIORITY {
-    HIGH
-    MEDIUM
-    LOW
+  HIGH
+  MEDIUM
+  LOW
 }
 
 enum STATUS {
-    ACTIVE
-    ENDED
-    CANCELLED
+  ACTIVE
+  ENDED
+  CANCELLED
+}
+
+enum SyncType {
+  save_element
+  editDrawingName
+  editTaskDescription
+  addPage
+  addTask
+  addStatus
+  toggleStatus
+  updateTaskIndex
+  deleteTask
+  deleteStatus
+  deletePage
+  deleteDrawing
+  editTaskName
+  editPageName
+  changeStatusColor
 }

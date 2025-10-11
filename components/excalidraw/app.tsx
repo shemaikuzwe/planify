@@ -3,9 +3,9 @@ import React, {
   useState,
   useRef,
   useCallback,
-  useMemo,
   Children,
   cloneElement,
+  useMemo,
 } from "react";
 
 import type * as TExcalidraw from "@excalidraw/excalidraw";
@@ -17,56 +17,38 @@ import type {
 import type {
   AppState,
   ExcalidrawImperativeAPI,
-  ExcalidrawInitialDataState,
-  Gesture,
-  PointerDownState as ExcalidrawPointerDownState,
   BinaryFiles,
 } from "@excalidraw/excalidraw/types";
 
-import {
-  resolvablePromise,
-} from "./utils";
-
 import CustomFooter from "./footer";
-import type { ResolvablePromise } from "./utils";
 import { useSidebar } from "../ui/sidebar";
 import { cn } from "@/lib/utils/utils";
 import { useTheme } from "next-themes";
-import { useLocalStorage } from "@/hooks/use-local-storage";
-import { createDrawingElementsStorage } from "@/lib/store/excali-store";
-import SaveDialog from "./save-dialog";
+import { createDrawingStorage } from "@/lib/store/excali-store";
 import InlineInput from "../ui/inline-input";
-import { editDrawingName, saveDrawing } from "@/lib/actions/drawing";
-import { Drawing } from "@prisma/client";
-import { createFileStorage } from "@/lib/store/files-store";
+import { useParams } from "next/navigation";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "@/lib/store/dexie";
+import { useDebouncedCallback } from "use-debounce";
 
-
-const initialData = {
+type InitialData = {
+  scrollToContent: boolean;
+  files: BinaryFiles | null;
+  elements: OrderedExcalidrawElement[];
+};
+const initialData: InitialData = {
   scrollToContent: true,
-}
+  files: {},
+  elements: [],
+};
 export interface AppProps {
-  apiElements?: OrderedExcalidrawElement[],
-  drawingsPromise: Promise<Drawing[]>,
-  drawingId?: string,
-  drawingName?: string,
   children: React.ReactNode;
   excalidrawLib: typeof TExcalidraw;
 }
 
-export default function App({
-  apiElements,
-  drawingsPromise,
-  children,
-  drawingId,
-  excalidrawLib,
-  drawingName,
-}: AppProps) {
+export default function App({ children, excalidrawLib }: AppProps) {
   const {
-    exportToClipboard,
     useHandleLibrary,
-    MIME_TYPES,
-    sceneCoordsToViewportCoords,
-    viewportCoordsToSceneCoords,
     Footer,
     WelcomeScreen,
     LiveCollaborationTrigger,
@@ -75,85 +57,41 @@ export default function App({
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const appRef = useRef<any>(null);
+  const { id } = useParams<{ id: string }>();
+  const drawingStorage = useMemo(() => createDrawingStorage(id), [id]);
+  const [elements, setElements] = useState<OrderedExcalidrawElement[] | null>(
+    null,
+  );
 
-  // feat add react-compiler
-  const drawingStorage = useMemo(() => createDrawingElementsStorage(drawingId), [drawingId]);
-  const fileStorage = useMemo(() => createFileStorage(drawingId), [drawingId])
-
-  const [elements, setElements] = useState<OrderedExcalidrawElement[] | null>(null);
-  const [appState, setAppState] = useLocalStorage<null | AppState>("appState", null);
-  const [files, setFiles] = useState<undefined | BinaryFiles>(undefined);
-
+  const drawing = useLiveQuery(async () => db.drawings.get(id));
+  console.log("found this drawing", drawing?.id);
+  console.log("elements", drawing?.elements);
   const [viewModeEnabled, setViewModeEnabled] = useState(false);
   const [zenModeEnabled, setZenModeEnabled] = useState(false);
   const [gridModeEnabled, setGridModeEnabled] = useState(false);
-  const { theme } = useTheme()
+  const { theme } = useTheme();
   const [disableImageTool, setDisableImageTool] = useState(false);
   const [isCollaborating, setIsCollaborating] = useState(false);
+  const updateElements = useDebouncedCallback(
+    (newElements: OrderedExcalidrawElement[], files: BinaryFiles) => {
+      setElements(newElements);
+      if (!(JSON.stringify(newElements) === JSON.stringify(elements))) {
+        drawingStorage.saveElements(newElements).catch((error) => {
+          console.error("Failed to save elements:", error);
+        });
+      }
+      // Save files
+      drawingStorage.saveFile(files).catch((error) => {
+        console.error("Failed to save files:", error);
+      });
+    },
+    2000,
+  );
 
-  const initialStatePromiseRef = useRef<{
-    promise: ResolvablePromise<ExcalidrawInitialDataState | null>;
-    resolved: boolean;
-  }>({ promise: null!, resolved: false });
-  if (!initialStatePromiseRef.current.promise) {
-    initialStatePromiseRef.current.promise =
-      resolvablePromise<ExcalidrawInitialDataState | null>();
-    initialStatePromiseRef.current.resolved = false;
-
-  }
   const [excalidrawAPI, setExcalidrawAPI] =
     useState<ExcalidrawImperativeAPI | null>(null);
 
-
   useHandleLibrary({ excalidrawAPI });
-
-  // Initialize elements from storage when component mounts or drawingStorage changes
-  useEffect(() => {
-    const storedElements = drawingStorage.getElementsArray();
-
-
-    if (storedElements.length > 0) {
-
-      setElements(storedElements);
-    } else if (apiElements && apiElements.length > 0) {
-
-      const syncResult = drawingStorage.syncWithApiElements(apiElements);
-
-      const mergedElements = drawingStorage.getElementsArray();
-
-      setElements(mergedElements);
-    } else {
-      setElements([]);
-    }
-  }, [drawingStorage, apiElements, drawingId]);
-  useEffect(() => {
-    if (!excalidrawAPI || elements === null || initialStatePromiseRef.current.resolved) {
-      return;
-    }
-    const fetchData = async () => {
-      // const res = await fetch("/images/rocket.jpeg");
-      // const imageData = await res.blob();
-      // const reader = new FileReader();
-      // reader.readAsDataURL(imageData);
-
-      // reader.onload = function () {
-      //   //@ts-ignore
-      //   initialStatePromiseRef.current.promise.resolve();
-      // };
-    
-      const storedFiles = await fileStorage.getFiles();
-      // @ts-ignore
-      initialStatePromiseRef.current.promise.resolve({
-        ...initialData,
-        elements,
-        files: storedFiles ?? {},
-        scrollToContent: true,
-      });
-      initialStatePromiseRef.current.resolved = true;
-    };
-    fetchData();
-  }, [excalidrawAPI, convertToExcalidrawElements, MIME_TYPES, elements, drawingId]);
-
 
   const renderExcalidraw = (children: React.ReactNode) => {
     const Excalidraw: any = Children.toArray(children).find(
@@ -167,27 +105,34 @@ export default function App({
     if (!Excalidraw) {
       return;
     }
+
+    useEffect(() => {
+      async function init() {
+        if (!drawingStorage) return;
+        const [storedFiles, storedElements] = await Promise.all([
+          drawingStorage.getFiles(),
+          drawingStorage?.getElements(),
+        ]);
+        setElements(storedElements);
+        initialData.files = storedFiles;
+        initialData.elements = storedElements;
+      }
+      init();
+    }, [drawingStorage]);
+
     const newElement = cloneElement(
       Excalidraw,
       {
         excalidrawAPI: (api: ExcalidrawImperativeAPI) => setExcalidrawAPI(api),
         // Always resolve initial data via promise so we can await files from IndexedDB
-        initialData: initialStatePromiseRef.current.promise,
+        initialData: initialData,
         onChange: (
           newElements: OrderedExcalidrawElement[],
           state: AppState,
-          files: BinaryFiles
+          files: BinaryFiles,
         ) => {
-          setAppState(state);
-          // Update local state
-          setElements(newElements);
-          // Save files (IndexedDB-backed). Fire and forget.
-          fileStorage.saveFile(files)
-          
-          newElements.forEach(element => {
-            drawingStorage.saveElement(element.id, element);
-          });
-          drawingStorage.saveElements(newElements);
+          // if (!drawingStorage) return;
+          updateElements(newElements, files);
         },
         viewModeEnabled,
         zenModeEnabled,
@@ -197,7 +142,7 @@ export default function App({
         UIOptions: {
           canvasActions: {
             toggleTheme: true,
-            theme: theme,
+            theme: theme == "light" ? "light" : "dark",
           },
 
           tools: { image: !disableImageTool },
@@ -221,23 +166,18 @@ export default function App({
     return newElement;
   };
   const handleNameChange = (name: string) => {
-    if (drawingId) {
-      editDrawingName(drawingId, name);
-      return;
-    }
-    const formData = new FormData();
-    formData.append("title", name);
-    formData.append("elements", JSON.stringify(elements));
-    saveDrawing(formData);
-    localStorage.removeItem("drawing-new");
-  }
+    if (!drawingStorage) return;
+    drawingStorage.editDrawingName(name);
+  };
 
   const renderTopRightUI = (isMobile: boolean) => {
     return (
       <>
         <div className="absolute flex justify-center items-center top-0 left-8 z-[10000]">
           {/* <DrawingPicker drawingsPromise={drawingsPromise}/> */}
-          <InlineInput value={drawingName ?? "Untitled"} onChange={handleNameChange}
+          <InlineInput
+            value={drawing?.name ?? "Untitled"}
+            onChange={handleNameChange}
             options={{ slice: 20 }}
             className="w-36 mt-2 ml-2 text-md"
           />
@@ -250,7 +190,6 @@ export default function App({
             }}
           />
         )}
-        <SaveDialog elements={elements} drawingId={drawingId} />
       </>
     );
   };
@@ -277,16 +216,18 @@ export default function App({
     },
     [],
   );
+
   return (
-    <div className={cn("h-full fixed px-2 py-2", {
-      "w-330": collapsed,
-      "w-270": !collapsed
-    })}
-      ref={appRef}>
+    <div
+      className={cn("h-full fixed px-2 py-2", {
+        "w-330": collapsed,
+        "w-270": !collapsed,
+      })}
+      ref={appRef}
+    >
       {renderExcalidraw(children)}
       {/* {Object.keys(commentIcons || []).length > 0 && renderCommentIcons()}
         {comment && renderComment()} */}
-
     </div>
   );
 }

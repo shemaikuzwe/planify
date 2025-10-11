@@ -1,8 +1,10 @@
 "use server";
-
-import { revalidateTag } from "next/cache";
 import { db } from "../prisma";
-import { addGroupSchema, AddTaskSchema, AddTaskValue, ToggleTaskStatusSchema, } from "../types/schema";
+import {
+  AddTaskSchema,
+  AddTaskValue,
+  ToggleTaskStatusSchema,
+} from "../types/schema";
 import { auth } from "@/auth";
 import { z } from "zod";
 
@@ -11,10 +13,19 @@ async function addTask(data: AddTaskValue) {
   if (!validate.success) {
     return validate.error.flatten().fieldErrors;
   }
-  const { text, time, priority, dueDate, statusId, tags } = validate.data;
-  const task = await db.task.create({ data: { time, priority, dueDate: dueDate ? new Date(dueDate) : null, text, statusId, tags } });
-  revalidateTag("tasks")
-  return task
+  const { text, time, priority, dueDate, statusId, tags, taskId } =
+    validate.data;
+  await db.task.create({
+    data: {
+      id: taskId,
+      time,
+      priority,
+      dueDate: dueDate ? new Date(dueDate) : null,
+      text,
+      statusId,
+      tags,
+    },
+  });
 }
 async function editTask(data: AddTaskValue) {
   const validate = AddTaskSchema.safeParse(data);
@@ -22,7 +33,7 @@ async function editTask(data: AddTaskValue) {
     return validate.error.flatten().fieldErrors;
   }
   if (!validate.data.taskId) return;
-  const { text, time, priority, dueDate, taskId, tags } = validate.data
+  const { text, time, priority, dueDate, taskId, tags } = validate.data;
   await db.task.update({
     where: { id: taskId },
     data: {
@@ -30,27 +41,27 @@ async function editTask(data: AddTaskValue) {
       time,
       priority,
       dueDate: dueDate ? new Date(dueDate) : null,
-      tags
-    }
-  })
-  revalidateTag("tasks")
+      tags,
+    },
+  });
 }
 
-async function editName(data: { taskId: string, text: string }) {
-  const validate = z.object({
-    taskId: z.string().uuid(),
-    text: z.string().min(1).max(50),
-  }).safeParse(data)
+async function editName(data: { taskId: string; text: string }) {
+  const validate = z
+    .object({
+      taskId: z.string().uuid(),
+      text: z.string().min(1).max(50),
+    })
+    .safeParse(data);
   if (!validate.success) {
     return validate.error.flatten().fieldErrors;
   }
   if (!validate.data.taskId) return;
-  const { text, taskId } = validate.data
+  const { text, taskId } = validate.data;
   await db.task.update({
     where: { id: taskId },
     data: { text },
-  })
-  revalidatePath("/")
+  });
 }
 async function toggleStatus(taskId: string, status: string) {
   const validate = ToggleTaskStatusSchema.safeParse({ taskId, status });
@@ -61,89 +72,110 @@ async function toggleStatus(taskId: string, status: string) {
     where: { id: taskId },
     data: { statusId: validate.data.status },
   });
-  revalidateTag("tasks")
 }
 async function deleteTask(taskId: string) {
   await db.task.delete({ where: { id: taskId } });
-
-  revalidateTag("tasks")
 }
 
-
-export async function saveTaskDescription(taskId: string, description: string) {
+export async function editTaskDescription(taskId: string, description: string) {
   await db.task.update({
     where: { id: taskId },
     data: { description },
-  })
-  revalidateTag("tasks")
+  });
 }
 
-// Group
+export async function editTaskName(taskId: string, name: string) {
+  await db.task.update({
+    where: { id: taskId },
+    data: { text: name },
+  });
+}
 
-async function addGroup(data: { name: string }) {
+async function addPage(data: {
+  name: string;
+  pageId: string;
+  todoId: string;
+  inProgressId: string;
+  doneId: string;
+}) {
   const session = await auth();
   const userId = session?.user.id;
   if (!userId) return;
-
-  const validate = addGroupSchema.safeParse(data);
-  if (!validate.success) {
-    return validate.error.flatten().fieldErrors;
-  }
-  const category = await db.taskCategory.create({ data: { name: validate.data.name, userId } })
-  await db.taskStatus.create({ data: { name: "TODO", categoryId: category.id } })
-  await db.taskStatus.create({ data: { name: "IN PROGRESS", categoryId: category.id,primaryColor:"bg-blue-600" } })
-  await db.taskStatus.create({ data: { name: "DONE", categoryId: category.id,primaryColor:"bg-green-600" } })
-  revalidateTag("groups")
+  const category = await db.taskCategory.create({
+    data: { id: data.pageId, name: data.name, userId },
+  });
+  await db.taskStatus.create({
+    data: { id: data.todoId, name: "TODO", categoryId: category.id },
+  });
+  await db.taskStatus.create({
+    data: {
+      id: data.inProgressId,
+      name: "IN PROGRESS",
+      categoryId: category.id,
+      primaryColor: "bg-blue-600",
+    },
+  });
+  await db.taskStatus.create({
+    data: {
+      id: data.doneId,
+      name: "DONE",
+      categoryId: category.id,
+      primaryColor: "bg-green-600",
+    },
+  });
 }
-async function deleteGroup(categoryId: string) {
-  await db.taskCategory.delete({ where: { id: categoryId } });
-  revalidateTag("groups")
+async function deletePage(pageId: string) {
+  await db.taskCategory.delete({ where: { id: pageId } });
 }
-async function editGroupName(categoryId: string, name: string) {
+async function editPageName(categoryId: string, name: string) {
   await db.taskCategory.update({ where: { id: categoryId }, data: { name } });
-  revalidateTag("groups")
 }
 async function deleteStatus(statusId: string) {
   await db.taskStatus.delete({ where: { id: statusId } });
-  revalidateTag("tasks")
 }
 
 async function changeStatusColor(statusId: string, color: string) {
-  await db.taskStatus.update({ where: { id: statusId }, data: { primaryColor: color } });
-  revalidateTag("tasks")
+  await db.taskStatus.update({
+    where: { id: statusId },
+    data: { primaryColor: color },
+  });
 }
 async function changeTaskStatus(taskId: string, statusId: string) {
   await db.task.update({ where: { id: taskId }, data: { statusId } });
-  revalidateTag("tasks")
 }
 
-async function updateTaskIndex(tasks: { id: string; taskIndex: number }[]) {
+async function updateTaskIndex(
+  tasks: { id: string; taskIndex: number }[],
+  opts?: { taskId: string; statusId: string },
+) {
+  if (opts) {
+    await db.task.update({
+      where: { id: opts.taskId },
+      data: { statusId: opts.statusId },
+    });
+  }
   await db.$transaction(
-    tasks.map(task =>
+    tasks.map((task) =>
       db.task.update({
         where: { id: task.id },
-        data: { taskIndex: task.taskIndex }
-      })
-    )
+        data: { taskIndex: task.taskIndex },
+      }),
+    ),
   );
-  revalidateTag("tasks")
 }
-
-
-async function addStatus(data: { name: string, id: string | undefined }) {
-  const validate = addGroupSchema.safeParse(data);
-  if (!validate.success) {
-    throw validate.error.flatten().fieldErrors;
-  }
-  const { name, id } = validate.data
-  if (!id) throw new Error("id is required");
-  await db.taskStatus.create({ data: { name, categoryId: id } });
-  revalidateTag("tasks")
+async function addStatus(data: {
+  statusId: string;
+  name: string;
+  pageId: string;
+}) {
+  await db.taskStatus.create({
+    data: { name: data.name, categoryId: data.pageId },
+  });
 }
 export {
-  addGroup,
-  deleteGroup,
-  editGroupName,
+  addPage,
+  deletePage,
+  editPageName,
   addTask,
   editTask,
   updateTaskIndex,
@@ -153,5 +185,5 @@ export {
   deleteStatus,
   changeStatusColor,
   changeTaskStatus,
-  editName
-}
+  editName,
+};

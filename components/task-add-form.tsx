@@ -16,11 +16,10 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { cn } from "@/lib/utils/utils"
-import { addTask } from "@/lib/actions/task"
 import { AddTaskSchema } from "@/lib/types/schema"
-import React from "react"
 import { getColorVariants } from "@/lib/utils"
 import { Task } from "@prisma/client"
+import { taskStore } from "@/lib/store/tasks-store"
 
 interface TaskAddFormProps {
   bgClass?: string;
@@ -47,7 +46,7 @@ export function TaskAddForm({
   })
 
   const onSubmit = async (values: TaskFormValues) => {
-    const newTask=await addTask({
+    const newTask=await taskStore.addTask({
       text: values.text,
       dueDate: values.dueDate,
       priority: "MEDIUM",

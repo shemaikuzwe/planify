@@ -9,30 +9,30 @@ import { OrderedExcalidrawElement } from '@excalidraw/excalidraw/element/types';
 /**
  * Save a single drawing element with timestamp
  */
-export const saveDrawingElement = (id: string, element: OrderedExcalidrawElement) => {
-  drawingElementsStorage.saveElement(id, element);
+export const saveDrawingElement = async (id: string, element: OrderedExcalidrawElement): Promise<void> => {
+  await drawingElementsStorage.saveElement(id, element);
 };
 
 /**
  * Get a drawing element by ID
  */
-export const getDrawingElement = (id: string): OrderedExcalidrawElement | null => {
-  return drawingElementsStorage.getElement(id);
+export const getDrawingElement = async (id: string): Promise<OrderedExcalidrawElement | null> => {
+  return await drawingElementsStorage.getElement(id);
 };
 
 /**
  * Get the last updated timestamp for an element
  */
-export const getElementLastUpdated = (id: string): string | null => {
-  return drawingElementsStorage.getLastUpdated(id);
+export const getElementLastUpdated = async (id: string): Promise<string | null> => {
+  return await drawingElementsStorage.getLastUpdated(id);
 };
 
 /**
  * Get element with its metadata (element + lastUpdated)
  */
-export const getElementWithMetadata = (id: string) => {
-  const element = drawingElementsStorage.getElement(id);
-  const lastUpdated = drawingElementsStorage.getLastUpdated(id);
+export const getElementWithMetadata = async (id: string) => {
+  const element = await drawingElementsStorage.getElement(id);
+  const lastUpdated = await drawingElementsStorage.getLastUpdated(id);
 
   return {
     element,
@@ -44,43 +44,43 @@ export const getElementWithMetadata = (id: string) => {
 /**
  * Get all elements as an array
  */
-export const getAllDrawingElements = (): OrderedExcalidrawElement[] => {
-  return drawingElementsStorage.getElementsArray();
+export const getAllDrawingElements = async (): Promise<OrderedExcalidrawElement[]> => {
+  return await drawingElementsStorage.getElementsArray();
 };
 
 /**
  * Get all elements with their metadata
  */
-export const getAllElementsWithMetadata = () => {
-  return drawingElementsStorage.getAllElements();
+export const getAllElementsWithMetadata = async () => {
+  return await drawingElementsStorage.getAllElements();
 };
 
 /**
  * Check if an element exists in storage
  */
-export const hasDrawingElement = (id: string): boolean => {
-  return drawingElementsStorage.hasElement(id);
+export const hasDrawingElement = async (id: string): Promise<boolean> => {
+  return await drawingElementsStorage.hasElement(id);
 };
 
 /**
  * Remove a specific element from storage
  */
-export const removeDrawingElement = (id: string) => {
-  drawingElementsStorage.removeElement(id);
+export const removeDrawingElement = async (id: string): Promise<void> => {
+  await drawingElementsStorage.removeElement(id);
 };
 
 /**
  * Clear all elements from storage
  */
-export const clearAllDrawingElements = () => {
-  drawingElementsStorage.clearAllElements();
+export const clearAllDrawingElements = async (): Promise<void> => {
+  await drawingElementsStorage.clearAllElements();
 };
 
 /**
  * Save multiple elements at once
  */
-export const saveMultipleDrawingElements = (elements: OrderedExcalidrawElement[]) => {
-  drawingElementsStorage.saveElements(elements);
+export const saveMultipleDrawingElements = async (elements: OrderedExcalidrawElement[]): Promise<void> => {
+  await drawingElementsStorage.saveElements(elements);
 };
 
 /**
@@ -93,32 +93,32 @@ export const createDrawingStorage = (drawingId?: string) => {
 /**
  * Save a single drawing element with timestamp for a specific drawing
  */
-export const saveDrawingElementForDrawing = (drawingId: string, id: string, element: OrderedExcalidrawElement) => {
+export const saveDrawingElementForDrawing = async (drawingId: string, id: string, element: OrderedExcalidrawElement): Promise<void> => {
   const storage = createDrawingElementsStorage(drawingId);
-  storage.saveElement(id, element);
+  await storage.saveElement(id, element);
 };
 
 /**
  * Get a drawing element by ID for a specific drawing
  */
-export const getDrawingElementForDrawing = (drawingId: string, id: string): OrderedExcalidrawElement | null => {
+export const getDrawingElementForDrawing = async (drawingId: string, id: string): Promise<OrderedExcalidrawElement | null> => {
   const storage = createDrawingElementsStorage(drawingId);
-  return storage.getElement(id);
+  return await storage.getElement(id);
 };
 
 /**
  * Save multiple elements at once for a specific drawing
  */
-export const saveMultipleDrawingElementsForDrawing = (drawingId: string, elements: OrderedExcalidrawElement[]) => {
+export const saveMultipleDrawingElementsForDrawing = async (drawingId: string, elements: OrderedExcalidrawElement[]): Promise<void> => {
   const storage = createDrawingElementsStorage(drawingId);
-  storage.saveElements(elements);
+  await storage.saveElements(elements);
 };
 
 /**
  * Get elements that were updated after a specific timestamp
  */
-export const getElementsUpdatedAfter = (timestamp: string): OrderedExcalidrawElement[] => {
-  const allElements = drawingElementsStorage.getAllElements();
+export const getElementsUpdatedAfter = async (timestamp: string): Promise<OrderedExcalidrawElement[]> => {
+  const allElements = await drawingElementsStorage.getAllElements();
 
   return Object.values(allElements)
     .filter(data => data.lastUpdated > timestamp)
@@ -128,8 +128,8 @@ export const getElementsUpdatedAfter = (timestamp: string): OrderedExcalidrawEle
 /**
  * Get the most recently updated element
  */
-export const getMostRecentlyUpdatedElement = (): { element: OrderedExcalidrawElement; lastUpdated: string } | null => {
-  const allElements = drawingElementsStorage.getAllElements();
+export const getMostRecentlyUpdatedElement = async (): Promise<{ element: OrderedExcalidrawElement; lastUpdated: string } | null> => {
+  const allElements = await drawingElementsStorage.getAllElements();
 
   if (Object.keys(allElements).length === 0) {
     return null;
@@ -148,8 +148,8 @@ export const getMostRecentlyUpdatedElement = (): { element: OrderedExcalidrawEle
 /**
  * Export elements to JSON with metadata
  */
-export const exportElementsWithMetadata = () => {
-  const allElements = drawingElementsStorage.getAllElements();
+export const exportElementsWithMetadata = async () => {
+  const allElements = await drawingElementsStorage.getAllElements();
 
   return {
     exportedAt: new Date().toISOString(),
@@ -161,36 +161,17 @@ export const exportElementsWithMetadata = () => {
 /**
  * Import elements from JSON (with or without metadata)
  */
-export const importElements = (data: any) => {
+export const importElements = async (data: any): Promise<void> => {
   if (Array.isArray(data)) {
     // If it's just an array of elements, save them
-    drawingElementsStorage.saveElements(data);
+    await drawingElementsStorage.saveElements(data);
   } else if (data.elements) {
     // If it's an export with metadata, we need to restore each element individually
     const elementsMap = data.elements;
-    Object.entries(elementsMap).forEach(([id, elementData]: [string, any]) => {
-      drawingElementsStorage.saveElement(id, elementData.element);
-    });
+    for (const [id, elementData] of Object.entries(elementsMap)) {
+      await drawingElementsStorage.saveElement(id, (elementData as any).element);
+    }
   }
 };
 
-/**
- * Synchronize API elements with localStorage based on timestamps
- * @param apiElements Elements from API
- * @param apiTimestamp Optional timestamp for API elements
- * @returns Sync result with details about what was updated
- */
-export const syncApiElementsWithLocal = (
-  apiElements: OrderedExcalidrawElement[],
-  apiTimestamp?: string
-) => {
-  return drawingElementsStorage.syncWithApiElements(apiElements, apiTimestamp);
-};
 
-/**
- * Get merged elements after synchronization
- * @returns All elements (from API sync + local-only elements)
- */
-export const getMergedElements = (): OrderedExcalidrawElement[] => {
-  return drawingElementsStorage.getMergedElements();
-};
