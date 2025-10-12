@@ -85,7 +85,7 @@ export default function App({ children, excalidrawLib }: AppProps) {
         console.error("Failed to save files:", error);
       });
     },
-    2000,
+    1000,
   );
 
   const [excalidrawAPI, setExcalidrawAPI] =
