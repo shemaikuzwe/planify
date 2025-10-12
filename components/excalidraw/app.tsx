@@ -54,8 +54,6 @@ export default function App({ children, excalidrawLib }: AppProps) {
     LiveCollaborationTrigger,
     convertToExcalidrawElements,
   } = excalidrawLib;
-  const { state } = useSidebar();
-  const collapsed = state === "collapsed";
   const appRef = useRef<any>(null);
   const { id } = useParams<{ id: string }>();
   const drawingStorage = useMemo(() => createDrawingStorage(id), [id]);
@@ -218,13 +216,7 @@ export default function App({ children, excalidrawLib }: AppProps) {
   );
 
   return (
-    <div
-      className={cn("h-full fixed px-2 py-2", {
-        "w-330": collapsed,
-        "w-270": !collapsed,
-      })}
-      ref={appRef}
-    >
+    <div className={cn("h-full fixed px-2 py-2 w-full")} ref={appRef}>
       {renderExcalidraw(children)}
       {/* {Object.keys(commentIcons || []).length > 0 && renderCommentIcons()}
         {comment && renderComment()} */}

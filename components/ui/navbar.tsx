@@ -18,6 +18,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  SidebarProvider,
 } from "@/components/ui/sidebar";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
@@ -31,7 +32,6 @@ import AddPage from "../task/add-page";
 import InlineInput from "./inline-input";
 import { db } from "@/lib/store/dexie";
 import { useState } from "react";
-import { editGroupName } from "@/lib/actions/task";
 import PageOptions from "../task/page-options";
 import { syncChange } from "@/lib/utils/sync";
 export function Navbar() {
