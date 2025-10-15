@@ -8,6 +8,7 @@ import {
   ChevronDown,
   Folder,
   ChevronRight,
+  PanelLeftCloseIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,36 +16,47 @@ import { cn } from "@/lib/utils";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/store/dexie";
 import { formatDate } from "@/lib/utils/utils";
+import { useRouter } from "next/navigation";
 
 interface DrawingPickerProps {
+  defaultDrawingId: string;
   isCollapsed: boolean;
   setCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
 }
 export default function DrawingPicker({
+  defaultDrawingId,
   isCollapsed,
   setCollapsed,
 }: DrawingPickerProps) {
   const drawings = useLiveQuery(async () => await db.drawings.toArray());
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedId, setSelectedId] = useState("1");
-
+  const [selectedId, setSelectedId] = useState(defaultDrawingId);
+  const router = useRouter();
+  const filteredDrawings =
+    !searchQuery || searchQuery.trim() === ""
+      ? drawings
+      : drawings?.filter((drawing) =>
+          drawing.name.toLowerCase().includes(searchQuery.toLowerCase()),
+        );
   return (
     <div>
       <aside
         className={cn(
-          "border-r border-border bg-card flex flex-col transition-all duration-300 ease-in-out",
-          isCollapsed ? "w-0 border-r-0 overflow-hidden" : "w-64",
+          "border border-border  rounded-lg bg-card flex flex-col transition-all duration-200 ease-out",
+          isCollapsed
+            ? "w-0 border-0 overflow-hidden"
+            : "w-64 py-4 px-2 min-h-64",
         )}
       >
         {/* Header */}
         <div className="p-4 border-b border-border">
-          <div className="flex items-center justify-between mb-4">
+          {/*<div className="flex items-center justify-between mb-4">
             <button className="flex items-center gap-2 text-sm font-medium">
               <Folder className="w-4 h-4" />
               <span>My Workspace</span>
               <ChevronDown className="w-4 h-4" />
             </button>
-          </div>
+          </div>*/}
 
           {/* Search */}
           <div className="relative">
@@ -77,13 +89,13 @@ export default function DrawingPicker({
 
         {/* Document List */}
         <div className="flex flex-col overflow-y-auto">
-          {drawings?.map((drawing) => (
-            <button
+          {filteredDrawings?.map((drawing) => (
+            <div
               key={drawing.id}
-              onClick={() => setSelectedId(drawing.id)}
+              onClick={() => router.push(`/whiteboard/${drawing.id}`)}
               className={cn(
                 "w-full text-left transition-colors border-l-2 hover:bg-secondary/50 px-4 py-3",
-                selectedId === drawing.id
+                drawing.id === defaultDrawingId
                   ? "bg-primary/10 border-l-primary"
                   : "border-l-transparent",
               )}
@@ -101,7 +113,7 @@ export default function DrawingPicker({
                 {/*<span>•</span>*/}
                 <span>{formatDate(drawing.createdAt)}</span>
               </div>
-            </button>
+            </div>
           ))}
         </div>
 
@@ -120,11 +132,11 @@ export default function DrawingPicker({
         onClick={() => setCollapsed(!isCollapsed)}
         className={cn(
           "absolute top-0 z-10 h-8 w-8 transition-all bg-muted-foreground duration-300",
-          isCollapsed ? "left-4" : "left-[304px]",
+          isCollapsed ? "left-4" : "left-[280px]",
         )}
         title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
-        <ChevronRight
+        <PanelLeftCloseIcon
           className={cn(
             "w-4 h-4 transition-transform duration-300",
             !isCollapsed && "rotate-180",

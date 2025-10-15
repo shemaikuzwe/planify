@@ -21,7 +21,6 @@ import type {
 } from "@excalidraw/excalidraw/types";
 
 import CustomFooter from "./footer";
-import { useSidebar } from "../ui/sidebar";
 import { cn } from "@/lib/utils/utils";
 import { useTheme } from "next-themes";
 import { createDrawingStorage } from "@/lib/store/excali-store";
@@ -74,6 +73,7 @@ export default function App({ children, excalidrawLib }: AppProps) {
   console.log("theme", theme);
   const [disableImageTool, setDisableImageTool] = useState(false);
   const [isCollaborating, setIsCollaborating] = useState(false);
+
   const updateElements = useDebouncedCallback(
     (newElements: OrderedExcalidrawElement[], files: BinaryFiles) => {
       setElements(newElements);
@@ -92,7 +92,6 @@ export default function App({ children, excalidrawLib }: AppProps) {
 
   const [excalidrawAPI, setExcalidrawAPI] =
     useState<ExcalidrawImperativeAPI | null>(null);
-  const [isPickerCollapsed, setIsPickerCollapsed] = useState(true);
 
   useHandleLibrary({ excalidrawAPI });
 
@@ -140,7 +139,7 @@ export default function App({ children, excalidrawLib }: AppProps) {
         viewModeEnabled,
         zenModeEnabled,
         gridModeEnabled,
-        theme,
+        theme: theme,
         name: "excalidraw",
         UIOptions: {
           canvasActions: {
@@ -177,7 +176,11 @@ export default function App({ children, excalidrawLib }: AppProps) {
     return (
       <>
         <div className="absolute top-0 left-0 z-[10000]">
-          <DrawingPicker isCollapsed={collapsed} setCollapsed={setCollapsed} />
+          <DrawingPicker
+            defaultDrawingId={id}
+            isCollapsed={collapsed}
+            setCollapsed={setCollapsed}
+          />
         </div>
         {collapsed && (
           <div className="absolute flex justify-center items-center top-0 left-24 z-[10000]">
