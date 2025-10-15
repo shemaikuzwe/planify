@@ -30,6 +30,7 @@ import { useParams } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/store/dexie";
 import { useDebouncedCallback } from "use-debounce";
+import DrawingPicker from "../ui/drawing-picker";
 
 type InitialData = {
   scrollToContent: boolean;
@@ -60,14 +61,17 @@ export default function App({ children, excalidrawLib }: AppProps) {
   const [elements, setElements] = useState<OrderedExcalidrawElement[] | null>(
     null,
   );
+  const [collapsed, setCollapsed] = useState(true);
 
   const drawing = useLiveQuery(async () => db.drawings.get(id));
   console.log("found this drawing", drawing?.id);
   console.log("elements", drawing?.elements);
+
   const [viewModeEnabled, setViewModeEnabled] = useState(false);
   const [zenModeEnabled, setZenModeEnabled] = useState(false);
   const [gridModeEnabled, setGridModeEnabled] = useState(false);
   const { theme } = useTheme();
+  console.log("theme", theme);
   const [disableImageTool, setDisableImageTool] = useState(false);
   const [isCollaborating, setIsCollaborating] = useState(false);
   const updateElements = useDebouncedCallback(
@@ -88,6 +92,7 @@ export default function App({ children, excalidrawLib }: AppProps) {
 
   const [excalidrawAPI, setExcalidrawAPI] =
     useState<ExcalidrawImperativeAPI | null>(null);
+  const [isPickerCollapsed, setIsPickerCollapsed] = useState(true);
 
   useHandleLibrary({ excalidrawAPI });
 
@@ -140,7 +145,7 @@ export default function App({ children, excalidrawLib }: AppProps) {
         UIOptions: {
           canvasActions: {
             toggleTheme: true,
-            theme: theme == "light" ? "light" : "dark",
+            theme: theme,
           },
 
           tools: { image: !disableImageTool },
@@ -171,15 +176,19 @@ export default function App({ children, excalidrawLib }: AppProps) {
   const renderTopRightUI = (isMobile: boolean) => {
     return (
       <>
-        <div className="absolute flex justify-center items-center top-0 left-8 z-[10000]">
-          {/* <DrawingPicker drawingsPromise={drawingsPromise}/> */}
-          <InlineInput
-            value={drawing?.name ?? "Untitled"}
-            onChange={handleNameChange}
-            options={{ slice: 20 }}
-            className="w-36 mt-2 ml-2 text-md"
-          />
+        <div className="absolute top-0 left-0 z-[10000]">
+          <DrawingPicker isCollapsed={collapsed} setCollapsed={setCollapsed} />
         </div>
+        {collapsed && (
+          <div className="absolute flex justify-center items-center top-0 left-24 z-[10000]">
+            <InlineInput
+              value={drawing?.name ?? "Untitled"}
+              onChange={handleNameChange}
+              options={{ slice: 20 }}
+              className="w-36 mt-2 ml-2 text-md"
+            />
+          </div>
+        )}
         {!isMobile && (
           <LiveCollaborationTrigger
             isCollaborating={isCollaborating}

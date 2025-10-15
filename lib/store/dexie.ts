@@ -19,7 +19,7 @@ export class PlanifyDB extends Dexie {
     });
     this.version(3).stores({
       files: "&key",
-      drawings: "&id, userId, name",
+      drawings: "&id, userId, name,createdAt",
     });
     this.version(4).stores({
       pages: "&id, userId",
