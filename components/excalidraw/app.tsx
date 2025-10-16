@@ -144,7 +144,7 @@ export default function App({ children, excalidrawLib }: AppProps) {
         name: "excalidraw",
         UIOptions: {
           canvasActions: {
-            toggleTheme: true,
+            // toggleTheme: true,
             theme: theme,
           },
 

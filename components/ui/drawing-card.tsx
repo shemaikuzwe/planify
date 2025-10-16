@@ -51,16 +51,16 @@ export function DrawingCard({ id, name, updatedAt }: DrawingCardProps) {
   };
   return (
     <Card
-      className="px-3 border rounded-lg"
-      onDoubleClick={() => router.push(`/whiteboard/${id}`)}
+      className="px-3 border rounded-lg cursor-pointer"
+      onClick={() => router.push(`/whiteboard/${id}`)}
     >
       <CardContent className="p-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-end">
+          {/*<div className="flex items-center gap-2">
             <div className="p-2 rounded-full">
               <MessageSquare className="text-primary h-5 w-5" />
             </div>
-          </div>
+          </div>*/}
           <DropdownMenu>
             <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
               <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -87,7 +87,7 @@ export function DrawingCard({ id, name, updatedAt }: DrawingCardProps) {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <div className="mt-3 space-y-2">
+        <div className=" space-y-2">
           {editingDrawingId ? (
             <Input
               type="text"
@@ -104,13 +104,8 @@ export function DrawingCard({ id, name, updatedAt }: DrawingCardProps) {
               {name}
             </p>
           )}
-          <div className="flex items-center justify-between text-xs w-full">
+          <div className="flex items-center justify-start text-xs w-full">
             <span>{updatedAt ? formatDate(updatedAt) : ""}</span>
-            <ChevronRight
-              size={20}
-              className="cursor-pointer"
-              onClick={() => router.push(`/whiteboard/${id}`)}
-            />
           </div>
         </div>
       </CardContent>
