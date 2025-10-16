@@ -22,7 +22,6 @@ import type {
 
 import CustomFooter from "./footer";
 import { cn } from "@/lib/utils/utils";
-import { useTheme } from "next-themes";
 import { createDrawingStorage } from "@/lib/store/excali-store";
 import InlineInput from "../ui/inline-input";
 import { useParams } from "next/navigation";
@@ -30,6 +29,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/store/dexie";
 import { useDebouncedCallback } from "use-debounce";
 import DrawingPicker from "../ui/drawing-picker";
+import { useTheme } from "@/hooks/use-theme";
 
 type InitialData = {
   scrollToContent: boolean;
@@ -60,6 +60,7 @@ export default function App({ children, excalidrawLib }: AppProps) {
   const [elements, setElements] = useState<OrderedExcalidrawElement[] | null>(
     null,
   );
+  const { theme } = useTheme();
   const [collapsed, setCollapsed] = useState(true);
 
   const drawing = useLiveQuery(async () => db.drawings.get(id));
@@ -69,7 +70,7 @@ export default function App({ children, excalidrawLib }: AppProps) {
   const [viewModeEnabled, setViewModeEnabled] = useState(false);
   const [zenModeEnabled, setZenModeEnabled] = useState(false);
   const [gridModeEnabled, setGridModeEnabled] = useState(false);
-  const { theme } = useTheme();
+
   console.log("theme", theme);
   const [disableImageTool, setDisableImageTool] = useState(false);
   const [isCollaborating, setIsCollaborating] = useState(false);
@@ -139,12 +140,12 @@ export default function App({ children, excalidrawLib }: AppProps) {
         viewModeEnabled,
         zenModeEnabled,
         gridModeEnabled,
-        theme: "dark",
+        theme: theme,
         name: "excalidraw",
         UIOptions: {
           canvasActions: {
             toggleTheme: true,
-            theme: "dark",
+            theme: theme,
           },
 
           tools: { image: !disableImageTool },

@@ -30,7 +30,6 @@ export default function DrawingPicker({
 }: DrawingPickerProps) {
   const drawings = useLiveQuery(async () => await db.drawings.toArray());
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedId, setSelectedId] = useState(defaultDrawingId);
   const router = useRouter();
   const filteredDrawings =
     !searchQuery || searchQuery.trim() === ""
@@ -131,7 +130,7 @@ export default function DrawingPicker({
         variant={"outline"}
         onClick={() => setCollapsed(!isCollapsed)}
         className={cn(
-          "absolute top-0 z-10 h-8 w-8 transition-all bg-muted-foreground duration-300",
+          "absolute top-0 z-10 h-8 w-8 transition-all  duration-300",
           isCollapsed ? "left-4" : "left-[280px]",
         )}
         title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
