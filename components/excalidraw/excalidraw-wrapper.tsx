@@ -9,7 +9,7 @@ const ExcalidrawWrapper = () => {
   const { theme } = useTheme();
   return (
     <App excalidrawLib={excalidrawLib}>
-      <Excalidraw theme={theme === "system" ? "light" : (theme ?? "light")} />
+      <Excalidraw theme={"dark"} />
     </App>
   );
 };

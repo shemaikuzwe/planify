@@ -139,12 +139,12 @@ export default function App({ children, excalidrawLib }: AppProps) {
         viewModeEnabled,
         zenModeEnabled,
         gridModeEnabled,
-        theme: theme,
+        theme: "dark",
         name: "excalidraw",
         UIOptions: {
           canvasActions: {
             toggleTheme: true,
-            theme: theme,
+            theme: "dark",
           },
 
           tools: { image: !disableImageTool },

@@ -8,7 +8,6 @@ export default function layout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     syncManager.sync();
   }, [syncManager]);
-
   return (
     <div className="flex h-screen gap-2 w-full">
       <Navbar />

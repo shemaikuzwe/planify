@@ -1,5 +1,11 @@
 "use client";
-import { Settings, ListTodo, StickyNote } from "lucide-react";
+import {
+  Settings,
+  ListTodo,
+  StickyNote,
+  Presentation,
+  PresentationIcon,
+} from "lucide-react";
 import Link from "next/link";
 import User from "@/components/profile/user";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -19,6 +25,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarProvider,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
@@ -36,6 +43,8 @@ import PageOptions from "../task/page-options";
 import { syncChange } from "@/lib/utils/sync";
 export function Navbar() {
   const pathName = usePathname();
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
   return (
     <Sidebar className="border-r" collapsible="icon">
       <SidebarHeader className="border-b">
@@ -56,12 +65,24 @@ export function Navbar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  tooltip={"Excalidraw"}
+                  isActive={pathName === "/"}
+                >
+                  <Link href={"/"} className="flex gap-2 items-center w-full">
+                    <PresentationIcon />
+                    <span>Whiteboard</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               <SidebarMenuItem className="ml-2">
                 <Collapsible defaultOpen className="group/collapsible">
                   <CollapsibleTrigger className="flex items-center justify-center gap-5">
                     <div className="flex items-center gap-2">
-                      <ListTodo className="h-4 w-4" />
-                      <span>Tasks</span>
+                      <ListTodo className="h-5 w-5" />
+                      {!isCollapsed && <span>Tasks</span>}
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
@@ -76,26 +97,7 @@ export function Navbar() {
                   </CollapsibleContent>
                 </Collapsible>
               </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  tooltip={"Excalidraw"}
-                  isActive={pathName.includes("/excalidraw")}
-                >
-                  <Link
-                    href={"/whiteboard"}
-                    className="flex gap-2 items-center w-full"
-                  >
-                    <Image
-                      src="/excalidraw.png"
-                      alt="Excalidraw"
-                      width={16}
-                      height={16}
-                    />
-                    <span>White Board</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
