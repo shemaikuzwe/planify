@@ -97,12 +97,18 @@ async function addPage(data: {
   todoId: string;
   inProgressId: string;
   doneId: string;
+  type: "task" | "project";
 }) {
   const session = await auth();
   const userId = session?.user.id;
   if (!userId) return;
   const category = await db.taskCategory.create({
-    data: { id: data.pageId, name: data.name, userId },
+    data: {
+      id: data.pageId,
+      name: data.name,
+      userId,
+      type: data.type === "project" ? "PROJECT" : "TASK",
+    },
   });
   await db.taskStatus.create({
     data: { id: data.todoId, name: "TODO", categoryId: category.id },

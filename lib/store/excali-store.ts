@@ -83,10 +83,6 @@ export class DrawingStorage {
     const drawing = await db.drawings.get(this.id);
     return drawing;
   }
-  private async getAllKeys(): Promise<string[]> {
-    const keys = await db.drawings.toCollection().keys();
-    return keys as string[];
-  }
   async removeElements(): Promise<void> {
     await db.drawings.delete(this.id);
   }

@@ -139,6 +139,7 @@ export async function POST(request: NextRequest) {
           todoId: validate.todoId,
           inProgressId: validate.inProgressId,
           doneId: validate.doneId,
+          type: validate.type,
         });
         break;
       }
@@ -180,28 +181,28 @@ export async function POST(request: NextRequest) {
         break;
       }
       case "deleteTask": {
-        const data = z.object({ id: z.string().uuid() }).parse(body.data);
+        const data = z.object({ id: z.uuid() }).parse(body.data);
         await deleteTask(data.id);
         break;
       }
       case "deleteStatus": {
-        const data = z.object({ id: z.string().uuid() }).parse(body.data);
+        const data = z.object({ id: z.uuid() }).parse(body.data);
         await deleteStatus(data.id);
         break;
       }
       case "deletePage": {
-        const data = z.object({ id: z.string().uuid() }).parse(body.data);
+        const data = z.object({ id: z.uuid() }).parse(body.data);
         await deletePage(data.id);
         break;
       }
       case "deleteDrawing":
-        const data = z.object({ id: z.string().uuid() }).parse(body.data);
+        const data = z.object({ id: z.uuid() }).parse(body.data);
         await deleteDrawing(data.id);
         break;
       case "editTaskDescription": {
         const validate = z
           .object({
-            taskId: z.string().uuid(),
+            taskId: z.uuid(),
             description: z.string().min(1),
           })
           .parse(body.data);
@@ -211,7 +212,7 @@ export async function POST(request: NextRequest) {
       case "editTaskName": {
         const validate = z
           .object({
-            id: z.string().uuid(),
+            id: z.uuid(),
             name: z.string().min(1),
           })
           .parse(body.data);
@@ -221,7 +222,7 @@ export async function POST(request: NextRequest) {
       case "editPageName": {
         const validate = z
           .object({
-            id: z.string().uuid(),
+            id: z.uuid(),
             name: z.string().min(1),
           })
           .parse(body.data);
@@ -231,8 +232,8 @@ export async function POST(request: NextRequest) {
       case "toggleStatus": {
         const validate = z
           .object({
-            id: z.string().uuid(),
-            status: z.string().uuid(),
+            id: z.uuid(),
+            status: z.uuid(),
           })
           .parse(body.data);
         await changeTaskStatus(validate.id, validate.status);

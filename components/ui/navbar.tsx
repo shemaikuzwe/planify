@@ -24,10 +24,8 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-  SidebarProvider,
   useSidebar,
 } from "@/components/ui/sidebar";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import Logo from "./logo";
 import {
@@ -41,6 +39,7 @@ import { db } from "@/lib/store/dexie";
 import { useState } from "react";
 import PageOptions from "../task/page-options";
 import { syncChange } from "@/lib/utils/sync";
+
 export function Navbar() {
   const pathName = usePathname();
   const { state } = useSidebar();
@@ -87,7 +86,7 @@ export function Navbar() {
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
-                      <NavTask />
+                      <NavTask type="task" />
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton asChild>
                           <AddPage />
@@ -98,20 +97,25 @@ export function Navbar() {
                 </Collapsible>
               </SidebarMenuItem>
 
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  tooltip="Project Planner"
-                  isActive={pathName.includes("/project-planner")}
-                >
-                  <Link
-                    href="/project-planner"
-                    className="flex items-center gap-2 "
-                  >
-                    <ListTodo className="h-4 w-4" />
-                    <span>Project Planner</span>
-                  </Link>
-                </SidebarMenuButton>
+              <SidebarMenuItem className="ml-2">
+                <Collapsible defaultOpen className="group/collapsible">
+                  <CollapsibleTrigger className="flex items-center justify-center gap-5">
+                    <div className="flex items-center gap-2">
+                      <ListTodo className="h-5 w-5" />
+                      {!isCollapsed && <span>Projects</span>}
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <NavTask type="project" />
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild>
+                          <AddPage type="project" />
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
@@ -147,19 +151,11 @@ export function Navbar() {
     </Sidebar>
   );
 }
-// function NavBarSkelton({ number = 5 }: { number?: number }) {
-//   return (
-//     <SidebarMenu>
-//       {Array.from({ length: number }).map((_, index) => (
-//         <SidebarMenuItem key={index}>
-//           <SidebarMenuSkeleton showIcon />
-//         </SidebarMenuItem>
-//       ))}
-//     </SidebarMenu>
-//   )
-// }
-function NavTask() {
-  const tasks = useLiveQuery(async () => await db.pages.toArray());
+function NavTask({ type }: { type: "task" | "project" }) {
+  const tasks = useLiveQuery(
+    async () =>
+      await db.pages.where("type").equals(type.toUpperCase()).toArray()
+  );
   const [hoveredTaskId, setHoveredTaskId] = useState<string | null>(null);
   const router = useRouter();
   const handleMouseEnter = (taskId: string) => {
@@ -175,7 +171,7 @@ function NavTask() {
     tasks.map((task) => (
       <SidebarMenuSubItem key={task.id}>
         <SidebarMenuSubButton
-          href={`/${task.id}`}
+          href={`/${type}/${task.id}`}
           className="flex items-center justify-between gap-2 w-full relative group"
           onMouseEnter={() => handleMouseEnter(task.id)}
           onMouseLeave={() => handleMouseLeave()}
@@ -187,7 +183,7 @@ function NavTask() {
             onMouseLeave={() => handleMouseLeave()}
           >
             <Link
-              href={`/${task.id}`}
+              href={`/${type}/${task.id}`}
               className="flex items-center gap-2 w-full relative group"
             >
               <StickyNote className="h-4 w-4" />

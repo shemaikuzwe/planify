@@ -7,7 +7,7 @@ export class TasksStore {
   constructor(db: PlanifyDB) {
     this.db = db;
   }
-  async addPage(name: string, userId: string) {
+  async addPage(name: string, type: "task" | "project", userId: string) {
     const pageId = crypto.randomUUID();
     const todoStatusId = crypto.randomUUID();
     const inProgressStatusId = crypto.randomUUID();
@@ -19,10 +19,12 @@ export class TasksStore {
       todoStatusId,
       doneStatusId,
       inProgressStatusId,
+      type: type === "task" ? "TASK" : "PROJECT",
     });
     syncChange("addPage", {
       pageId: pageId,
       name,
+      type,
       todoId: todoStatusId,
       inProgressId: inProgressStatusId,
       doneId: doneStatusId,
@@ -137,6 +139,7 @@ export class TasksStore {
     doneStatusId,
     name,
     userId,
+    type,
   }: {
     pageId: string;
     todoStatusId: string;
@@ -144,6 +147,7 @@ export class TasksStore {
     doneStatusId: string;
     name: string;
     userId?: string;
+    type: "TASK" | "PROJECT";
   }) {
     await this.db.taskStatus.add({
       name: "TODO",
@@ -179,6 +183,7 @@ export class TasksStore {
       createdAt: new Date(),
       updatedAt: new Date(),
       taskStatus: [todoStatusId, inProgressStatusId, doneStatusId],
+      type,
     });
   }
   async createTask(data: {

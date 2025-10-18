@@ -66,6 +66,7 @@ class SyncManager {
               inProgressStatusId: data.inProgressId,
               name: data.name,
               todoStatusId: data.todoId,
+              type: data.type === "project" ? "PROJECT" : "TASK",
             });
             break;
           }
@@ -149,8 +150,8 @@ class SyncManager {
               await this.db.drawings.put({
                 id: data.id,
                 elements: data.elements as unknown as any,
-                createdAt: new Date(),
-                updatedAt: new Date(),
+                createdAt: event.createdAt ?? new Date(),
+                updatedAt: event.createdAt ?? new Date(),
                 name: "Untitled",
                 userId: (event as any).userId,
               });
@@ -272,6 +273,7 @@ class SyncManager {
       if (!Array.isArray(data)) {
         continue;
       }
+      console.log(table, data);
       switch (table) {
         case "pages":
           await this.db.pages.bulkAdd(
@@ -282,6 +284,7 @@ class SyncManager {
               updatedAt: page.updatedAt,
               userId: page.userId,
               taskStatus: page.taskStatus.map((status: any) => status.id),
+              type: page.type?.toLowerCase(),
             })),
           );
           break;

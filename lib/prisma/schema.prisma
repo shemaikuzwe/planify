@@ -28,12 +28,18 @@ model Account {
   @@id([provider, providerAccountId])
 }
 
+enum TaskType {
+  TASK
+  PROJECT
+}
+
 model TaskCategory {
   id         String       @id @default(uuid()) @db.Uuid
   name       String
   createdAt  DateTime?    @default(now())
   updatedAt  DateTime?    @updatedAt
   taskStatus TaskStatus[]
+  type       TaskType     @default(TASK)
   userId     String       @db.Uuid
   user       User         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }

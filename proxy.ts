@@ -21,5 +21,5 @@ export const config = {
     // Always run for API routes
     "/(api|trpc)(.*)",
   ],
-  runtime: "nodejs",
+  // ...(process.env.NODE_ENV === "production" && { runtime: "nodejs" }),
 };

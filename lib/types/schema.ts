@@ -27,10 +27,11 @@ export const saveElement = z.object({
 
 export const addPageSchema = z.object({
   name: z.string().min(2),
-  pageId: z.string().uuid(),
-  todoId: z.string().uuid(),
-  inProgressId: z.string().uuid(),
-  doneId: z.string().uuid(),
+  pageId: z.uuid(),
+  todoId: z.uuid(),
+  inProgressId: z.uuid(),
+  doneId: z.uuid(),
+  type: z.enum(["task", "project"]),
 });
 
 export const addStatusSchema = z.object({

@@ -22,7 +22,7 @@ export class PlanifyDB extends Dexie {
       drawings: "&id, userId, name,createdAt,updatedAt",
     });
     this.version(4).stores({
-      pages: "&id, userId",
+      pages: "&id, userId,type",
       taskStatus: "&id, categoryId",
       tasks: "&id, statusId",
     });
