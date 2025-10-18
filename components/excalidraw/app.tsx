@@ -173,25 +173,29 @@ export default function App({ children, excalidrawLib }: AppProps) {
   const renderTopRightUI = (isMobile: boolean) => {
     return (
       <>
-        <div className="absolute top-0 left-0 z-[10000]">
-          <Button
-            onClick={() => router.back()}
-            variant={"outline"}
-            size={"icon"}
-          >
-            <ArrowLeftIcon className="h-8 w-8" />
-          </Button>
-          <DrawingPicker defaultDrawingId={id} />
-        </div>
+        {!isMobile && (
+          <>
+            <div className="absolute top-0 left-0 z-[10000]">
+              <Button
+                onClick={() => router.back()}
+                variant={"outline"}
+                size={"icon"}
+              >
+                <ArrowLeftIcon className="h-8 w-8" />
+              </Button>
+              <DrawingPicker defaultDrawingId={id} />
+            </div>
 
-        <div className="absolute flex justify-center items-center top-0 left-32 z-[10000]">
-          <InlineInput
-            value={drawing?.name ?? "Untitled"}
-            onChange={handleNameChange}
-            options={{ slice: 20 }}
-            className="w-36 mt-2 ml-2 text-md"
-          />
-        </div>
+            <div className="absolute flex justify-center items-center top-0 left-32 z-[10000]">
+              <InlineInput
+                value={drawing?.name ?? "Untitled"}
+                onChange={handleNameChange}
+                options={{ slice: 20 }}
+                className="w-36 mt-2 ml-2 text-md"
+              />
+            </div>
+          </>
+        )}
 
         {!isMobile && (
           <LiveCollaborationTrigger

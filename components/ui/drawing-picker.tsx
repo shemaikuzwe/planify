@@ -8,6 +8,8 @@ import {
   ArrowUpDown,
   PanelLeftCloseIcon,
   HomeIcon,
+  Folder,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +27,9 @@ interface DrawingPickerProps {
 export default function DrawingPicker({
   defaultDrawingId,
 }: DrawingPickerProps) {
-  const drawings = useLiveQuery(async () => await db.drawings.toArray());
+  const drawings = useLiveQuery(
+    async () => await db.drawings.orderBy("updatedAt").toArray(),
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
   const filteredDrawings =
@@ -43,14 +47,14 @@ export default function DrawingPicker({
         }
       >
         {/* Header */}
-        <div className="p-4 mt-8 flex flex-col gap-2 border-b border-border">
-          {/*<div className="flex items-center justify-between mb-4">
+        <div className="p-4 mt-4 flex flex-col gap-2 border-b border-border">
+          <div className="flex items-center justify-between mb-4">
             <button className="flex items-center gap-2 text-sm font-medium">
               <Folder className="w-4 h-4" />
-              <span>My Workspace</span>
-              <ChevronDown className="w-4 h-4" />
+              <span>Workspace</span>
+              {/*<ChevronDown className="w-4 h-4" />*/}
             </button>
-          </div>*/}
+          </div>
 
           {/* Search */}
           <div className="relative">
@@ -89,7 +93,7 @@ export default function DrawingPicker({
             </Button>
           </div>
         </div>
-        <div className="flex flex-col overflow-y-auto">
+        <div className="flex flex-col overflow-y-auto w-full">
           {filteredDrawings?.map((drawing) => (
             <div
               key={drawing.id}
@@ -105,14 +109,13 @@ export default function DrawingPicker({
                 <h3 className="font-medium text-sm leading-tight text-pretty">
                   {drawing.name}
                 </h3>
-                {/*{drawing.isPrivate && (
-                  <Lock className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 mt-0.5" />
-                )}*/}
               </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                {/*<span>by {drawing.}</span>*/}
-                {/*<span>•</span>*/}
-                <span>{formatDate(drawing.createdAt)}</span>
+              <div className="flex  w-full flex-col justify-center items-start gap-2 text-xs text-muted-foreground">
+                <span>by You</span>
+                <div className="flex items-start gap-4  justify-between">
+                  <span>{formatDate(drawing.updatedAt)}</span>
+                  {/*<Lock className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 mt-0.5" />*/}
+                </div>
               </div>
             </div>
           ))}
