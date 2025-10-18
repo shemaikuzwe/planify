@@ -5,10 +5,9 @@ import {
   Search,
   Lock,
   Plus,
-  ChevronDown,
-  Folder,
-  ChevronRight,
+  ArrowUpDown,
   PanelLeftCloseIcon,
+  HomeIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,16 +16,14 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/store/dexie";
 import { formatDate } from "@/lib/utils/utils";
 import { useRouter } from "next/navigation";
+import { Sheet, SheetContent, SheetTrigger } from "./sheet";
+import Link from "next/link";
 
 interface DrawingPickerProps {
   defaultDrawingId: string;
-  isCollapsed: boolean;
-  setCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
 }
 export default function DrawingPicker({
   defaultDrawingId,
-  isCollapsed,
-  setCollapsed,
 }: DrawingPickerProps) {
   const drawings = useLiveQuery(async () => await db.drawings.toArray());
   const [searchQuery, setSearchQuery] = useState("");
@@ -38,17 +35,15 @@ export default function DrawingPicker({
           drawing.name.toLowerCase().includes(searchQuery.toLowerCase()),
         );
   return (
-    <div>
-      <aside
-        className={cn(
-          "border border-border  rounded-lg bg-card flex flex-col transition-all duration-200 ease-out",
-          isCollapsed
-            ? "w-0 border-0 overflow-hidden"
-            : "w-64 py-4 px-2 min-h-64",
-        )}
+    <Sheet>
+      <SheetContent
+        side="left"
+        className={
+          "border border-border  rounded-lg bg-card flex flex-col transition-all duration-200 ease-out w-80 py-4 px-2"
+        }
       >
         {/* Header */}
-        <div className="p-4 border-b border-border">
+        <div className="p-4 mt-8 flex flex-col gap-2 border-b border-border">
           {/*<div className="flex items-center justify-between mb-4">
             <button className="flex items-center gap-2 text-sm font-medium">
               <Folder className="w-4 h-4" />
@@ -59,34 +54,41 @@ export default function DrawingPicker({
 
           {/* Search */}
           <div className="relative">
-            {/*<Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />*/}
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Quick search"
+              placeholder="Search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9  border-0 h-9 text-sm"
             />
-            {/*<kbd className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
-              ⌘K
-            </kbd>*/}
           </div>
-        </div>
 
-        {/* Section Header */}
-        <div className="px-4 py-3 flex items-center justify-between border-b border-border">
-          <div className="flex items-center gap-2">
-            <Lock className="w-3.5 h-3.5 text-muted-foreground" />
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Recent
-            </h2>
-          </div>
-          <Button size="icon" variant="ghost" className="h-6 w-6">
-            <Plus className="w-4 h-4" />
+          <Button variant={"ghost"} asChild>
+            <Link href={"/"} className="w-full flex justify-start items-center">
+              <HomeIcon />
+              Home
+            </Link>
           </Button>
         </div>
 
-        {/* Document List */}
+        {/* Section Header */}
+        <div className="px-4 py-3 flex items-center justify-between border-b border-border ">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold">Recent</h2>
+          </div>
+
+          <div className="flex gap-2">
+            <Button size={"icon"} className="h-6 w-6" variant={"outline"}>
+              <ArrowUpDown />
+            </Button>
+            <Button size="icon" className="h-6 w-6" asChild>
+              <Link href={`/whiteboard/${crypto.randomUUID()}`}>
+                <Plus className="w-4 h-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
         <div className="flex flex-col overflow-y-auto">
           {filteredDrawings?.map((drawing) => (
             <div
@@ -115,33 +117,22 @@ export default function DrawingPicker({
             </div>
           ))}
         </div>
+      </SheetContent>
 
-        {/* Footer */}
-        <div className="p-4 border-t border-border">
-          <Button className="w-full" size="sm">
-            <Plus className="w-4 h-4 mr-2" />
-            New Drawing
-          </Button>
-        </div>
-      </aside>
-
-      <Button
-        size="icon"
-        variant={"outline"}
-        onClick={() => setCollapsed(!isCollapsed)}
-        className={cn(
-          "absolute top-0 z-10 h-8 w-8 transition-all  duration-300",
-          isCollapsed ? "left-4" : "left-[280px]",
-        )}
-        title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-      >
-        <PanelLeftCloseIcon
+      <SheetTrigger asChild>
+        <Button
+          size="icon"
+          variant={"outline"}
           className={cn(
-            "w-4 h-4 transition-transform duration-300",
-            !isCollapsed && "rotate-180",
+            "absolute top-0 z-10 h-8 w-8 transition-all  duration-300 left-12",
           )}
-        />
-      </Button>
-    </div>
+          title={"Expand Sidebar"}
+        >
+          <PanelLeftCloseIcon
+            className={"w-4 h-4 transition-transform duration-300"}
+          />
+        </Button>
+      </SheetTrigger>
+    </Sheet>
   );
 }

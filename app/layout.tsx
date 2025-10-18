@@ -7,14 +7,15 @@ import { Toaster } from "sonner";
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
-})
+});
 
 export const metadata: Metadata = {
   title: "Planify",
-  description: "Planify is a simple and easy app that helps you organize your life.",
+  description:
+    "Planify is a simple and easy app that helps you organize your life.",
   icons: {
-    icon: "/logo.png"
-  }
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({

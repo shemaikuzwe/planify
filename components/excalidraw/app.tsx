@@ -24,12 +24,14 @@ import CustomFooter from "./footer";
 import { cn } from "@/lib/utils/utils";
 import { createDrawingStorage } from "@/lib/store/excali-store";
 import InlineInput from "../ui/inline-input";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/store/dexie";
 import { useDebouncedCallback } from "use-debounce";
 import DrawingPicker from "../ui/drawing-picker";
 import { useTheme } from "@/hooks/use-theme";
+import { ArrowLeftIcon } from "lucide-react";
+import { Button } from "../ui/button";
 
 type InitialData = {
   scrollToContent: boolean;
@@ -61,17 +63,12 @@ export default function App({ children, excalidrawLib }: AppProps) {
     null,
   );
   const { theme } = useTheme();
-  const [collapsed, setCollapsed] = useState(true);
-
+  const router = useRouter();
   const drawing = useLiveQuery(async () => db.drawings.get(id));
-  console.log("found this drawing", drawing?.id);
-  console.log("elements", drawing?.elements);
 
   const [viewModeEnabled, setViewModeEnabled] = useState(false);
   const [zenModeEnabled, setZenModeEnabled] = useState(false);
   const [gridModeEnabled, setGridModeEnabled] = useState(false);
-
-  console.log("theme", theme);
   const [disableImageTool, setDisableImageTool] = useState(false);
   const [isCollaborating, setIsCollaborating] = useState(false);
 
@@ -88,7 +85,7 @@ export default function App({ children, excalidrawLib }: AppProps) {
         console.error("Failed to save files:", error);
       });
     },
-    1000,
+    500,
   );
 
   const [excalidrawAPI, setExcalidrawAPI] =
@@ -177,22 +174,25 @@ export default function App({ children, excalidrawLib }: AppProps) {
     return (
       <>
         <div className="absolute top-0 left-0 z-[10000]">
-          <DrawingPicker
-            defaultDrawingId={id}
-            isCollapsed={collapsed}
-            setCollapsed={setCollapsed}
+          <Button
+            onClick={() => router.back()}
+            variant={"outline"}
+            size={"icon"}
+          >
+            <ArrowLeftIcon className="h-8 w-8" />
+          </Button>
+          <DrawingPicker defaultDrawingId={id} />
+        </div>
+
+        <div className="absolute flex justify-center items-center top-0 left-32 z-[10000]">
+          <InlineInput
+            value={drawing?.name ?? "Untitled"}
+            onChange={handleNameChange}
+            options={{ slice: 20 }}
+            className="w-36 mt-2 ml-2 text-md"
           />
         </div>
-        {collapsed && (
-          <div className="absolute flex justify-center items-center top-0 left-24 z-[10000]">
-            <InlineInput
-              value={drawing?.name ?? "Untitled"}
-              onChange={handleNameChange}
-              options={{ slice: 20 }}
-              className="w-36 mt-2 ml-2 text-md"
-            />
-          </div>
-        )}
+
         {!isMobile && (
           <LiveCollaborationTrigger
             isCollaborating={isCollaborating}
@@ -229,7 +229,7 @@ export default function App({ children, excalidrawLib }: AppProps) {
   );
 
   return (
-    <div className={cn("h-full fixed px-2 py-2 w-full")} ref={appRef}>
+    <div className={cn("h-full fixed w-full")} ref={appRef}>
       {renderExcalidraw(children)}
       {/* {Object.keys(commentIcons || []).length > 0 && renderCommentIcons()}
         {comment && renderComment()} */}

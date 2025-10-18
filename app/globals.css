@@ -137,11 +137,11 @@
     }
 }
 .App-menu_top__left {
-    transform: translateX(4rem) !important;
+    transform: translateX(5.5rem) !important;
 }
-.App-menu {
-    /*display: none;*/
+/*.App-menu {
+
 }
 .App-menu_top {
-    /*display: none;*/
-}
+
+}*/

@@ -1,13 +1,13 @@
-import Chat from "@/components/excalidraw/chat";
+import WhiteBoards from "@/components/excalidraw/chat";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { MessageSquare, Presentation } from "lucide-react";
-import { Navbar } from "@/components/ui/navbar";
+
 import Header from "@/components/ui/header";
 
 export default function Page() {
   return (
-    <div className="flex  min-h-screen w-full">
+    <div className="flex  h-full w-full">
       <div className=" w-full">
         <Header
           title="Whiteboard"
@@ -17,12 +17,11 @@ export default function Page() {
           <div className="flex justify-end items-center mb-8">
             <Button asChild>
               <Link href={`/whiteboard/${crypto.randomUUID()}`}>
-                <MessageSquare size={16} />
                 New Whiteboard
               </Link>
             </Button>
           </div>
-          <Chat />
+          <WhiteBoards />
         </div>
       </div>
     </div>
