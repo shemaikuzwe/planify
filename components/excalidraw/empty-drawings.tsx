@@ -24,7 +24,7 @@ export default function EmptyDrawings() {
         </EmptyHeader>
         <EmptyContent>
           <Button asChild>
-            <Link href={`/whiteboard/${crypto.randomUUID()}`}>
+            <Link href={`/app/whiteboard/${crypto.randomUUID()}`}>
               New Whiteboard
             </Link>
           </Button>

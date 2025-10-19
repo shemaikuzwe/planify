@@ -1,15 +1,13 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { CheckSquare } from "lucide-react";
+import Logo from "../ui/logo";
+import LoginForm from "../auth/login-form";
 
 export function Header() {
   return (
-    <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 w-full">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2">
-          <CheckSquare className="h-6 w-6 text-accent" />
-          <span className="text-xl font-bold">Planify</span>
-        </Link>
+        <Logo />
 
         <nav className="hidden items-center gap-6 md:flex">
           <Link
@@ -33,15 +31,20 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm">
-            Log in
-          </Button>
-          <Button
-            size="sm"
-            className="bg-accent text-accent-foreground hover:bg-accent/90"
-          >
-            Start free trial
-          </Button>
+          <LoginForm>
+            <Button variant="ghost" size="sm">
+              Log in
+            </Button>
+          </LoginForm>
+
+          <LoginForm register>
+            <Button
+              size="sm"
+              className="bg-accent text-accent-foreground hover:bg-accent/90"
+            >
+              Get Started
+            </Button>
+          </LoginForm>
         </div>
       </div>
     </header>

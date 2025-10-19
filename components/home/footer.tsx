@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import LoginForm from "../auth/login-form";
 
 export function Footer() {
   return (
@@ -11,12 +12,11 @@ export function Footer() {
           Sign up for Planify today and take your productivity to the next
           level.
         </p>
-        <Button
-          size="lg"
-          className="bg-white text-gray-900 hover:bg-gray-100 font-semibold px-8"
-        >
-          Sign Up
-        </Button>
+        <LoginForm register>
+          <Button size="lg" variant={"outline"}>
+            Sign Up
+          </Button>
+        </LoginForm>
       </div>
     </section>
   );

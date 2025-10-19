@@ -1,69 +1,83 @@
-"use client"
-import { Button } from "@/components/ui/button"
-import Logo from "../ui/logo"
-import { signIn } from "next-auth/react"
-import GitHub from "./Github"
-import Google from "./Google"
-import TypingAnimation from "../ui/typing-animation"
+"use client";
+import { Button } from "@/components/ui/button";
+import { signIn } from "next-auth/react";
+import GitHub from "./Github";
+import Google from "./Google";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+import { useTransition } from "react";
+import { Spinner } from "../ui/spinner";
 
-
-export default function LoginForm() {
+export default function LoginForm({
+  children,
+  register = false,
+}: {
+  children: React.ReactNode;
+  register?: boolean;
+}) {
+  const [isPending, startTransition] = useTransition();
+  const handleSignIn = (provider: "google" | "github") => {
+    startTransition(() => {
+      signIn(provider, { redirectTo: "/app" });
+    });
+  };
   return (
-    <div className="grid lg:grid-cols-2 min-h-screen w-full">
-      <div className="hidden lg:flex flex-col justify-between bg-primary  w-full not-only:p-8 h-full">
-        <Logo className="bg-white" />
-        <div className="my-8 flex justify-start">
-          <TypingAnimation words={["Plan", "Create"]} />
+    <Dialog>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="w-full max-w-md h-80">
+        <DialogHeader className="text-center items-center pb-2 mb-5">
+          <DialogTitle className="text-2xl font-bold">
+            Welcome {!register && "Back"}
+          </DialogTitle>
+          <p className="text-muted-foreground">
+            {register
+              ? "Create your account,to continue"
+              : "Sign in to your account"}
+          </p>
+        </DialogHeader>
+        <div className="flex flex-col mb-10 justify-center items-center">
+          <form className="w-full" action={() => handleSignIn("github")}>
+            <Button
+              className="w-full h-12  flex gap-2 items-center justify-center mb-4"
+              type="submit"
+              variant={"outline"}
+              disabled={isPending}
+            >
+              {isPending ? (
+                <Spinner />
+              ) : (
+                <>
+                  <GitHub />
+                  Continue with GitHub
+                </>
+              )}
+            </Button>
+          </form>
+
+          <form className="w-full" action={() => handleSignIn("google")}>
+            <Button
+              className="w-full h-12 text-base justify-center"
+              type="submit"
+              variant={"outline"}
+              disabled={isPending}
+            >
+              {isPending ? (
+                <Spinner />
+              ) : (
+                <>
+                  <Google />
+                  Continue with Google
+                </>
+              )}
+            </Button>
+          </form>
         </div>
-
-        <div className="space-y-4">
-          <p >Everything you need to plan and create.</p>
-        </div>
-
-        <div className="mt-8 text-sm text-muted-foreground">Copyright © {new Date().getFullYear()} Planify</div>
-      </div>
-
-      <div className="flex flex-col items-center justify-center p-6 md:p-8 h-full  bg-white">
-        <div className="lg:hidden mb-8">
-          <Logo className="bg-gray-900" textClassName="text-gray-900" />
-        </div>
-
-        <div className="w-full max-w-md border dark:bg-white rounded-xl border-gray-200 p-4 text-gray-900 mb-5">
-          <div className="space-y-2 text-center pb-4">
-            <h2 className="text-2xl font-bold">Welcome back</h2>
-            <p className="text-muted-foreground">
-              Sign in to your account 
-            </p>
-          </div>
-          <div className="space-y-4 pt-0">
-            <form className="w-full" action={() => {
-              signIn("github",{ redirectTo: "/" })
-            }}>
-              <Button
-                className="w-full h-12  bg-slate-300  text-gray-900 hover:bg-slate-300 hover:opacity-90 flex gap-2 items-center justify-center mb-4"
-                type="submit"
-              >
-                <GitHub />
-                Continue with GitHub
-              </Button>
-            </form>
-
-            <form className="w-full" action={() => {
-              signIn("google", { redirectTo: "/" })
-            }}>
-              <Button
-                className="w-full h-12 text-base  bg-slate-300 text-gray-900 hover:bg-slate-300  hover:opacity-90 flex gap-2 items-center justify-center"
-                type="submit"
-              >
-                <Google />
-                Continue with Google
-              </Button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
+      </DialogContent>
+    </Dialog>
+  );
 }
-
-

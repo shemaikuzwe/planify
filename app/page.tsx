@@ -5,7 +5,7 @@ import { Hero } from "@/components/home/hero";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background w-full">
       <Header />
       <main>
         <Hero />

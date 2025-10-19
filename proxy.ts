@@ -3,13 +3,13 @@ import { auth } from "@/auth";
 
 export default auth((req) => {
   const isLoggedIn = req.auth;
-  const isOnLogin = req.nextUrl.pathname.startsWith("/auth/login");
+  const isOnHome = req.nextUrl.pathname === "/";
   const isApiRoute = req.nextUrl.pathname.startsWith("/api");
   if (isApiRoute) return NextResponse.next();
-  else if (!isLoggedIn && !isOnLogin) {
-    return NextResponse.redirect(new URL("/auth/login", req.url));
-  } else if (isLoggedIn && isOnLogin) {
+  else if (!isLoggedIn && !isOnHome) {
     return NextResponse.redirect(new URL("/", req.url));
+  } else if (isLoggedIn && isOnHome) {
+    return NextResponse.redirect(new URL("/app", req.url));
   }
   return NextResponse.next();
 });

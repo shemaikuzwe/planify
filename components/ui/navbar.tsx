@@ -1,11 +1,5 @@
 "use client";
-import {
-  Settings,
-  ListTodo,
-  StickyNote,
-  Presentation,
-  PresentationIcon,
-} from "lucide-react";
+import { Settings, ListTodo, StickyNote, PresentationIcon } from "lucide-react";
 import Link from "next/link";
 import User from "@/components/profile/user";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -26,7 +20,7 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import Logo from "./logo";
 import {
   Collapsible,
@@ -68,7 +62,7 @@ export function Navbar() {
                 <SidebarMenuButton
                   asChild
                   tooltip={"Excalidraw"}
-                  isActive={pathName === "/"}
+                  isActive={pathName === "/app"}
                 >
                   <Link href={"/"} className="flex gap-2 items-center w-full">
                     <PresentationIcon />
@@ -152,12 +146,12 @@ export function Navbar() {
   );
 }
 function NavTask({ type }: { type: "task" | "project" }) {
+  const pathName = usePathname();
   const tasks = useLiveQuery(
     async () =>
-      await db.pages.where("type").equals(type.toUpperCase()).toArray()
+      await db.pages.where("type").equals(type.toUpperCase()).toArray(),
   );
   const [hoveredTaskId, setHoveredTaskId] = useState<string | null>(null);
-  const router = useRouter();
   const handleMouseEnter = (taskId: string) => {
     setHoveredTaskId(taskId);
   };
@@ -171,7 +165,8 @@ function NavTask({ type }: { type: "task" | "project" }) {
     tasks.map((task) => (
       <SidebarMenuSubItem key={task.id}>
         <SidebarMenuSubButton
-          href={`/${type}/${task.id}`}
+          isActive={pathName.includes(task.id)}
+          href={`/app/${type}/${task.id}`}
           className="flex items-center justify-between gap-2 w-full relative group"
           onMouseEnter={() => handleMouseEnter(task.id)}
           onMouseLeave={() => handleMouseLeave()}
@@ -183,7 +178,7 @@ function NavTask({ type }: { type: "task" | "project" }) {
             onMouseLeave={() => handleMouseLeave()}
           >
             <Link
-              href={`/${type}/${task.id}`}
+              href={`/app/${type}/${task.id}`}
               className="flex items-center gap-2 w-full relative group"
             >
               <StickyNote className="h-4 w-4" />

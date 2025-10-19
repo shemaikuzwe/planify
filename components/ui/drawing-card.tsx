@@ -52,7 +52,7 @@ export function DrawingCard({ id, name, updatedAt }: DrawingCardProps) {
   return (
     <Card
       className="px-3 border rounded-lg cursor-pointer"
-      onDoubleClick={() => router.push(`/whiteboard/${id}`)}
+      onDoubleClick={() => router.push(`/app/whiteboard/${id}`)}
     >
       <CardContent className="p-0">
         <div className="flex items-center justify-end">
@@ -109,7 +109,7 @@ export function DrawingCard({ id, name, updatedAt }: DrawingCardProps) {
             <ChevronRight
               size={20}
               className="cursor-pointer"
-              onClick={() => router.push(`/whiteboard/${id}`)}
+              onClick={() => router.push(`/app/whiteboard/${id}`)}
             />
           </div>
         </div>

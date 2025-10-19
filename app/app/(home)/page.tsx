@@ -15,7 +15,7 @@ export default function Page() {
         <div className="max-w-6xl mx-auto mt-4">
           <div className="flex justify-end items-center mb-8">
             <Button asChild>
-              <Link href={`/whiteboard/${crypto.randomUUID()}`}>
+              <Link href={`/app/whiteboard/${crypto.randomUUID()}`}>
                 <MessageSquare size={16} />
                 New Whiteboard
               </Link>

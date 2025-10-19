@@ -87,7 +87,7 @@ export default function DrawingPicker({
               <ArrowUpDown />
             </Button>
             <Button size="icon" className="h-6 w-6" asChild>
-              <Link href={`/whiteboard/${crypto.randomUUID()}`}>
+              <Link href={`/app/whiteboard/${crypto.randomUUID()}`}>
                 <Plus className="w-4 h-4" />
               </Link>
             </Button>
@@ -97,7 +97,7 @@ export default function DrawingPicker({
           {filteredDrawings?.map((drawing) => (
             <div
               key={drawing.id}
-              onClick={() => router.push(`/whiteboard/${drawing.id}`)}
+              onClick={() => router.push(`/app/whiteboard/${drawing.id}`)}
               className={cn(
                 "w-full text-left transition-colors border-l-2 hover:bg-secondary/50 px-4 py-3",
                 drawing.id === defaultDrawingId
