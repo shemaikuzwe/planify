@@ -9,3 +9,4 @@ export type Drawing = {
 export interface TaskStatusTask extends TaskStatus {
   tasks: Task[];
 }
+export type PageType = "TASK" | "PROJECT";

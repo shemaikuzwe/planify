@@ -32,6 +32,7 @@ import DrawingPicker from "../ui/drawing-picker";
 import { useTheme } from "@/hooks/use-theme";
 import { ArrowLeftIcon } from "lucide-react";
 import { Button } from "../ui/button";
+import ThemeToggleButton from "../ui/theme-toggleBtn";
 
 type InitialData = {
   scrollToContent: boolean;
@@ -62,7 +63,7 @@ export default function App({ children, excalidrawLib }: AppProps) {
   const [elements, setElements] = useState<OrderedExcalidrawElement[] | null>(
     null,
   );
-  const { theme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const router = useRouter();
   const drawing = useLiveQuery(async () => db.drawings.get(id));
 
@@ -181,7 +182,7 @@ export default function App({ children, excalidrawLib }: AppProps) {
                 variant={"outline"}
                 size={"icon"}
               >
-                <ArrowLeftIcon className="h-8 w-8" />
+                <ArrowLeftIcon className="h-5 w-5" />
               </Button>
               <DrawingPicker defaultDrawingId={id} />
             </div>
@@ -194,6 +195,7 @@ export default function App({ children, excalidrawLib }: AppProps) {
                 className="w-36 mt-2 ml-2 text-md"
               />
             </div>
+            <ThemeToggleButton />
           </>
         )}
 

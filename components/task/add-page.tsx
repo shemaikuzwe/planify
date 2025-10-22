@@ -17,11 +17,8 @@ import { toast } from "sonner";
 import { taskStore } from "@/lib/store/tasks-store";
 import { useSession } from "next-auth/react";
 import { z } from "zod";
-export default function AddPage({
-  type = "task",
-}: {
-  type?: "task" | "project";
-}) {
+import { PageType } from "@/lib/types";
+export default function AddPage({ type = "TASK" }: { type?: PageType }) {
   const [isOpen, setIsOpen] = useState(false);
   const form = useForm({
     resolver: zodResolver(
@@ -37,7 +34,7 @@ export default function AddPage({
       if (!userId) {
         throw new Error("User not found");
       }
-      await taskStore.addPage(data.name,type, userId);
+      await taskStore.addPage(data.name, type, userId);
       form.reset();
       setIsOpen(false);
     } catch (error) {

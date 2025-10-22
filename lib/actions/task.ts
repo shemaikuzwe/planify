@@ -97,7 +97,7 @@ async function addPage(data: {
   todoId: string;
   inProgressId: string;
   doneId: string;
-  type: "task" | "project";
+  type: "TASK" | "PROJECT";
 }) {
   const session = await auth();
   const userId = session?.user.id;
@@ -107,7 +107,7 @@ async function addPage(data: {
       id: data.pageId,
       name: data.name,
       userId,
-      type: data.type === "project" ? "PROJECT" : "TASK",
+      type: data.type,
     },
   });
   await db.taskStatus.create({
@@ -178,6 +178,28 @@ async function addStatus(data: {
     data: { name: data.name, categoryId: data.pageId },
   });
 }
+
+async function updateStatusIndex(
+  statuses: { id: string; statusIndex: number }[],
+) {
+  const session = await auth();
+  const userId = session?.user.id;
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+  await db.$transaction(async (tx) => {
+    for (const status of statuses) {
+      await tx.taskStatus.update({
+        where: {
+          id: status.id,
+        },
+        data: {
+          statusIndex: status.statusIndex,
+        },
+      });
+    }
+  });
+}
 export {
   addPage,
   deletePage,
@@ -192,4 +214,5 @@ export {
   changeStatusColor,
   changeTaskStatus,
   editName,
+  updateStatusIndex,
 };

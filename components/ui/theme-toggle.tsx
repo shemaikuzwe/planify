@@ -1,10 +1,9 @@
-
-import { useTheme } from "next-themes"
-import {  Moon, PcCase, Sun } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useTheme } from "next-themes";
+import { Moon, PcCase, Sun } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function ThemeToggle() {
-  const { setTheme, theme } = useTheme()
+  const { setTheme, theme } = useTheme();
 
   return (
     <div className="flex items-center gap-1 rounded-md p-1 ">
@@ -35,5 +34,5 @@ export default function ThemeToggle() {
         <Moon className="h-4 w-4" />
       </Button>
     </div>
-  )
+  );
 }

@@ -1,13 +1,15 @@
 import { db, PlanifyDB } from "./dexie";
 import { AddTaskValue } from "../types/schema";
 import { syncChange } from "../utils/sync";
+import { taskStatus } from "./schema/schema";
+import { PageType } from "../types";
 
 export class TasksStore {
   private db: PlanifyDB;
   constructor(db: PlanifyDB) {
     this.db = db;
   }
-  async addPage(name: string, type: "task" | "project", userId: string) {
+  async addPage(name: string, type: PageType, userId: string) {
     const pageId = crypto.randomUUID();
     const todoStatusId = crypto.randomUUID();
     const inProgressStatusId = crypto.randomUUID();
@@ -19,7 +21,7 @@ export class TasksStore {
       todoStatusId,
       doneStatusId,
       inProgressStatusId,
-      type: type === "task" ? "TASK" : "PROJECT",
+      type: type,
     });
     syncChange("addPage", {
       pageId: pageId,
@@ -35,11 +37,11 @@ export class TasksStore {
     await this.createTask({
       id,
       text: data.text,
-      time: data.time,
+      time: data.time ?? undefined,
       tags: data.tags,
       statusId: data.statusId,
       priority: data.priority as unknown as any,
-      dueDate: data.dueDate,
+      dueDate: data.dueDate ?? undefined,
     });
     const task = await this.db.tasks.get(id);
     if (!task) throw new Error("Task not found");
@@ -76,6 +78,7 @@ export class TasksStore {
       updatedAt: new Date(),
       tasks: [],
       primaryColor: "bg-neutral-600",
+      statusIndex: 0,
     });
     syncChange("addStatus", {
       statusId: statusId,
@@ -112,6 +115,11 @@ export class TasksStore {
       opts: opts ? { taskId: opts.taskId, statusId: opts.statusId } : undefined,
     });
   }
+  async updateStatusIndex(statuses: taskStatus[]) {
+    await db.taskStatus.bulkPut(statuses);
+    console.log("Statuses updated");
+    syncChange("updateStatusIndex", statuses);
+  }
   async editName(id: string, name: string) {
     await this.db.tasks.update(id, { text: name });
     syncChange("editTaskName", {
@@ -147,7 +155,7 @@ export class TasksStore {
     doneStatusId: string;
     name: string;
     userId?: string;
-    type: "TASK" | "PROJECT";
+    type: PageType;
   }) {
     await this.db.taskStatus.add({
       name: "TODO",
@@ -157,6 +165,7 @@ export class TasksStore {
       id: todoStatusId,
       primaryColor: "bg-gray-600",
       tasks: [],
+      statusIndex: 0,
     });
     await this.db.taskStatus.add({
       name: "IN PROGRESS",
@@ -166,6 +175,7 @@ export class TasksStore {
       id: inProgressStatusId,
       primaryColor: "bg-blue-600",
       tasks: [],
+      statusIndex: 1,
     });
     await this.db.taskStatus.add({
       name: "DONE",
@@ -175,6 +185,7 @@ export class TasksStore {
       id: doneStatusId,
       primaryColor: "bg-green-600",
       tasks: [],
+      statusIndex: 2,
     });
     await this.db.pages.add({
       id: pageId,

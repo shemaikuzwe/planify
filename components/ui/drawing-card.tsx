@@ -51,7 +51,7 @@ export function DrawingCard({ id, name, updatedAt }: DrawingCardProps) {
   };
   return (
     <Card
-      className="px-3 border rounded-lg cursor-pointer"
+      className="px-3 border rounded-lg"
       onDoubleClick={() => router.push(`/app/whiteboard/${id}`)}
     >
       <CardContent className="p-0">

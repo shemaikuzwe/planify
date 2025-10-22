@@ -23,7 +23,7 @@ export class PlanifyDB extends Dexie {
     });
     this.version(4).stores({
       pages: "&id, userId,type",
-      taskStatus: "&id, categoryId",
+      taskStatus: "&id, categoryId,statusIndex",
       tasks: "&id, statusId",
     });
     this.version(5).stores({

@@ -7,6 +7,7 @@ import {
   changeStatusSchema,
   editDrawingNameSchema,
   saveElement,
+  updateStatusIndexSchema,
   updateTaksIndexSchema,
 } from "../types/schema";
 import { TasksStore, taskStore } from "./tasks-store";
@@ -66,7 +67,7 @@ class SyncManager {
               inProgressStatusId: data.inProgressId,
               name: data.name,
               todoStatusId: data.todoId,
-              type: data.type === "project" ? "PROJECT" : "TASK",
+              type: data.type,
             });
             break;
           }
@@ -80,9 +81,9 @@ class SyncManager {
               statusId: data.statusId,
               text: data.text,
               tags: data.tags,
-              time: data.time,
+              time: data.time ?? undefined,
               priority: data.priority ?? "",
-              dueDate: data.dueDate,
+              dueDate: data.dueDate ?? undefined,
             });
             break;
           }
@@ -96,14 +97,15 @@ class SyncManager {
               updatedAt: event.createdAt,
               primaryColor: "bg-gray-600",
               tasks: [],
+              statusIndex: data.statusIndex,
             });
             break;
           }
           case "toggleStatus": {
             const data = z
               .object({
-                id: z.string().uuid(),
-                status: z.string().uuid(),
+                id: z.uuid(),
+                status: z.uuid(),
               })
               .parse(event.data);
             await this.db.tasks.update(data.id, {
@@ -126,10 +128,21 @@ class SyncManager {
             });
             break;
           }
+          case "updateStatusIndex": {
+            const data = updateStatusIndexSchema.parse(event.data);
+            await this.db.transaction("rw", this.db.taskStatus, async () => {
+              data.forEach((status) => {
+                this.db.taskStatus.update(status.id, {
+                  statusIndex: status.statusIndex,
+                });
+              });
+            });
+            break;
+          }
           case "editPageName": {
             const data = z
               .object({
-                id: z.string().uuid(),
+                id: z.uuid(),
                 name: z.string(),
               })
               .parse(event.data);
@@ -174,7 +187,7 @@ class SyncManager {
           case "editTaskDescription": {
             const data = z
               .object({
-                taskId: z.string().uuid(),
+                taskId: z.uuid(),
                 description: z.string().min(1),
               })
               .parse(event.data);
@@ -187,7 +200,7 @@ class SyncManager {
           case "editTaskName": {
             const data = z
               .object({
-                id: z.string().uuid(),
+                id: z.uuid(),
                 name: z.string().min(1),
               })
               .parse(event.data);
@@ -201,7 +214,7 @@ class SyncManager {
           case "deleteTask": {
             const data = z
               .object({
-                id: z.string().uuid(),
+                id: z.uuid(),
               })
               .parse(event.data);
             await this.db.tasks.delete(data.id);
@@ -210,7 +223,7 @@ class SyncManager {
           case "deleteStatus": {
             const data = z
               .object({
-                id: z.string().uuid(),
+                id: z.uuid(),
               })
               .parse(event.data);
             await this.db.taskStatus.delete(data.id);
@@ -219,7 +232,7 @@ class SyncManager {
           case "deleteDrawing": {
             const data = z
               .object({
-                id: z.string().uuid(),
+                id: z.uuid(),
               })
               .parse(event.data);
             await this.db.drawings.delete(data.id);
@@ -228,7 +241,7 @@ class SyncManager {
           case "deletePage": {
             const data = z
               .object({
-                id: z.string().uuid(),
+                id: z.uuid(),
               })
               .parse(event.data);
             await this.taskStore.deletePage(data.id);
@@ -273,7 +286,6 @@ class SyncManager {
       if (!Array.isArray(data)) {
         continue;
       }
-      console.log(table, data);
       switch (table) {
         case "pages":
           await this.db.pages.bulkAdd(
@@ -284,7 +296,7 @@ class SyncManager {
               updatedAt: page.updatedAt,
               userId: page.userId,
               taskStatus: page.taskStatus.map((status: any) => status.id),
-              type: page.type?.toLowerCase(),
+              type: page.type,
             })),
           );
           break;
@@ -299,6 +311,7 @@ class SyncManager {
               userId: status.userId,
               categoryId: status.categoryId,
               tasks: [],
+              statusIndex: status.taskIndex,
             })),
           );
           break;

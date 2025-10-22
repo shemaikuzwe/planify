@@ -38,12 +38,12 @@ export default function InlineInput({
             if (e.key === "Enter") handleSave();
             if (e.key === "Escape") handleCancel();
           }}
-          className={cn("text-sm", className)}
+          className={cn("text-sm rounded-md", className)}
           autoFocus
         />
       ) : (
         <h3
-          className={cn("text-sm rounded-lg", className)}
+          className={cn("text-sm", className)}
           onDoubleClick={() => {
             setIsEditing(true);
           }}

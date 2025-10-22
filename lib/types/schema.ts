@@ -1,17 +1,17 @@
 import { z } from "zod";
 export const AddTaskSchema = z.object({
-  text: z.string({ required_error: "Task name is required" }).min(1).max(50),
+  text: z.string({ error: "Task name is required" }).min(1).max(50),
   time: z.string().optional().nullable(),
   priority: z.enum(["HIGH", "MEDIUM", "LOW"]).optional(),
   dueDate: z.string().optional().nullable(),
-  taskId: z.string().uuid().optional(),
+  taskId: z.uuid().optional(),
   tags: z.array(z.string()).optional(),
-  statusId: z.string().uuid(),
+  statusId: z.uuid(),
 });
 export type AddTaskValue = z.infer<typeof AddTaskSchema>;
 
 export const ToggleTaskStatusSchema = z.object({
-  taskId: z.string().uuid(),
+  taskId: z.uuid(),
   status: z.string(),
 });
 
@@ -22,7 +22,7 @@ export const addDrawingSchema = z.object({
 
 export const saveElement = z.object({
   elements: z.array(z.any()),
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export const addPageSchema = z.object({
@@ -31,33 +31,39 @@ export const addPageSchema = z.object({
   todoId: z.uuid(),
   inProgressId: z.uuid(),
   doneId: z.uuid(),
-  type: z.enum(["task", "project"]),
+  type: z.enum(["TASK", "PROJECT"]),
 });
 
 export const addStatusSchema = z.object({
   name: z.string().min(2),
-  statusId: z.string().uuid(),
-  pageId: z.string().uuid(),
+  statusId: z.uuid(),
+  pageId: z.uuid(),
+  statusIndex: z.number(),
 });
 
 export const updateTaksIndexSchema = z.object({
-  tasks: z.array(
-    z.object({ id: z.string().uuid(), taskIndex: z.number().min(0) }),
-  ),
+  tasks: z.array(z.object({ id: z.uuid(), taskIndex: z.number().min(0) })),
   opts: z
     .object({
-      taskId: z.string().uuid(),
-      statusId: z.string().uuid(),
+      taskId: z.uuid(),
+      statusId: z.uuid(),
     })
     .optional(),
 });
 
+export const updateStatusIndexSchema = z.array(
+  z.object({
+    id: z.uuid(),
+    statusIndex: z.number().min(0),
+  }),
+);
+
 export const editDrawingNameSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   name: z.string().min(2),
 });
 export const changeStatusSchema = z.object({
-  statusId: z.string().uuid(),
+  statusId: z.uuid(),
   color: z.string(),
 });
 
@@ -70,6 +76,7 @@ export const syncOptions = [
   "addStatus",
   "toggleStatus",
   "updateTaskIndex",
+  "updateStatusIndex",
   "deleteTask",
   "deleteStatus",
   "deletePage",
@@ -82,7 +89,7 @@ export type SyncType = (typeof syncOptions)[number];
 export const teamSchema = z.object({
   name: z.string().min(2).max(100),
   slogan: z.string().min(2).optional(),
-  members: z.array(z.string().email()).min(1),
+  members: z.array(z.email()).min(1),
 });
 
 export type TeamData = z.infer<typeof teamSchema>;

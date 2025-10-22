@@ -104,7 +104,7 @@ export function Navbar() {
                       <NavTask type="project" />
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton asChild>
-                          <AddPage type="project" />
+                          <AddPage type="PROJECT" />
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     </SidebarMenuSub>
@@ -121,7 +121,7 @@ export function Navbar() {
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Settings">
                   <Link
-                    href="/settings?tab=settings"
+                    href="/app/settings?tab=settings"
                     className="flex items-center gap-2 "
                   >
                     <Settings className="h-4 w-4" />

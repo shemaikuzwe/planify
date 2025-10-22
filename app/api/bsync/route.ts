@@ -16,6 +16,7 @@ import {
   editPageName,
   editTaskDescription,
   editTaskName,
+  updateStatusIndex,
   updateTaskIndex,
 } from "@/lib/actions/task";
 import { db } from "@/lib/prisma";
@@ -27,6 +28,7 @@ import {
   editDrawingNameSchema,
   saveElement,
   SyncType,
+  updateStatusIndexSchema,
   updateTaksIndexSchema,
 } from "@/lib/types/schema";
 import { after, NextRequest, NextResponse } from "next/server";
@@ -163,6 +165,11 @@ export async function POST(request: NextRequest) {
       case "updateTaskIndex": {
         const validate = updateTaksIndexSchema.parse(body.data);
         await updateTaskIndex(validate.tasks, validate.opts);
+        break;
+      }
+      case "updateStatusIndex": {
+        const validate = updateStatusIndexSchema.parse(body.data);
+        await updateStatusIndex(validate);
         break;
       }
       case "save_element": {

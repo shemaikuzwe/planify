@@ -17,7 +17,7 @@ export default function Page() {
             <Button asChild>
               <Link href={`/app/whiteboard/${crypto.randomUUID()}`}>
                 <MessageSquare size={16} />
-                New Whiteboard
+                New
               </Link>
             </Button>
           </div>

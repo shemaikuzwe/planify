@@ -98,6 +98,7 @@ model TaskStatus {
   name         String
   primaryColor String       @default("bg-neutral-600")
   tasks        Task[]
+  statusIndex  Int          @default(autoincrement())
   createdAt    DateTime?    @default(now())
   updatedAt    DateTime?    @updatedAt
   categoryId   String       @db.Uuid
@@ -168,6 +169,7 @@ enum SyncType {
   addStatus
   toggleStatus
   updateTaskIndex
+  updateStatusIndex
   deleteTask
   deleteStatus
   deletePage

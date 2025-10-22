@@ -22,9 +22,7 @@ export default function LoginForm({
 }) {
   const [isPending, startTransition] = useTransition();
   const handleSignIn = (provider: "google" | "github") => {
-    startTransition(() => {
-      signIn(provider, { redirectTo: "/app" });
-    });
+    signIn(provider, { redirectTo: "/app" });
   };
   return (
     <Dialog>

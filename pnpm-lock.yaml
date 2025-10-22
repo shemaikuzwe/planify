@@ -78,6 +78,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.90.2
         version: 5.90.2(react@19.1.1)
+      DefaultItems:
+        specifier: link:@excalidraw/excalidraw/components/main-menu/DefaultItems
+        version: link:@excalidraw/excalidraw/components/main-menu/DefaultItems
       babel-plugin-react-compiler:
         specifier: 19.1.0-rc.3
         version: 19.1.0-rc.3
@@ -90,6 +93,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      components:
+        specifier: link:@excalidraw/excalidraw/components
+        version: link:@excalidraw/excalidraw/components
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
