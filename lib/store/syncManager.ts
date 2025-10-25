@@ -184,6 +184,11 @@ class SyncManager {
             });
             break;
           }
+          case "save_file": {
+            // const data = saveFilesSchema.parse(event.data);
+            // await this.db.files.put({ key: data.id, files: data.files });
+            break;
+          }
           case "editTaskDescription": {
             const data = z
               .object({

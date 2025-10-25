@@ -60,7 +60,12 @@ export const updateStatusIndexSchema = z.array(
 
 export const editDrawingNameSchema = z.object({
   id: z.uuid(),
-  name: z.string().min(2),
+  name: z.string(),
+});
+
+export const uploadFilesSchema = z.object({
+  id: z.uuid(),
+  files: z.array(z.object({ fileUrl: z.string(), id: z.string() })),
 });
 export const changeStatusSchema = z.object({
   statusId: z.uuid(),
@@ -84,6 +89,7 @@ export const syncOptions = [
   "editTaskName",
   "editPageName",
   "changeStatusColor",
+  "save_file",
 ] as const;
 export type SyncType = (typeof syncOptions)[number];
 export const teamSchema = z.object({

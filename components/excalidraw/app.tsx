@@ -81,6 +81,7 @@ export default function App({ children, excalidrawLib }: AppProps) {
           console.error("Failed to save elements:", error);
         });
       }
+      console.log("saved changes", files);
       // Save files
       drawingStorage.saveFile(files).catch((error) => {
         console.error("Failed to save files:", error);
@@ -144,6 +145,7 @@ export default function App({ children, excalidrawLib }: AppProps) {
           canvasActions: {
             // toggleTheme: true,
             theme: theme,
+            saveAsImage: true,
           },
 
           tools: { image: !disableImageTool },

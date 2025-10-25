@@ -23,7 +23,7 @@ export default function Page() {
             <Search search={search} setSearch={setSearch} />
             <Button
               onClick={() =>
-                router.push(`/app/whiteboard/${crypto.randomUUID}`)
+                router.push(`/app/whiteboard/${crypto.randomUUID()}`)
               }
             >
               <MessageSquare size={16} />

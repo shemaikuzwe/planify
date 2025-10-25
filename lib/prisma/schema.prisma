@@ -177,4 +177,5 @@ enum SyncType {
   editTaskName
   editPageName
   changeStatusColor
+  save_file
 }

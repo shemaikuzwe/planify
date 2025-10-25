@@ -3,8 +3,9 @@ import { revalidateTag } from "next/cache";
 import { addDrawingSchema } from "@/lib/types/schema";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import { UTApi } from "uploadthing/server";
 
-// const utapi = new UTApi({ logLevel: "Error" });
+const utapi = new UTApi({ logLevel: "Error" });
 
 async function saveDrawing(data: {
   id: string;
@@ -39,20 +40,20 @@ async function deleteDrawing(drawingId: string) {
   await db.drawing.delete({ where: { id: drawingId } });
 }
 async function uploadDrawingFiles(key: string, files: File[]): Promise<void> {
-  // const uploadedFiles = await utapi.uploadFiles(files)
+  const uploadedFiles = await utapi.uploadFiles(files);
   console.log("uploadedFiles", files);
 
-  // for (const file of uploadedFiles) {
-  //     if (file.error) continue;
-  //     await db.drawingFile.create({
-  //         data: {
-  //             drawingId: key,
-  //             url: file.data.ufsUrl,
-  //             mimeType: file.data.type,
-  //             name: file.data.name,
-  //         }
-  //     })
-  // }
+  for (const file of uploadedFiles) {
+    if (file.error) continue;
+    await db.drawingFile.create({
+      data: {
+        drawingId: key,
+        url: file.data.ufsUrl,
+        mimeType: file.data.type,
+        name: file.data.name,
+      },
+    });
+  }
 }
 
 export { saveDrawing, editDrawingName, deleteDrawing, uploadDrawingFiles };

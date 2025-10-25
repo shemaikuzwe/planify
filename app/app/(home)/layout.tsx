@@ -1,15 +1,25 @@
 "use client";
 import { Navbar } from "@/components/ui/navbar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useOnline } from "@/hooks/use-online";
 import { syncManager } from "@/lib/store/syncManager";
 import { useEffect } from "react";
+import { toast } from "sonner";
 
 export default function layout({ children }: { children: React.ReactNode }) {
-  
+  const { isOnline } = useOnline();
   useEffect(() => {
     syncManager.sync();
   }, [syncManager]);
 
+  // useEffect(() => {
+  //   if (isOnline) {
+  //     toast.info("You are online");
+  //   }
+  //   if (!isOnline) {
+  //     toast.error("You are offline");
+  //   }
+  // }, [isOnline]);
 
   return (
     <div className="flex h-screen gap-2 w-full">

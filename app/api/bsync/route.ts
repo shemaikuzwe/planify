@@ -246,6 +246,9 @@ export async function POST(request: NextRequest) {
         await changeTaskStatus(validate.id, validate.status);
         break;
       }
+      case "save_file": {
+        break;
+      }
       default: {
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });
       }
