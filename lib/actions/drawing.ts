@@ -40,7 +40,17 @@ async function deleteDrawing(drawingId: string) {
   await db.drawingFile.deleteMany({ where: { drawingId } });
 }
 async function uploadDrawingFiles(key: string, files: File[]) {
-  const uploadedFiles = await utapi.uploadFiles(files);
+  const existingFiles = await db.drawingFile.findMany({
+    where: { drawingId: key },
+  });
+  //check for duplicates
+  const filesToUpload = files.filter(
+    (file) =>
+      !existingFiles.some((existingFile) => existingFile.id === file.name),
+  );
+  if (!filesToUpload.length) return [];
+
+  const uploadedFiles = await utapi.uploadFiles(filesToUpload);
   const uploaded: {
     id: string;
     url: string;

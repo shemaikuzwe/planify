@@ -17,12 +17,12 @@ export default function Search({ search, setSearch }: Props) {
     500,
   );
   return (
-    <div className="flex px-2 items-center space-x-2 bg-card rounded-md">
-      <SearchIcon />
+    <div className="flex px-2 items-center space-x-2 rounded-md">
+      {/*<SearchIcon />*/}
       <Input
         placeholder={"Search"}
         onChange={handleSearch}
-        className="bg-card outline-none border-none"
+        className="bg-none outline-none border-none"
       />
     </div>
   );

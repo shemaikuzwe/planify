@@ -1,27 +1,24 @@
-"use client";
-import KanbanBoard from "@/components/kanban-board";
-import Header from "@/components/ui/header";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { db } from "@/lib/store/dexie";
-import { useLiveQuery } from "dexie-react-hooks";
-import { ListTodo } from "lucide-react";
-import { useParams } from "next/navigation";
+import { Metadata } from "next";
+import Project from "./project";
+import { db } from "@/lib/prisma";
 
-export default function page() {
-  const { taskId } = useParams<{ taskId: string }>();
-  if (!taskId) {
-    throw new Error("something went wrong");
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ taskId: string | undefined }>;
+}): Promise<Metadata> {
+  const { taskId } = await params;
+  if (!taskId) return { title: "" };
+  const page = await db.taskCategory.findUnique({ where: { id: taskId } });
+  if (!page) {
+    return {
+      title: "",
+    };
   }
-  const page = useLiveQuery(async () => await db.pages.get({ id: taskId }));
-  return (
-    <div className="flex flex-col gap-4 w-full h-full">
-      <Header
-        title={page?.name ?? "Project"}
-        icon={<ListTodo className="h-5 w-5 " />}
-      />
-      <ScrollArea>
-        <KanbanBoard taskId={taskId} />
-      </ScrollArea>
-    </div>
-  );
+  return {
+    title: page?.name || "",
+  };
+}
+export default function page() {
+  return <Project />;
 }

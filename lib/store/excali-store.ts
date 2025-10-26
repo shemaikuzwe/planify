@@ -109,6 +109,7 @@ export class DrawingStorage {
       await db.files.put({ key: this.id, files: filesToStore });
 
       if (this.id && newIds.length > 0) {
+        // const found = await db.files.where("");
         const toUpload = this.getFilesByIds(files, newIds);
         if (toUpload.length > 0) {
           const uploadedFiles = await uploadDrawingFiles(this.id, toUpload);
