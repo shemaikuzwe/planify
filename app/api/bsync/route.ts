@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
           },
         },
       });
-      const drawings = await db.drawing.findMany({
+      const drawingsWithFiles = await db.drawing.findMany({
         where: {
           userId: userId,
         },
@@ -86,23 +86,20 @@ export async function GET(req: NextRequest) {
           },
         }),
       ]);
-      // const formatedFiles: { id: string; files: StoredFiles }[] = [];
-      // for (const drawing of drawings) {
-      //   const res = await fetch(file.url);
-      //   if (!res.ok) {
-      //     console.error("failed to get file", file.id);
-      //     continue;
-      //   }
-      //   const blob = await res.blob();
-      //   const f=[file.id]{}
-      // }
+      const files = drawingsWithFiles.map((drawing) => ({
+        key: drawing.id,
+        files: drawing.files,
+      }));
+      const drawings = drawingsWithFiles.map(
+        ({ files, ...drawing }) => drawing,
+      );
       return NextResponse.json(
         {
           tables: {
             pages,
             taskStatus: taskStatuses,
             tasks,
-            // files: formatedFiles,
+            files,
             drawings,
           },
           metadata: {
@@ -217,6 +214,7 @@ export async function POST(request: NextRequest) {
       case "deleteDrawing":
         const data = z.object({ id: z.uuid() }).parse(body.data);
         await deleteDrawing(data.id);
+
         break;
       case "editTaskDescription": {
         const validate = z

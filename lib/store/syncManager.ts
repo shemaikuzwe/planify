@@ -280,6 +280,7 @@ class SyncManager {
               })
               .parse(event.data);
             await this.db.drawings.delete(data.id);
+            await this.db.files.delete(data.id);
             break;
           }
           case "deletePage": {
@@ -388,6 +389,43 @@ class SyncManager {
             })),
           );
           break;
+        case "files": {
+          const filesToStore = [];
+          for (const fileData of data as any[]) {
+            if (!fileData.files?.length) continue;
+            const storedFiles: StoredFiles = {};
+            for (const file of fileData.files) {
+              try {
+                const response = await fetch(file.url);
+                if (!response.ok) {
+                  console.error(`Failed to fetch file from ${file.url}`);
+                  continue;
+                }
+                const blob = await response.blob();
+                storedFiles[file.id] = {
+                  blob,
+                  mimeType: file.mimeType,
+                  created: new Date(file.createdAt).getTime(),
+                };
+              } catch (e) {
+                console.error(
+                  `Error fetching or processing file ${file.url}`,
+                  e,
+                );
+              }
+            }
+            if (Object.keys(storedFiles).length > 0) {
+              filesToStore.push({
+                key: fileData.key,
+                files: storedFiles,
+              });
+            }
+          }
+          if (filesToStore.length > 0) {
+            await this.db.files.bulkAdd(filesToStore);
+          }
+          break;
+        }
       }
     }
     await this.db.metadata.put({

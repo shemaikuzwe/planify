@@ -37,6 +37,7 @@ async function editDrawingName(drawingId: string, name: string) {
 
 async function deleteDrawing(drawingId: string) {
   await db.drawing.delete({ where: { id: drawingId } });
+  await db.drawingFile.deleteMany({ where: { drawingId } });
 }
 async function uploadDrawingFiles(key: string, files: File[]) {
   const uploadedFiles = await utapi.uploadFiles(files);
