@@ -20,6 +20,7 @@ import {
   updateTaskIndex,
 } from "@/lib/actions/task";
 import { db } from "@/lib/prisma";
+import { StoredFiles } from "@/lib/types";
 import {
   addPageSchema,
   addStatusSchema,
@@ -72,8 +73,11 @@ export async function GET(req: NextRequest) {
         where: {
           userId: userId,
         },
+        include: {
+          files: true,
+        },
       });
-      const [tasks, files] = await Promise.all([
+      const [tasks] = await Promise.all([
         db.task.findMany({
           where: {
             statusId: {
@@ -81,18 +85,26 @@ export async function GET(req: NextRequest) {
             },
           },
         }),
-
-        db.drawingFile.findMany({
-          where: {
-            drawingId: {
-              in: drawings.map((drawing) => drawing.id),
-            },
-          },
-        }),
       ]);
+      // const formatedFiles: { id: string; files: StoredFiles }[] = [];
+      // for (const drawing of drawings) {
+      //   const res = await fetch(file.url);
+      //   if (!res.ok) {
+      //     console.error("failed to get file", file.id);
+      //     continue;
+      //   }
+      //   const blob = await res.blob();
+      //   const f=[file.id]{}
+      // }
       return NextResponse.json(
         {
-          tables: { pages, taskStatus: taskStatuses, tasks, files, drawings },
+          tables: {
+            pages,
+            taskStatus: taskStatuses,
+            tasks,
+            // files: formatedFiles,
+            drawings,
+          },
           metadata: {
             lastSyncedAt: new Date().toISOString(),
           },

@@ -13,6 +13,19 @@ import {
 import { TasksStore, taskStore } from "./tasks-store";
 import z from "zod";
 import { differenceInDays } from "date-fns";
+import { StoredFiles } from "../types";
+
+const saveFilesSchema = z.object({
+  id: z.string(), // This is the drawing ID
+  files: z.array(
+    z.object({
+      id: z.string(), // This is the file ID
+      url: z.url(),
+      mimeType: z.string(),
+      created: z.number().optional(),
+    }),
+  ),
+});
 
 class SyncManager {
   private apiUrl: string;
@@ -185,8 +198,34 @@ class SyncManager {
             break;
           }
           case "save_file": {
-            // const data = saveFilesSchema.parse(event.data);
-            // await this.db.files.put({ key: data.id, files: data.files });
+            const data = saveFilesSchema.parse(event.data);
+            const drawingId = data.id;
+            console.log(data);
+            const existingRecord = await this.db.files.get(drawingId);
+            const existingFiles: StoredFiles = existingRecord?.files ?? {};
+
+            for (const file of data.files) {
+              try {
+                const response = await fetch(file.url);
+                if (!response.ok) {
+                  console.error(`Failed to fetch file from ${file.url}`);
+                  continue;
+                }
+                const blob = await response.blob();
+                existingFiles[file.id] = {
+                  blob,
+                  mimeType: file.mimeType,
+                  created: file.created ?? Date.now(),
+                };
+              } catch (e) {
+                console.error(
+                  `Error fetching or processing file ${file.url}`,
+                  e,
+                );
+              }
+            }
+
+            await this.db.files.put({ key: drawingId, files: existingFiles });
             break;
           }
           case "editTaskDescription": {

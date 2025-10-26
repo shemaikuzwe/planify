@@ -1,8 +1,12 @@
-import { OrderedExcalidrawElement } from "@excalidraw/excalidraw/element/types";
+import {
+  FileId,
+  OrderedExcalidrawElement,
+} from "@excalidraw/excalidraw/element/types";
 import { db } from "./dexie";
-import { BinaryFiles } from "@excalidraw/excalidraw/types";
+import { BinaryFiles, DataURL } from "@excalidraw/excalidraw/types";
 import { uploadDrawingFiles } from "../actions/drawing";
 import { syncChange } from "../utils/sync";
+import { StoredFiles } from "../types";
 
 export class DrawingStorage {
   id: string;
@@ -32,8 +36,6 @@ export class DrawingStorage {
   async getElements(): Promise<OrderedExcalidrawElement[]> {
     try {
       const drawing = await this.getDrawingById();
-      console.log("me i found", this.id);
-      console.log("drawing", drawing?.elements);
       return drawing?.elements ?? [];
     } catch (error) {
       console.error("Failed to load elements:", error);
@@ -94,12 +96,29 @@ export class DrawingStorage {
       const prevIds = new Set(Object.keys(prev?.files ?? {}));
       const currentIds = Object.keys(files ?? {});
       const newIds = currentIds.filter((id) => !prevIds.has(id));
-      await db.files.put({ key: this.id, files });
+      const filesToStore: StoredFiles = {};
+      for (const id of currentIds) {
+        const fileData = files[id];
+        const blob = this.dataURLToBlob(fileData.dataURL); // Using existing helper
+        filesToStore[id] = {
+          blob,
+          mimeType: fileData.mimeType,
+          created: fileData.created,
+        };
+      }
+      await db.files.put({ key: this.id, files: filesToStore });
+
       if (this.id && newIds.length > 0) {
         const toUpload = this.getFilesByIds(files, newIds);
         if (toUpload.length > 0) {
-          uploadDrawingFiles(this.id, toUpload);
-          // syncChange(toUpload);
+          const uploadedFiles = await uploadDrawingFiles(this.id, toUpload);
+
+          if (uploadedFiles && uploadedFiles.length > 0) {
+            syncChange("save_file", {
+              id: this.id,
+              files: uploadedFiles,
+            });
+          }
         }
       }
     } catch (e) {
@@ -108,11 +127,42 @@ export class DrawingStorage {
     }
   }
 
-  async getFiles() {
+  async getFiles(): Promise<BinaryFiles | null> {
     try {
       const rec = await db.files.get(this.id);
-      const files = rec?.files ?? null;
-      return files;
+      const storedFiles = rec?.files as StoredFiles | undefined;
+      if (!storedFiles) {
+        return null;
+      }
+
+      const binaryFiles: BinaryFiles = {};
+      const fileIds = Object.keys(storedFiles);
+
+      const readBlobAsDataURL = (blob: Blob): Promise<string> => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = (error) => reject(error);
+          reader.readAsDataURL(blob);
+        });
+      };
+
+      await Promise.all(
+        fileIds.map(async (id) => {
+          const fileData = storedFiles[id];
+          if (fileData?.blob) {
+            const dataURL = await readBlobAsDataURL(fileData.blob);
+            binaryFiles[id as FileId] = {
+              id: id as FileId,
+              dataURL: dataURL as DataURL,
+              mimeType: fileData.mimeType,
+              created: fileData.created,
+            };
+          }
+        }),
+      );
+
+      return binaryFiles;
     } catch (e) {
       console.warn("FilesStore IndexedDB get failed", e);
       return null;

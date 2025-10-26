@@ -58,7 +58,7 @@ model Drawing {
 }
 
 model DrawingFile {
-  id        String    @id @default(uuid()) @db.Uuid
+  id        String    @id
   drawingId String    @db.Uuid
   url       String
   mimeType  String

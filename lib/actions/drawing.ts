@@ -1,8 +1,7 @@
+"use server";
 import { db } from "@/lib/prisma";
-import { revalidateTag } from "next/cache";
 import { addDrawingSchema } from "@/lib/types/schema";
 import { auth } from "@/auth";
-import { redirect } from "next/navigation";
 import { UTApi } from "uploadthing/server";
 
 const utapi = new UTApi({ logLevel: "Error" });
@@ -39,21 +38,33 @@ async function editDrawingName(drawingId: string, name: string) {
 async function deleteDrawing(drawingId: string) {
   await db.drawing.delete({ where: { id: drawingId } });
 }
-async function uploadDrawingFiles(key: string, files: File[]): Promise<void> {
+async function uploadDrawingFiles(key: string, files: File[]) {
   const uploadedFiles = await utapi.uploadFiles(files);
-  console.log("uploadedFiles", files);
-
+  const uploaded: {
+    id: string;
+    url: string;
+    mimeType: string;
+    created: number | undefined;
+  }[] = [];
   for (const file of uploadedFiles) {
     if (file.error) continue;
     await db.drawingFile.create({
       data: {
+        id: file.data.name,
         drawingId: key,
         url: file.data.ufsUrl,
         mimeType: file.data.type,
         name: file.data.name,
       },
     });
+    uploaded.push({
+      url: file.data.ufsUrl,
+      id: file.data.name,
+      mimeType: file.data.type,
+      created: file.data.lastModified,
+    });
   }
+  return uploaded;
 }
 
 export { saveDrawing, editDrawingName, deleteDrawing, uploadDrawingFiles };

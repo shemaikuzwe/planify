@@ -10,3 +10,9 @@ export interface TaskStatusTask extends TaskStatus {
   tasks: Task[];
 }
 export type PageType = "TASK" | "PROJECT";
+type StoredFileData = {
+  blob: Blob;
+  mimeType: string;
+  created: number;
+};
+export type StoredFiles = Record<string, StoredFileData>;
