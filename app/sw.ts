@@ -32,12 +32,12 @@ const serwist = new Serwist({
   disableDevLogs: true,
   fallbacks: {
     entries: [
-      // {
-      //   url: "/~offline",
-      //   matcher({ request }) {
-      //     return request.destination === "document";
-      //   },
-      // },
+      {
+        url: "/app",
+        matcher({ request }) {
+          return request.destination === "document";
+        },
+      },
     ],
   },
 });

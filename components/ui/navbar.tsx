@@ -64,7 +64,10 @@ export function Navbar() {
                   tooltip={"Excalidraw"}
                   isActive={pathName === "/app"}
                 >
-                  <Link href={"/"} className="flex gap-2 items-center w-full">
+                  <Link
+                    href={"/app"}
+                    className="flex gap-2 items-center w-full"
+                  >
                     <PresentationIcon />
                     <span>Whiteboard</span>
                   </Link>

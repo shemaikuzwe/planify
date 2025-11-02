@@ -5,10 +5,10 @@ const revision = crypto.randomUUID();
 
 const withSerwist = withSerwistInit({
   cacheOnNavigation: process.env.NODE_ENV === "production",
-  disable: process.env.NODE_ENV === "development",
+  // disable: process.env.NODE_ENV === "development",
   swSrc: "app/sw.ts",
   swDest: "public/sw.js",
-  additionalPrecacheEntries: [{ url: "/~offline", revision }],
+  additionalPrecacheEntries: [{ url: "/app", revision }],
 });
 
 const nextConfig: NextConfig = {
