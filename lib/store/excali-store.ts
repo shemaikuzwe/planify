@@ -42,7 +42,9 @@ export class DrawingStorage {
       return [];
     }
   }
-  async saveElements(elements: OrderedExcalidrawElement[]): Promise<void> {
+  async saveElements(
+    elements: Readonly<OrderedExcalidrawElement[]>,
+  ): Promise<void> {
     try {
       console.log(`attempting to save this element`, this.id);
       const drawing = await this.getDrawingById();
@@ -50,13 +52,13 @@ export class DrawingStorage {
         await db.drawings.update(this.id, {
           id: this.id,
           updatedAt: new Date(),
-          elements,
+          elements: elements as OrderedExcalidrawElement[],
         });
       } else {
         const id = await db.drawings.put({
           id: this.id,
           updatedAt: new Date(),
-          elements,
+          elements: elements as OrderedExcalidrawElement[],
           createdAt: new Date(),
           userId: "",
           name: "untitled",

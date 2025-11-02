@@ -4,7 +4,6 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useOnline } from "@/hooks/use-online";
 import { syncManager } from "@/lib/store/syncManager";
 import { useEffect } from "react";
-import { toast } from "sonner";
 
 export default function layout({ children }: { children: React.ReactNode }) {
   const { isOnline } = useOnline();

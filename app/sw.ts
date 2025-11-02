@@ -6,7 +6,6 @@ import {
   NetworkOnly,
   Serwist,
 } from "serwist";
-import { syncManager } from "../lib/store/syncManager";
 
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
@@ -33,12 +32,12 @@ const serwist = new Serwist({
   disableDevLogs: true,
   fallbacks: {
     entries: [
-      {
-        url: "/~offline",
-        matcher({ request }) {
-          return request.destination === "document";
-        },
-      },
+      // {
+      //   url: "/~offline",
+      //   matcher({ request }) {
+      //     return request.destination === "document";
+      //   },
+      // },
     ],
   },
 });
