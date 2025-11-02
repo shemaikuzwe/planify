@@ -1,14 +1,14 @@
-"use client";
 import React, {
   useEffect,
   useState,
   useRef,
   useCallback,
+  Children,
+  cloneElement,
   useMemo,
 } from "react";
 
-import * as excalidrawLib from "@excalidraw/excalidraw";
-import { Excalidraw } from "@excalidraw/excalidraw";
+import type * as TExcalidraw from "@excalidraw/excalidraw";
 import type {
   NonDeletedExcalidrawElement,
   OrderedExcalidrawElement,
@@ -18,7 +18,6 @@ import type {
   AppState,
   ExcalidrawImperativeAPI,
   BinaryFiles,
-  ExcalidrawInitialDataState,
 } from "@excalidraw/excalidraw/types";
 
 import CustomFooter from "./footer";
@@ -34,22 +33,37 @@ import { useTheme } from "@/hooks/use-theme";
 import { ArrowLeftIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import ThemeToggleButton from "../ui/theme-toggleBtn";
-import "@excalidraw/excalidraw/index.css";
 
-const ExcalidrawWrapper = () => {
-  const { useHandleLibrary, Footer, WelcomeScreen, LiveCollaborationTrigger } =
-    excalidrawLib;
+type InitialData = {
+  scrollToContent: boolean;
+  files: BinaryFiles | null;
+  elements: OrderedExcalidrawElement[];
+};
+const initialData: InitialData = {
+  scrollToContent: true,
+  files: {},
+  elements: [],
+};
+export interface AppProps {
+  children: React.ReactNode;
+  excalidrawLib: typeof TExcalidraw;
+}
+
+export default function App({ children, excalidrawLib }: AppProps) {
+  const {
+    useHandleLibrary,
+    Footer,
+    WelcomeScreen,
+    LiveCollaborationTrigger,
+    convertToExcalidrawElements,
+  } = excalidrawLib;
   const appRef = useRef<any>(null);
   const { id } = useParams<{ id: string }>();
   const drawingStorage = useMemo(() => createDrawingStorage(id), [id]);
-
-  const [initialData, setInitialData] =
-    useState<ExcalidrawInitialDataState | null>(null);
-
-  const [elements, setElements] = useState<Readonly<
-    OrderedExcalidrawElement[]
-  > | null>(null);
-  const { theme } = useTheme();
+  const [elements, setElements] = useState<OrderedExcalidrawElement[] | null>(
+    null,
+  );
+  const { theme, setTheme } = useTheme();
   const router = useRouter();
   const drawing = useLiveQuery(async () => db.drawings.get(id));
 
@@ -59,25 +73,8 @@ const ExcalidrawWrapper = () => {
   const [disableImageTool, setDisableImageTool] = useState(false);
   const [isCollaborating, setIsCollaborating] = useState(false);
 
-  useEffect(() => {
-    async function init() {
-      if (!drawingStorage) return;
-      const [storedFiles, storedElements] = await Promise.all([
-        drawingStorage.getFiles(),
-        drawingStorage?.getElements(),
-      ]);
-      setElements(storedElements);
-      setInitialData({
-        scrollToContent: true,
-        files: storedFiles ?? undefined,
-        elements: storedElements,
-      });
-    }
-    init();
-  }, [drawingStorage]);
-
   const updateElements = useDebouncedCallback(
-    (newElements: Readonly<OrderedExcalidrawElement[]>, files: BinaryFiles) => {
+    (newElements: OrderedExcalidrawElement[], files: BinaryFiles) => {
       setElements(newElements);
       if (!(JSON.stringify(newElements) === JSON.stringify(elements))) {
         drawingStorage.saveElements(newElements).catch((error) => {
@@ -98,6 +95,79 @@ const ExcalidrawWrapper = () => {
 
   useHandleLibrary({ excalidrawAPI });
 
+  const renderExcalidraw = (children: React.ReactNode) => {
+    const Excalidraw: any = Children.toArray(children).find(
+      (child) =>
+        React.isValidElement(child) &&
+        typeof child.type !== "string" &&
+        //@ts-expect-error
+        // display
+        child.type.displayName === "Excalidraw",
+    );
+    if (!Excalidraw) {
+      return;
+    }
+
+    useEffect(() => {
+      async function init() {
+        if (!drawingStorage) return;
+        const [storedFiles, storedElements] = await Promise.all([
+          drawingStorage.getFiles(),
+          drawingStorage?.getElements(),
+        ]);
+        setElements(storedElements);
+        initialData.files = storedFiles;
+        initialData.elements = storedElements;
+      }
+      init();
+    }, [drawingStorage]);
+
+    const newElement = cloneElement(
+      Excalidraw,
+      {
+        excalidrawAPI: (api: ExcalidrawImperativeAPI) => setExcalidrawAPI(api),
+        // Always resolve initial data via promise so we can await files from IndexedDB
+        initialData: initialData,
+        onChange: (
+          newElements: OrderedExcalidrawElement[],
+          state: AppState,
+          files: BinaryFiles,
+        ) => {
+          // if (!drawingStorage) return;
+          updateElements(newElements, files);
+        },
+        viewModeEnabled,
+        zenModeEnabled,
+        gridModeEnabled,
+        theme: theme,
+        name: "excalidraw",
+        UIOptions: {
+          canvasActions: {
+            // toggleTheme: true,
+            theme: theme,
+            saveAsImage: true,
+          },
+
+          tools: { image: !disableImageTool },
+        },
+        renderTopRightUI,
+        onLinkOpen,
+        validateEmbeddable: true,
+      },
+      <>
+        {excalidrawAPI && (
+          <Footer>
+            <CustomFooter
+              excalidrawAPI={excalidrawAPI}
+              excalidrawLib={excalidrawLib}
+            />
+          </Footer>
+        )}
+        <WelcomeScreen />
+      </>,
+    );
+    return newElement;
+  };
   const handleNameChange = (name: string) => {
     if (!drawingStorage) return;
     drawingStorage.editDrawingName(name);
@@ -157,56 +227,20 @@ const ExcalidrawWrapper = () => {
       const isInternalLink =
         link.startsWith("/") || link.includes(window.location.origin);
       if (isInternalLink && !isNewTab && !isNewWindow) {
+        // signal that we're handling the redirect ourselves
         event.preventDefault();
+        // do a custom redirect, such as passing to react-router
+        // ...
       }
     },
     [],
   );
 
-  // if (!initialData) {
-  //   // TODO: Add a proper skeleton loader
-  //   return <div>Loading...</div>;
-  // }
-
   return (
     <div className={cn("h-full fixed w-full")} ref={appRef}>
-      <Excalidraw
-        excalidrawAPI={(api: ExcalidrawImperativeAPI) => setExcalidrawAPI(api)}
-        initialData={initialData}
-        onChange={(
-          newElements: Readonly<OrderedExcalidrawElement[]>,
-          state: AppState,
-          files: BinaryFiles,
-        ) => {
-          updateElements(newElements, files);
-        }}
-        viewModeEnabled={viewModeEnabled}
-        zenModeEnabled={zenModeEnabled}
-        gridModeEnabled={gridModeEnabled}
-        theme={theme}
-        name={drawing?.name ?? "Untitled"}
-        UIOptions={{
-          canvasActions: {
-            saveAsImage: true,
-          },
-          tools: { image: !disableImageTool },
-        }}
-        renderTopRightUI={renderTopRightUI}
-        onLinkOpen={onLinkOpen}
-        validateEmbeddable={true}
-      >
-        {excalidrawAPI && (
-          <Footer>
-            <CustomFooter
-              excalidrawAPI={excalidrawAPI}
-              excalidrawLib={excalidrawLib}
-            />
-          </Footer>
-        )}
-        <WelcomeScreen />
-      </Excalidraw>
+      {renderExcalidraw(children)}
+      {/* {Object.keys(commentIcons || []).length > 0 && renderCommentIcons()}
+        {comment && renderComment()} */}
     </div>
   );
-};
-
-export default ExcalidrawWrapper;
+}
