@@ -19,6 +19,7 @@ import { useSession } from "next-auth/react";
 import { z } from "zod";
 import { PageType } from "@/lib/types";
 import { useNavigate } from "react-router";
+
 export default function AddPage({ type = "TASK" }: { type?: PageType }) {
   const [isOpen, setIsOpen] = useState(false);
   const form = useForm({
@@ -36,10 +37,10 @@ export default function AddPage({ type = "TASK" }: { type?: PageType }) {
       if (!userId) {
         throw new Error("User not found");
       }
-      const pageId = await taskStore.addPage(data.name, type, userId);
+      const page = await taskStore.addPage(data.name, type, userId);
       form.reset();
       setIsOpen(false);
-      router(`/app/${type.toLocaleLowerCase()}/${pageId}`);
+      router(`/app/${type.toLocaleLowerCase()}/${page.pageId}`);
     } catch (error) {
       console.log(error);
       // toast.error("Failed to add page");
