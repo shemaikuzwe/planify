@@ -31,6 +31,7 @@ export class TasksStore {
       inProgressId: inProgressStatusId,
       doneId: doneStatusId,
     });
+    return { pageId };
   }
   async addTask(data: AddTaskValue) {
     const id = crypto.randomUUID();

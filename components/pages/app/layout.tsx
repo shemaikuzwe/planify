@@ -1,11 +1,11 @@
-"use client";
 import { Navbar } from "@/components/ui/navbar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useOnline } from "@/hooks/use-online";
 import { syncManager } from "@/lib/store/syncManager";
 import { useEffect } from "react";
+import { Outlet } from "react-router";
 
-export default function layout({ children }: { children: React.ReactNode }) {
+export default function AppLayout() {
   const { isOnline } = useOnline();
   useEffect(() => {
     syncManager.sync();
@@ -25,7 +25,7 @@ export default function layout({ children }: { children: React.ReactNode }) {
       <Navbar />
       <main className="flex h-screen w-full p-2 md:p-4">
         <SidebarTrigger className="h-5 w-5" />
-        {children}
+        <Outlet />
       </main>
     </div>
   );

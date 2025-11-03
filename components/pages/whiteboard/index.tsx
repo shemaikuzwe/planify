@@ -3,12 +3,12 @@ import WhiteBoards from "@/components/excalidraw/chat";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Presentation } from "lucide-react";
 import Header from "@/components/ui/header";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Search from "@/components/ui/search";
+import { useNavigate } from "react-router";
 
-export default function Whiteboard() {
-  const router = useRouter();
+export default function AppIndex() {
+  const router = useNavigate();
   const [search, setSearch] = useState<string | null>(null);
   return (
     <div className="flex  min-h-screen w-full">
@@ -21,9 +21,7 @@ export default function Whiteboard() {
           <div className="flex gap-4 justify-end items-center mb-8">
             <Search search={search} setSearch={setSearch} />
             <Button
-              onClick={() =>
-                router.push(`/app/whiteboard/${crypto.randomUUID()}`)
-              }
+              onClick={() => router(`/app/whiteboard/${crypto.randomUUID()}`)}
             >
               <MessageSquare size={16} />
               New

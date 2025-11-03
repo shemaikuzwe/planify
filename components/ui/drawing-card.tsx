@@ -2,14 +2,7 @@
 
 import type React from "react";
 
-import { useRouter } from "next/navigation";
-import {
-  ChevronRight,
-  MessageSquare,
-  Pencil,
-  MoreVertical,
-  Trash2,
-} from "lucide-react";
+import { ChevronRight, Pencil, MoreVertical, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -24,6 +17,7 @@ import { useState } from "react";
 import { Input } from "./input";
 import { db } from "@/lib/store/dexie";
 import { syncChange } from "@/lib/utils/sync";
+import { useNavigate } from "react-router";
 interface DrawingCardProps {
   id: string;
   name: string;
@@ -31,7 +25,7 @@ interface DrawingCardProps {
 }
 
 export function DrawingCard({ id, name, updatedAt }: DrawingCardProps) {
-  const router = useRouter();
+  const router = useNavigate();
   const [editingDrawingId, setEditingDrawingId] = useState(false);
   const [editDrawingName, setEditDrawingName] = useState("");
   const handleDoubleClick = () => {
@@ -52,7 +46,7 @@ export function DrawingCard({ id, name, updatedAt }: DrawingCardProps) {
   return (
     <Card
       className="px-3 border rounded-lg"
-      onDoubleClick={() => router.push(`/app/whiteboard/${id}`)}
+      onDoubleClick={() => router(`/app/whiteboard/${id}`)}
     >
       <CardContent className="p-0">
         <div className="flex items-center justify-end">
@@ -109,7 +103,7 @@ export function DrawingCard({ id, name, updatedAt }: DrawingCardProps) {
             <ChevronRight
               size={20}
               className="cursor-pointer"
-              onClick={() => router.push(`/app/whiteboard/${id}`)}
+              onClick={() => router(`/app/whiteboard/${id}`)}
             />
           </div>
         </div>

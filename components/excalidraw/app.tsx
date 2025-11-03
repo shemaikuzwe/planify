@@ -24,7 +24,6 @@ import CustomFooter from "./footer";
 import { cn } from "@/lib/utils/utils";
 import { createDrawingStorage } from "@/lib/store/excali-store";
 import InlineInput from "../ui/inline-input";
-import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/store/dexie";
 import { useDebouncedCallback } from "use-debounce";
@@ -33,6 +32,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { ArrowLeftIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import ThemeToggleButton from "../ui/theme-toggleBtn";
+import { useNavigate, useParams } from "react-router";
 
 type InitialData = {
   scrollToContent: boolean;
@@ -59,12 +59,13 @@ export default function App({ children, excalidrawLib }: AppProps) {
   } = excalidrawLib;
   const appRef = useRef<any>(null);
   const { id } = useParams<{ id: string }>();
+  if (!id) throw new Error("id is required");
   const drawingStorage = useMemo(() => createDrawingStorage(id), [id]);
   const [elements, setElements] = useState<OrderedExcalidrawElement[] | null>(
     null,
   );
   const { theme, setTheme } = useTheme();
-  const router = useRouter();
+  const router = useNavigate();
   const drawing = useLiveQuery(async () => db.drawings.get(id));
 
   const [viewModeEnabled, setViewModeEnabled] = useState(false);
@@ -180,7 +181,7 @@ export default function App({ children, excalidrawLib }: AppProps) {
           <>
             <div className="absolute top-0 left-0 z-[10000]">
               <Button
-                onClick={() => router.back()}
+                onClick={() => router("/app")}
                 variant={"outline"}
                 size={"icon"}
               >

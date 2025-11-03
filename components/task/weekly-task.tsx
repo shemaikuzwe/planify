@@ -1,19 +1,19 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Button } from "@/components/ui/button"
-import { List, Share, Star, MessageSquare } from "lucide-react"
-import Header from "@/components/ui/header"
+import { useState } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { List, Share } from "lucide-react";
+import Header from "@/components/ui/header";
 
 interface Todo {
-  id: string
-  text: string
-  completed: boolean
+  id: string;
+  text: string;
+  completed: boolean;
 }
 
 interface DayTodos {
-  [key: string]: Todo[]
+  [key: string]: Todo[];
 }
 
 export function WeeklyTask() {
@@ -52,33 +52,38 @@ export function WeeklyTask() {
       { id: "sun-2", text: "To-do", completed: false },
       { id: "sun-3", text: "To-do", completed: false },
     ],
-  })
+  });
 
   const toggleTodo = (day: string, id: string) => {
     setTodos((prev) => {
-      const updatedTodos = { ...prev }
+      const updatedTodos = { ...prev };
       updatedTodos[day] = updatedTodos[day].map((todo) =>
         todo.id === id ? { ...todo, completed: !todo.completed } : todo,
-      )
-      return updatedTodos
-    })
-  }
+      );
+      return updatedTodos;
+    });
+  };
 
   const addTodo = (day: string) => {
     setTodos((prev) => {
-      const updatedTodos = { ...prev }
-      updatedTodos[day] = [...updatedTodos[day], { id: `${day}-${Date.now()}`, text: "To-do", completed: false }]
-      return updatedTodos
-    })
-  }
+      const updatedTodos = { ...prev };
+      updatedTodos[day] = [
+        ...updatedTodos[day],
+        { id: `${day}-${Date.now()}`, text: "To-do", completed: false },
+      ];
+      return updatedTodos;
+    });
+  };
 
   const updateTodoText = (day: string, id: string, text: string) => {
     setTodos((prev) => {
-      const updatedTodos = { ...prev }
-      updatedTodos[day] = updatedTodos[day].map((todo) => (todo.id === id ? { ...todo, text } : todo))
-      return updatedTodos
-    })
-  }
+      const updatedTodos = { ...prev };
+      updatedTodos[day] = updatedTodos[day].map((todo) =>
+        todo.id === id ? { ...todo, text } : todo,
+      );
+      return updatedTodos;
+    });
+  };
 
   const createNewWeek = () => {
     const emptyTodos: DayTodos = {
@@ -89,27 +94,30 @@ export function WeeklyTask() {
       Fri: [{ id: "fri-new-1", text: "To-do", completed: false }],
       Sat: [{ id: "sat-new-1", text: "To-do", completed: false }],
       Sun: [{ id: "sun-new-1", text: "To-do", completed: false }],
-    }
-    setTodos(emptyTodos)
-  }
+    };
+    setTodos(emptyTodos);
+  };
 
   return (
     <div className="min-h-screen w-full">
       <Header title="Weekly To-do" icon={<List className="h-5 w-5 " />} />
 
       <div className="p-8 max-w-5xl mx-auto">
-
         <Button variant="default" className="mb-8" onClick={createNewWeek}>
           <List className="h-4 w-4 mr-2" />
           New
         </Button>
 
-        <h2 className="text-2xl font-semibold mb-6 border-b border-neutral-800 pb-2">March 4 - March 9</h2>
+        <h2 className="text-2xl font-semibold mb-6 border-b border-neutral-800 pb-2">
+          March 4 - March 9
+        </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-4">
           {Object.entries(todos).map(([day, dayTodos]) => (
             <div key={day} className="space-y-2">
-              <h3 className="font-medium text-neutral-300 bg-neutral-800 p-2">{day}</h3>
+              <h3 className="font-medium text-neutral-300 bg-neutral-800 p-2">
+                {day}
+              </h3>
               <div className="space-y-1">
                 {dayTodos.map((todo) => (
                   <div key={todo.id} className="flex items-start gap-2 group">
@@ -121,12 +129,17 @@ export function WeeklyTask() {
                     <input
                       type="text"
                       value={todo.text}
-                      onChange={(e) => updateTodoText(day, todo.id, e.target.value)}
+                      onChange={(e) =>
+                        updateTodoText(day, todo.id, e.target.value)
+                      }
                       className="bg-transparent border-none focus:outline-none focus:ring-0 text-sm flex-1 py-0.5"
                     />
                   </div>
                 ))}
-                <button onClick={() => addTodo(day)} className="text-neutral-500 hover:text-neutral-300 text-sm pl-6">
+                <button
+                  onClick={() => addTodo(day)}
+                  className="text-neutral-500 hover:text-neutral-300 text-sm pl-6"
+                >
                   + Add task
                 </button>
               </div>
@@ -135,6 +148,5 @@ export function WeeklyTask() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-

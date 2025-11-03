@@ -17,9 +17,9 @@ import { cn } from "@/lib/utils";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/store/dexie";
 import { formatDate } from "@/lib/utils/utils";
-import { useRouter } from "next/navigation";
 import { Sheet, SheetContent, SheetTrigger } from "./sheet";
 import Link from "next/link";
+import { useNavigate } from "react-router";
 
 interface DrawingPickerProps {
   defaultDrawingId: string;
@@ -31,7 +31,7 @@ export default function DrawingPicker({
     async () => await db.drawings.orderBy("updatedAt").toArray(),
   );
   const [searchQuery, setSearchQuery] = useState("");
-  const router = useRouter();
+  const router = useNavigate();
   const filteredDrawings =
     !searchQuery || searchQuery.trim() === ""
       ? drawings
@@ -97,7 +97,7 @@ export default function DrawingPicker({
           {filteredDrawings?.map((drawing) => (
             <div
               key={drawing.id}
-              onClick={() => router.push(`/app/whiteboard/${drawing.id}`)}
+              onClick={() => router(`/app/whiteboard/${drawing.id}`)}
               className={cn(
                 "w-full text-left transition-colors border-l-2 hover:bg-secondary/50 px-4 py-3",
                 drawing.id === defaultDrawingId

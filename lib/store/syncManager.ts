@@ -432,6 +432,7 @@ class SyncManager {
       key: "lastSync",
       lastSyncedAt: new Date(metadata.lastSyncedAt),
     });
+    window.location.reload(); //reload window to get new updates
   }
 }
 
