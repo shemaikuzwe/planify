@@ -1,4 +1,3 @@
-"use client";
 import KanbanBoard from "@/components/kanban-board";
 import Header from "@/components/ui/header";
 import { ScrollArea } from "@/components/ui/scroll-area";

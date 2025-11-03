@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Search from "@/components/ui/search";
 
-export default function Whiteboard() {
+export default function AppIndex() {
   const router = useRouter();
   const [search, setSearch] = useState<string | null>(null);
   return (

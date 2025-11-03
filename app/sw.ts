@@ -33,7 +33,7 @@ const serwist = new Serwist({
   fallbacks: {
     entries: [
       {
-        url: "/app",
+        url: "/",
         matcher({ request }) {
           return request.destination === "document";
         },
