@@ -38,6 +38,12 @@ const serwist = new Serwist({
           return request.destination === "document";
         },
       },
+      {
+        url: "/app",
+        matcher({ request }) {
+          return request.destination === "document";
+        },
+      },
     ],
   },
 });
@@ -67,7 +73,7 @@ serwist.registerCapture(
   new NetworkOnly({
     plugins: [backgroundSync],
   }),
-  "POST",
+  "POST"
 );
 
 self.addEventListener("push", function (event) {
@@ -106,7 +112,7 @@ self.addEventListener("notificationclick", function (event) {
         }
         // If no matching tab exists, open a new one to the correct URL
         return clients.openWindow(urlToOpen);
-      }),
+      })
   );
 });
 

@@ -1,5 +1,4 @@
 import AppLayout from "@/components/pages/app/layout";
-import Home from "@/components/pages/home";
 import SettingIndex from "@/components/pages/settings";
 import TaskIndex from "@/components/pages/task";
 import AppIndex from "@/components/pages/whiteboard";
@@ -10,7 +9,6 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home />} />
         <Route element={<AppLayout />}>
           <Route path="/app" element={<AppIndex />} />
           <Route path="/app/task/:taskId" element={<TaskIndex type="Task" />} />
