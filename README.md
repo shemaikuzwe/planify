@@ -6,13 +6,13 @@ Plan,orginize your work
 
 - **Task Management**: Efficiently create, organize, and track your tasks.
 - **Project Management**: Manage your projects with ease, from inception to completion.
-- **Collaborative Whiteboards**: Brainstorm and collaborate in real-time using integrated [Excalidraw](https://excalidraw.com/) whiteboards.
+- **Collaborative Whiteboards**: Collaborate [Excalidraw](https://excalidraw.com/) whiteboards.
 - **Local-first Architecture**: Enjoy offline capabilities and fast performance with a local-first approach.
-- **Sync Engine**: Seamlessly synchronize your data across devices.
+- **Sync Engine**: synchronize your data across devices.
 
 ## Tech Stack
 
-- **Frontend**: Next.js, React Router
+- **Frontend**: Next.js, React Router(to allow serwist to precache routes)
 - **Backend**: Next.js API Routes
 - **Database ORM**: Prisma
 - **Client-side Database**: Dexie
