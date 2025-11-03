@@ -1,6 +1,5 @@
-"use client";
 import { Settings, ListTodo, StickyNote, PresentationIcon } from "lucide-react";
-import Link from "next/link";
+import { Link, useLocation } from "react-router";
 import User from "@/components/profile/user";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
@@ -35,7 +34,8 @@ import PageOptions from "../task/page-options";
 import { syncChange } from "@/lib/utils/sync";
 
 export function Navbar() {
-  const pathName = usePathname();
+  const { pathname } = useLocation();
+
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
   return (
@@ -62,12 +62,9 @@ export function Navbar() {
                 <SidebarMenuButton
                   asChild
                   tooltip={"Excalidraw"}
-                  isActive={pathName === "/app"}
+                  isActive={pathname === "/app"}
                 >
-                  <Link
-                    href={"/app"}
-                    className="flex gap-2 items-center w-full"
-                  >
+                  <Link to={"/app"} className="flex gap-2 items-center w-full">
                     <PresentationIcon />
                     <span>Whiteboard</span>
                   </Link>
@@ -122,9 +119,13 @@ export function Navbar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Settings">
+                <SidebarMenuButton
+                  asChild
+                  tooltip="Settings"
+                  isActive={pathname.startsWith("/app/settings")}
+                >
                   <Link
-                    href="/app/settings?tab=settings"
+                    to="/app/settings?tab=settings"
                     className="flex items-center gap-2 "
                   >
                     <Settings className="h-4 w-4" />
@@ -149,7 +150,7 @@ export function Navbar() {
   );
 }
 function NavTask({ type }: { type: "task" | "project" }) {
-  const pathName = usePathname();
+  const { pathname } = useLocation();
   const tasks = useLiveQuery(
     async () =>
       await db.pages.where("type").equals(type.toUpperCase()).toArray(),
@@ -168,8 +169,7 @@ function NavTask({ type }: { type: "task" | "project" }) {
     tasks.map((task) => (
       <SidebarMenuSubItem key={task.id}>
         <SidebarMenuSubButton
-          isActive={pathName.includes(task.id)}
-          href={`/app/${type}/${task.id}`}
+          isActive={pathname.includes(task.id)}
           className="flex items-center justify-between gap-2 w-full relative group"
           onMouseEnter={() => handleMouseEnter(task.id)}
           onMouseLeave={() => handleMouseLeave()}
@@ -181,7 +181,7 @@ function NavTask({ type }: { type: "task" | "project" }) {
             onMouseLeave={() => handleMouseLeave()}
           >
             <Link
-              href={`/app/${type}/${task.id}`}
+              to={`/app/${type}/${task.id}`}
               className="flex items-center gap-2 w-full relative group"
             >
               <StickyNote className="h-4 w-4" />

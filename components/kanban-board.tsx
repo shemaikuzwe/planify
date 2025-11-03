@@ -14,7 +14,6 @@ import { TaskAddForm } from "./task-add-form";
 import { GroupOptionsMenu } from "./group-options-menu";
 import { cn, formatDate } from "@/lib/utils/utils";
 import { Prisma, Task } from "@prisma/client";
-import AddGroup from "./add-group";
 import { getColorVariants } from "@/lib/utils";
 import { toast } from "sonner";
 import { TaskView } from "./task/task-view";
@@ -22,6 +21,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/store/dexie";
 import { taskStatus } from "@/lib/store/schema/schema";
 import { taskStore } from "@/lib/store/tasks-store";
+import AddGroup from "./task/add-group";
 
 export default function KanbanBoard({ taskId }: { taskId: string }) {
   const statuses = useLiveQuery(async () => {

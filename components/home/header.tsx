@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import Logo from "../ui/logo";
 import LoginForm from "../auth/login-form";
@@ -11,19 +11,19 @@ export function Header() {
 
         <nav className="hidden items-center gap-6 md:flex">
           <Link
-            href="#features"
+            to="#features"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             Features
           </Link>
           <Link
-            href="#pricing"
+            to="#pricing"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             Pricing
           </Link>
           <Link
-            href="#about"
+            to="#about"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             About

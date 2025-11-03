@@ -18,6 +18,7 @@ import { taskStore } from "@/lib/store/tasks-store";
 import { useSession } from "next-auth/react";
 import { z } from "zod";
 import { PageType } from "@/lib/types";
+import { useNavigate } from "react-router";
 export default function AddPage({ type = "TASK" }: { type?: PageType }) {
   const [isOpen, setIsOpen] = useState(false);
   const form = useForm({
@@ -27,6 +28,7 @@ export default function AddPage({ type = "TASK" }: { type?: PageType }) {
       }),
     ),
   });
+  const router = useNavigate();
   const session = useSession();
   const onSubmit = async (data: { name: string }) => {
     try {
@@ -34,12 +36,13 @@ export default function AddPage({ type = "TASK" }: { type?: PageType }) {
       if (!userId) {
         throw new Error("User not found");
       }
-      await taskStore.addPage(data.name, type, userId);
+      const pageId = await taskStore.addPage(data.name, type, userId);
       form.reset();
       setIsOpen(false);
+      router(`/app/${type.toLocaleLowerCase()}/${pageId}`);
     } catch (error) {
       console.log(error);
-      toast.error("Failed to add page");
+      // toast.error("Failed to add page");
     }
   };
   const handleEmojiSelect = (newEmoji: string) => {

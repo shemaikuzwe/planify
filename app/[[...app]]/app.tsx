@@ -1,6 +1,5 @@
 import AppLayout from "@/components/pages/app/layout";
 import Home from "@/components/pages/home";
-import ProjectIndex from "@/components/pages/project/page";
 import SettingIndex from "@/components/pages/settings";
 import TaskIndex from "@/components/pages/task";
 import AppIndex from "@/components/pages/whiteboard";
@@ -14,8 +13,11 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route element={<AppLayout />}>
           <Route path="/app" element={<AppIndex />} />
-          <Route path="/app/task/:id" element={<TaskIndex />} />
-          <Route path="/app/project/:id" element={<ProjectIndex />} />
+          <Route path="/app/task/:taskId" element={<TaskIndex type="Task" />} />
+          <Route
+            path="/app/project/:taskId"
+            element={<TaskIndex type="Project" />}
+          />
           <Route path="/app/settings" element={<SettingIndex />} />
         </Route>
         <Route path="/app/whiteboard/:id" element={<Whiteboard />} />

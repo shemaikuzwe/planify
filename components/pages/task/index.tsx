@@ -1,6 +1,6 @@
 // import { Metadata } from "next";
+import { useParams } from "react-router";
 import Task from "./task";
-// import { db } from "@/lib/prisma";
 
 // export async function generateMetadata({
 //   params,
@@ -21,6 +21,14 @@ import Task from "./task";
 //   };
 // }
 
-export default function TaskIndex() {
-  return <Task />;
+interface Props {
+  type?: string;
+}
+
+export default function TaskIndex({ type }: Props) {
+  const { taskId } = useParams<{ taskId: string }>();
+  if (!taskId) {
+    throw new Error("something went wrong");
+  }
+  return <Task id={taskId} key={taskId} type={type} />;
 }

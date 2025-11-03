@@ -27,7 +27,7 @@ export default function AddGroup() {
     resolver: zodResolver(
       z.object({
         name: z.string().min(2).max(100),
-        id: z.string().uuid(),
+        id: z.uuid(),
       }),
     ),
     defaultValues: { id },
@@ -64,9 +64,7 @@ export default function AddGroup() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Group Name <span className="text-red-500">*</span>{" "}
-                    </FormLabel>
+                    <FormLabel>Group Name</FormLabel>
                     <FormControl>
                       <Input
                         {...field}

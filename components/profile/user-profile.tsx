@@ -8,15 +8,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Mail, Edit } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { PushNotificationManager } from "../ui/push-notification";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useNavigate } from "react-router";
 
 export default function UserProfile() {
   const { data: session } = useSession();
   const user = session?.user;
   const tab = useSearchParams().get("tab") || "profile";
-  const { replace } = useRouter();
+  const navigate = useNavigate();
   const handleTabChange = (value: string) => {
-    replace(`/app/settings?tab=${value}`);
+    navigate(`/app/settings?tab=${value}`, { replace: true });
   };
   return (
     <div className="min-h-screen bg-background space-y-4">

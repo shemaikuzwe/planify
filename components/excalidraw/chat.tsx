@@ -1,4 +1,3 @@
-"use client";
 import { DrawingCard } from "@/components/ui/drawing-card";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/store/dexie";

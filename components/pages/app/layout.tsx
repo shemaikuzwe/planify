@@ -1,4 +1,3 @@
-"use client";
 import { Navbar } from "@/components/ui/navbar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useOnline } from "@/hooks/use-online";
