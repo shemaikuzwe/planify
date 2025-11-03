@@ -10,8 +10,8 @@ export function Hero() {
         <div className="space-y-8">
           <div className="space-y-4">
             <h1 className="text-balance text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
-              Organize
-              <br />& Simplify
+              Plan
+              <br />& Organize
               <br />
               Your Work
             </h1>
