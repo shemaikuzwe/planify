@@ -1,5 +1,5 @@
 "use client";
-import WhiteBoards from "@/components/excalidraw/chat";
+import WhiteBoards from "@/components/excalidraw/drawings";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Presentation } from "lucide-react";
 import Header from "@/components/ui/header";

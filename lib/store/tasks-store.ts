@@ -149,6 +149,7 @@ export class TasksStore {
     name,
     userId,
     type,
+    createdAt,
   }: {
     pageId: string;
     todoStatusId: string;
@@ -157,12 +158,13 @@ export class TasksStore {
     name: string;
     userId?: string;
     type: PageType;
+    createdAt?: Date | string;
   }) {
     await this.db.taskStatus.add({
       name: "TODO",
       categoryId: pageId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: createdAt ? new Date(createdAt) : new Date(),
+      updatedAt: createdAt ? new Date(createdAt) : new Date(),
       id: todoStatusId,
       primaryColor: "bg-gray-600",
       tasks: [],
@@ -171,8 +173,8 @@ export class TasksStore {
     await this.db.taskStatus.add({
       name: "IN PROGRESS",
       categoryId: pageId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: createdAt ? new Date(createdAt) : new Date(),
+      updatedAt: createdAt ? new Date(createdAt) : new Date(),
       id: inProgressStatusId,
       primaryColor: "bg-blue-600",
       tasks: [],
@@ -181,8 +183,8 @@ export class TasksStore {
     await this.db.taskStatus.add({
       name: "DONE",
       categoryId: pageId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: createdAt ? new Date(createdAt) : new Date(),
+      updatedAt: createdAt ? new Date(createdAt) : new Date(),
       id: doneStatusId,
       primaryColor: "bg-green-600",
       tasks: [],
@@ -192,8 +194,8 @@ export class TasksStore {
       id: pageId,
       name,
       userId: userId || "",
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: createdAt ? new Date(createdAt) : new Date(),
+      updatedAt: createdAt ? new Date(createdAt) : new Date(),
       taskStatus: [todoStatusId, inProgressStatusId, doneStatusId],
       type,
     });
@@ -206,11 +208,12 @@ export class TasksStore {
     statusId: string;
     priority: string;
     dueDate?: string;
+    createdAt?: string | Date;
   }) {
     await this.db.tasks.add({
       id: data.id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: data.createdAt ? new Date(data.createdAt) : new Date(),
+      updatedAt: data.createdAt ? new Date(data.createdAt) : new Date(),
       taskIndex: 0,
       text: data.text,
       description: null,

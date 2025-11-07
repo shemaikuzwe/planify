@@ -11,18 +11,14 @@ interface Props {
 }
 
 export default function Task({ id, type = "Task" }: Props) {
-  console.log("id", id);
   const page = useLiveQuery(async () => await db.pages.get({ id: id }));
-  console.log("page", page);
   return (
-    <div className="flex flex-col gap-4 w-full h-full">
+    <div className="flex flex-col gap-4 w-full h-full -m-2 md:-m-4">
       <Header
         title={page?.name ?? type}
         icon={<ListTodo className="h-5 w-5 " />}
       />
-      <ScrollArea>
-        <KanbanBoard taskId={id} />
-      </ScrollArea>
+      <KanbanBoard taskId={id} />
     </div>
   );
 }

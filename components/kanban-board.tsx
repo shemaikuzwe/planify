@@ -142,7 +142,6 @@ export default function KanbanBoard({ taskId }: { taskId: string }) {
       return;
     }
     if (type === "status") {
-      console.log("status changed");
       const newStatuses = Array.from(status);
       const [reorderedItem] = newStatuses.splice(source.index, 1);
       newStatuses.splice(destination.index, 0, reorderedItem);
@@ -246,7 +245,7 @@ export default function KanbanBoard({ taskId }: { taskId: string }) {
   };
 
   return (
-    <div>
+    <div className="w-full h-full">
       <DragDropContext
         onDragStart={onDragStart}
         onDragUpdate={onDragUpdate}
@@ -257,7 +256,7 @@ export default function KanbanBoard({ taskId }: { taskId: string }) {
             <div
               ref={provided.innerRef}
               {...provided.droppableProps}
-              className="flex gap-4 overflow-x-auto pb-4"
+              className="flex gap-4 overflow-x-auto pb-4 h-screen w-full"
             >
               {status.map((statusItem, index) => {
                 const colorVariants = getColorVariants(statusItem.primaryColor);
@@ -267,13 +266,12 @@ export default function KanbanBoard({ taskId }: { taskId: string }) {
                     key={statusItem.id}
                     draggableId={statusItem.id}
                     index={index}
-                    type="status"
                   >
                     {(draggableProvided) => (
                       <div
                         ref={draggableProvided.innerRef}
                         {...draggableProvided.draggableProps}
-                        className="flex-shrink-0"
+                        className="md:flex-shrink-0"
                       >
                         <Droppable
                           droppableId={statusItem.id}
@@ -293,7 +291,7 @@ export default function KanbanBoard({ taskId }: { taskId: string }) {
                               <div
                                 {...draggableProvided.dragHandleProps}
                                 className={cn(
-                                  "font-medium flex items-center justify-between rounded-md min-w-64",
+                                  "font-medium flex items-center justify-between rounded-md w-full md:min-w-64",
                                   colorVariants.lightBg,
                                   "group",
                                 )}
@@ -338,7 +336,6 @@ export default function KanbanBoard({ taskId }: { taskId: string }) {
                                     <Draggable
                                       draggableId={task.id}
                                       index={index}
-                                      type="task"
                                     >
                                       {(provided, snapshot) => (
                                         <TaskView

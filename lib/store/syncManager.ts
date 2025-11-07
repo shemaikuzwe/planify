@@ -81,6 +81,7 @@ class SyncManager {
               name: data.name,
               todoStatusId: data.todoId,
               type: data.type,
+              createdAt: event.createdAt ?? undefined,
             });
             break;
           }
@@ -159,7 +160,10 @@ class SyncManager {
                 name: z.string(),
               })
               .parse(event.data);
-            await this.db.pages.update(data.id, { name: data.name });
+            await this.db.pages.update(data.id, {
+              name: data.name,
+              updatedAt: event.createdAt,
+            });
             break;
           }
           case "changeStatusColor": {
@@ -200,7 +204,6 @@ class SyncManager {
           case "save_file": {
             const data = saveFilesSchema.parse(event.data);
             const drawingId = data.id;
-            console.log(data);
             const existingRecord = await this.db.files.get(drawingId);
             const existingFiles: StoredFiles = existingRecord?.files ?? {};
 
@@ -237,7 +240,7 @@ class SyncManager {
               .parse(event.data);
             await this.db.tasks.update(data.taskId, {
               description: data.description,
-              updatedAt: new Date(),
+              updatedAt: event.createdAt,
             });
             break;
           }
@@ -250,7 +253,7 @@ class SyncManager {
               .parse(event.data);
             await this.db.tasks.update(data.id, {
               text: data.name,
-              updatedAt: new Date(),
+              updatedAt: event.createdAt,
             });
             break;
           }
@@ -382,8 +385,8 @@ class SyncManager {
             data.map((drawing: any) => ({
               id: drawing.id,
               name: drawing.name,
-              createdAt: drawing.createdAt,
-              updatedAt: drawing.updatedAt,
+              createdAt: new Date(drawing.createdAt),
+              updatedAt: new Date(drawing.updatedAt),
               elements: drawing.elements ?? [],
               userId: drawing.userId,
             })),

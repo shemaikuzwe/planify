@@ -21,4 +21,6 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
 };
-export default withSerwist(nextConfig);
+// export default withSerwist(nextConfig);
+
+export default nextConfig;

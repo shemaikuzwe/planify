@@ -74,7 +74,7 @@ export class DrawingStorage {
     }
   }
   async editDrawingName(name: string) {
-    await db.drawings.update(this.id, { name });
+    await db.drawings.update(this.id, { name, updatedAt: new Date() });
     syncChange("editDrawingName", {
       id: this.id,
       name,

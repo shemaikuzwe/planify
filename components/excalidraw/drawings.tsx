@@ -4,12 +4,20 @@ import { db } from "@/lib/store/dexie";
 import EmptyDrawings from "./empty-drawings";
 
 export default function WhiteBoards({ search }: { search: string | null }) {
-  const drawings = useLiveQuery(async () => {
-    return await db.drawings.toArray();
-  });
+  const drawings = useLiveQuery(
+    async () => await db.drawings.orderBy("updatedAt").toArray(),
+  );
   const filteredDrawings = search
-    ? drawings?.filter((drawing) => drawing.name.includes(search))
-    : drawings;
+    ? drawings
+        ?.sort(
+          (a, b) =>
+            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+        )
+        .filter((drawing) => drawing.name.includes(search))
+    : drawings?.sort(
+        (a, b) =>
+          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+      );
   if (filteredDrawings && filteredDrawings?.length === 0) {
     return <EmptyDrawings />;
   }

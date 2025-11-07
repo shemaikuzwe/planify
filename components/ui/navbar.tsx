@@ -19,7 +19,6 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { usePathname } from "next/navigation";
 import Logo from "./logo";
 import {
   Collapsible,
