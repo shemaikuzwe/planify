@@ -13,7 +13,7 @@ interface Props {
 export default function Task({ id, type = "Task" }: Props) {
   const page = useLiveQuery(async () => await db.pages.get({ id: id }));
   return (
-    <div className="flex flex-col gap-4 w-full h-full -m-2 md:-m-4">
+    <div className="flex flex-col gap-4  h-full -m-2 md:-m-4">
       <Header
         title={page?.name ?? type}
         icon={<ListTodo className="h-5 w-5 " />}

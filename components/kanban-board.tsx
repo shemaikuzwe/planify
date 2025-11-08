@@ -22,6 +22,7 @@ import { db } from "@/lib/store/dexie";
 import { taskStatus } from "@/lib/store/schema/schema";
 import { taskStore } from "@/lib/store/tasks-store";
 import AddGroup from "./task/add-group";
+import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 
 export default function KanbanBoard({ taskId }: { taskId: string }) {
   const statuses = useLiveQuery(async () => {
@@ -245,203 +246,209 @@ export default function KanbanBoard({ taskId }: { taskId: string }) {
   };
 
   return (
-    <div className="w-full h-full">
+    <div className="h-full">
       <DragDropContext
         onDragStart={onDragStart}
         onDragUpdate={onDragUpdate}
         onDragEnd={onDragEnd}
       >
-        <Droppable droppableId="board" type="status" direction="horizontal">
-          {(provided) => (
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-              className="flex gap-4 overflow-x-auto pb-4 h-screen w-full"
-            >
-              {status.map((statusItem, index) => {
-                const colorVariants = getColorVariants(statusItem.primaryColor);
+        <ScrollArea className="w-240 h-full p-4">
+          <Droppable droppableId="board" type="status" direction="horizontal">
+            {(provided) => (
+              <div
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                className="flex gap-4 pb-4 h-full min-w-max"
+              >
+                {status.map((statusItem, index) => {
+                  const colorVariants = getColorVariants(
+                    statusItem.primaryColor,
+                  );
 
-                return (
-                  <Draggable
-                    key={statusItem.id}
-                    draggableId={statusItem.id}
-                    index={index}
-                  >
-                    {(draggableProvided) => (
-                      <div
-                        ref={draggableProvided.innerRef}
-                        {...draggableProvided.draggableProps}
-                        className="md:flex-shrink-0"
-                      >
-                        <Droppable
-                          droppableId={statusItem.id}
-                          key={statusItem.id}
-                          type="task"
+                  return (
+                    <Draggable
+                      key={statusItem.id}
+                      draggableId={statusItem.id}
+                      index={index}
+                    >
+                      {(draggableProvided) => (
+                        <div
+                          ref={draggableProvided.innerRef}
+                          {...draggableProvided.draggableProps}
+                          className="md:flex-shrink-0"
                         >
-                          {(droppableProvided) => (
-                            <div
-                              className={cn(
-                                "p-2",
-                                colorVariants.lightBg,
-                                "rounded-lg overflow-hidden flex flex-col h-fit",
-                              )}
-                              ref={droppableProvided.innerRef}
-                              {...droppableProvided.droppableProps}
-                            >
+                          <Droppable
+                            droppableId={statusItem.id}
+                            key={statusItem.id}
+                            type="task"
+                          >
+                            {(droppableProvided) => (
                               <div
-                                {...draggableProvided.dragHandleProps}
                                 className={cn(
-                                  "font-medium flex items-center justify-between rounded-md w-full md:min-w-64",
+                                  "p-2",
                                   colorVariants.lightBg,
-                                  "group",
+                                  "rounded-lg  flex flex-col h-fit",
                                 )}
+                                ref={droppableProvided.innerRef}
+                                {...droppableProvided.droppableProps}
                               >
-                                <div className="flex items-center gap-2">
-                                  <span
-                                    className={cn(
-                                      "p-1 rounded-md text-sm",
-                                      colorVariants.bgColor,
-                                      "text-white",
-                                    )}
-                                  >
-                                    {statusItem.name}
-                                  </span>
-                                  <span className="text-sm text-black">
-                                    {statusItem.tasks.length}
-                                  </span>
-                                </div>
-                                <GroupOptionsMenu
-                                  groupId={statusItem.id}
-                                  groupColor={statusItem.primaryColor}
-                                />
-                              </div>
-
-                              <div className="flex-1 p-2 space-y-2">
-                                {statusItem.tasks.map((task, index) => (
-                                  <div key={task.id}>
-                                    {/* Drop indicator above task */}
-                                    {dragState.isDragging &&
-                                      dragState.draggedOver?.droppableId ===
-                                        statusItem.id &&
-                                      dragState.draggedOver?.index ===
-                                        index && (
-                                        <div
-                                          className={cn(
-                                            "h-0.5 rounded-full mb-2 opacity-80",
-                                            colorVariants.bgColor,
-                                          )}
-                                        />
+                                <div
+                                  {...draggableProvided.dragHandleProps}
+                                  className={cn(
+                                    "font-medium flex items-center justify-between rounded-md w-full md:min-w-64",
+                                    colorVariants.lightBg,
+                                    "group",
+                                  )}
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <span
+                                      className={cn(
+                                        "p-1 rounded-md text-sm",
+                                        colorVariants.bgColor,
+                                        "text-white",
                                       )}
-
-                                    <Draggable
-                                      draggableId={task.id}
-                                      index={index}
                                     >
-                                      {(provided, snapshot) => (
-                                        <TaskView
-                                          task={task}
-                                          currStatus={statusItem}
-                                          status={status}
-                                        >
+                                      {statusItem.name}
+                                    </span>
+                                    <span className="text-sm text-black">
+                                      {statusItem.tasks.length}
+                                    </span>
+                                  </div>
+                                  <GroupOptionsMenu
+                                    groupId={statusItem.id}
+                                    groupColor={statusItem.primaryColor}
+                                  />
+                                </div>
+
+                                <div className="flex-1 p-2 space-y-2">
+                                  {statusItem.tasks.map((task, index) => (
+                                    <div key={task.id}>
+                                      {/* Drop indicator above task */}
+                                      {dragState.isDragging &&
+                                        dragState.draggedOver?.droppableId ===
+                                          statusItem.id &&
+                                        dragState.draggedOver?.index ===
+                                          index && (
                                           <div
-                                            ref={provided.innerRef}
-                                            {...provided.draggableProps}
-                                            {...provided.dragHandleProps}
                                             className={cn(
-                                              colorVariants.lightBg,
-                                              "rounded-md p-3 shadow-sm cursor-pointer transition-all duration-200 text-start",
-                                              snapshot.isDragging &&
-                                                "shadow-lg scale-105",
-                                              colorVariants.medBg,
+                                              "h-0.5 rounded-full mb-2 opacity-80",
+                                              colorVariants.bgColor,
                                             )}
+                                          />
+                                        )}
+
+                                      <Draggable
+                                        draggableId={task.id}
+                                        index={index}
+                                      >
+                                        {(provided, snapshot) => (
+                                          <TaskView
+                                            task={task}
+                                            currStatus={statusItem}
+                                            status={status}
                                           >
-                                            <div className="space-y-2">
-                                              <h3
-                                                className={cn(
-                                                  "text-sm font-medium text-black",
-                                                )}
-                                              >
-                                                {task.text}
-                                              </h3>
-
-                                              {task.dueDate && (
-                                                <div className="flex items-center gap-1 text-xs">
-                                                  <Calendar className="h-3 w-3" />
-                                                  <span>
-                                                    {formatDate(task.dueDate)}
-                                                  </span>
-                                                </div>
+                                            <div
+                                              ref={provided.innerRef}
+                                              {...provided.draggableProps}
+                                              {...provided.dragHandleProps}
+                                              className={cn(
+                                                colorVariants.lightBg,
+                                                "rounded-md p-3 shadow-sm cursor-pointer transition-all duration-200 text-start",
+                                                snapshot.isDragging &&
+                                                  "shadow-lg scale-105",
+                                                colorVariants.medBg,
                                               )}
+                                            >
+                                              <div className="space-y-2">
+                                                <h3
+                                                  className={cn(
+                                                    "text-sm font-medium text-black",
+                                                  )}
+                                                >
+                                                  {task.text}
+                                                </h3>
 
-                                              {task.tags &&
-                                                (task.tags as Prisma.JsonArray)
-                                                  ?.length > 0 && (
-                                                  <div className="flex flex-wrap gap-1">
-                                                    {(
-                                                      task.tags as Prisma.JsonArray
-                                                    )?.map((tag, index) => (
-                                                      <span
-                                                        key={index}
-                                                        className={cn(
-                                                          "px-2 py-0.5 bg-blue-500/20 text-blue-500 rounded text-xs",
-                                                        )}
-                                                      >
-                                                        {tag as string}
-                                                      </span>
-                                                    ))}
+                                                {task.dueDate && (
+                                                  <div className="flex items-center gap-1 text-xs">
+                                                    <Calendar className="h-3 w-3" />
+                                                    <span>
+                                                      {formatDate(task.dueDate)}
+                                                    </span>
                                                   </div>
                                                 )}
-                                            </div>
-                                          </div>
-                                        </TaskView>
-                                      )}
-                                    </Draggable>
-                                  </div>
-                                ))}
 
-                                {dragState.isDragging &&
-                                  dragState.draggedOver?.droppableId ===
-                                    statusItem.id &&
-                                  dragState.draggedOver?.index ===
-                                    statusItem.tasks.length && (
-                                    <div
-                                      className={cn(
-                                        "h-0.5 rounded-full mb-2 opacity-80",
-                                        colorVariants.bgColor,
-                                      )}
-                                    />
-                                  )}
-                                {droppableProvided.placeholder}
-                                <TaskAddForm
-                                  statusId={statusItem.id}
-                                  bgClass={colorVariants.bgColor}
-                                  onAddTask={(task) => {
-                                    setStatus((prevStatus) =>
-                                      prevStatus.map((item) =>
-                                        item.id === statusItem.id
-                                          ? {
-                                              ...item,
-                                              tasks: [...item.tasks, task],
-                                            }
-                                          : item,
-                                      ),
-                                    );
-                                  }}
-                                />
+                                                {task.tags &&
+                                                  (
+                                                    task.tags as Prisma.JsonArray
+                                                  )?.length > 0 && (
+                                                    <div className="flex flex-wrap gap-1">
+                                                      {(
+                                                        task.tags as Prisma.JsonArray
+                                                      )?.map((tag, index) => (
+                                                        <span
+                                                          key={index}
+                                                          className={cn(
+                                                            "px-2 py-0.5 bg-blue-500/20 text-blue-500 rounded text-xs",
+                                                          )}
+                                                        >
+                                                          {tag as string}
+                                                        </span>
+                                                      ))}
+                                                    </div>
+                                                  )}
+                                              </div>
+                                            </div>
+                                          </TaskView>
+                                        )}
+                                      </Draggable>
+                                    </div>
+                                  ))}
+
+                                  {dragState.isDragging &&
+                                    dragState.draggedOver?.droppableId ===
+                                      statusItem.id &&
+                                    dragState.draggedOver?.index ===
+                                      statusItem.tasks.length && (
+                                      <div
+                                        className={cn(
+                                          "h-0.5 rounded-full mb-2 opacity-80",
+                                          colorVariants.bgColor,
+                                        )}
+                                      />
+                                    )}
+                                  {droppableProvided.placeholder}
+                                  <TaskAddForm
+                                    statusId={statusItem.id}
+                                    bgClass={colorVariants.bgColor}
+                                    onAddTask={(task) => {
+                                      setStatus((prevStatus) =>
+                                        prevStatus.map((item) =>
+                                          item.id === statusItem.id
+                                            ? {
+                                                ...item,
+                                                tasks: [...item.tasks, task],
+                                              }
+                                            : item,
+                                        ),
+                                      );
+                                    }}
+                                  />
+                                </div>
                               </div>
-                            </div>
-                          )}
-                        </Droppable>
-                      </div>
-                    )}
-                  </Draggable>
-                );
-              })}
-              {provided.placeholder}
-              <AddGroup />
-            </div>
-          )}
-        </Droppable>
+                            )}
+                          </Droppable>
+                        </div>
+                      )}
+                    </Draggable>
+                  );
+                })}
+                {provided.placeholder}
+                <AddGroup />
+              </div>
+            )}
+          </Droppable>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
       </DragDropContext>
     </div>
   );
