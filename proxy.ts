@@ -21,5 +21,6 @@ export const config = {
     // Always run for API routes
     "/(api|trpc)(.*)",
   ],
+  // Comment this line if you get cannot find middleware  module error
   runtime: "nodejs",
 };
