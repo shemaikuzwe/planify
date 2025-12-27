@@ -1,4 +1,3 @@
-// import { Metadata } from "next";
 import { useParams } from "react-router";
 import Task from "./task";
 

@@ -1,4 +1,3 @@
-"use client";
 import * as excalidrawLib from "@excalidraw/excalidraw";
 import { Excalidraw } from "@excalidraw/excalidraw";
 import "@excalidraw/excalidraw/index.css";
@@ -10,7 +9,7 @@ const ExcalidrawWrapper = () => {
   if (!id) throw new Error("id is required");
   return (
     <App excalidrawLib={excalidrawLib} key={id}>
-      <Excalidraw />
+      <Excalidraw key={id} />
     </App>
   );
 };

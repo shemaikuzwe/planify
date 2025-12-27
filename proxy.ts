@@ -22,5 +22,5 @@ export const config = {
     "/(api|trpc)(.*)",
   ],
   // Comment this line if you get cannot find middleware  module error
-  runtime: "nodejs",
+  // runtime: "nodejs",
 };
