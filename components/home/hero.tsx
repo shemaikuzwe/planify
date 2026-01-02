@@ -20,7 +20,7 @@ export function Hero() {
               planning, and whiteboards
             </p>
           </div>
-          <LoginForm register>
+          <LoginForm>
             <Button size="lg">Get Started</Button>
           </LoginForm>
         </div>

@@ -12,7 +12,7 @@ export function Footer() {
           Sign up for Planify today and take your productivity to the next
           level.
         </p>
-        <LoginForm register>
+        <LoginForm>
           <Button size="lg" variant={"outline"}>
             Sign Up
           </Button>

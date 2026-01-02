@@ -3,19 +3,11 @@ import { useState } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
 import { LoginCard } from "./login-card";
 
-export default function LoginForm({
-  children,
-  register = false,
-}: {
-  children: React.ReactNode;
-  register?: boolean;
-}) {
+export default function LoginForm({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>

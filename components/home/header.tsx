@@ -37,7 +37,7 @@ export function Header() {
             </Button>
           </LoginForm>
 
-          <LoginForm register>
+          <LoginForm>
             <Button
               size="sm"
               className="bg-accent text-accent-foreground hover:bg-accent/90"
